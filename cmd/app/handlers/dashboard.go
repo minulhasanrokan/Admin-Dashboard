@@ -27,9 +27,14 @@ func (h Handler) Dashboard(c echo.Context) error {
 		return h.RenderWithErrorCheck(c, nil, nil, "500-error")
 	}
 
+	dashData, _ := h.Service.GetDashboardData()
+
 	data := map[string]interface{}{
-		"SessionData": sessionData,
-		"MenuTree":    menuTree,
+		"SessionData":      sessionData,
+		"MenuTree":         menuTree,
+		"Stats":            dashData.Stats,
+		"RecentActivities": dashData.RecentActivities,
+		"RecentLogins":     dashData.RecentLogins,
 	}
 
 	return h.RenderWithErrorCheck(c, data, err, "dashboard")

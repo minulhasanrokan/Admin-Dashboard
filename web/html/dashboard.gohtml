@@ -94,23 +94,21 @@
             <div class="card border-0">
                 <div class="card-body d-flex align-items-center justify-content-between flex-wrap pb-1">
                     <div class="d-flex align-items-center mb-3">
-                                    <span class="avatar avatar-xl flex-shrink-0">
-                                        <img src="assets/img/profiles/avatar-31.jpg" class="rounded-circle" alt="img">
-                                    </span>
+                        <span class="avatar avatar-xl flex-shrink-0">
+                            {{if .SessionData.Photo}}
+                                <img src="{{.ConfigData.AppBaseUrl}}/file/user/{{.SessionData.Photo}}" class="rounded-circle" alt="{{.SessionData.UserName}}">
+                            {{else}}
+                                <img src="{{.ConfigData.AssetBaseUrl}}/assets/img/profiles/avatar-02.jpg" class="rounded-circle" alt="User">
+                            {{end}}
+                        </span>
                         <div class="ms-3">
-                            <h3 class="mb-2">Welcome Back, Adrian <a href="#" class="edit-icon"><i
-                                            class="ti ti-edit fs-14"></i></a></h3>
-                            <p>You have <span class="text-primary text-decoration-underline">21</span> Pending
-                                Approvals & <span class="text-primary text-decoration-underline">14</span> Leave
-                                Requests</p>
+                            <h3 class="mb-2">Welcome Back, {{.SessionData.UserName}}</h3>
+                            <p>System Overview: <span class="text-primary fw-bold">{{.Stats.ActiveUsers}}</span> Active Users, <span class="text-primary fw-bold">{{.Stats.SuccessfulBackups}}</span> Backups, and <span class="text-primary fw-bold">{{.Stats.PendingEmails}}</span> Pending Queue Mails</p>
                         </div>
                     </div>
                     <div class="d-flex align-items-center flex-wrap mb-1">
-                        <a href="#" class="btn btn-white me-2 mb-2" data-bs-toggle="modal"
-                           data-bs-target="#add_project"><i class="ti ti-calendar-cog me-1"></i>Add Schedule</a>
-                        <a href="#" class="btn btn-primary mb-2" data-bs-toggle="modal"
-                           data-bs-target="#add_leaves"><i class="ti ti-square-rounded-plus me-1"></i>Add
-                            Requests</a>
+                        <a href="#" class="btn btn-white me-2 mb-2 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/backup" data-title="Backup" data-parameter="" data-name="Backup" data-popup-status="0" data-popup-width="1000" data-content-div="content"><i class="ti ti-database me-1"></i>Manage Backups</a>
+                        <a href="#" class="btn btn-primary mb-2 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/activity-logs" data-title="Activity Logs" data-parameter="" data-name="Activity Logs" data-popup-status="0" data-popup-width="1000" data-content-div="content"><i class="ti ti-activity me-1"></i>Audit Logs</a>
                     </div>
                 </div>
             </div>
@@ -124,96 +122,96 @@
                         <div class="col-md-3 col-sm-6 d-flex">
                             <div class="card flex-fill">
                                 <div class="card-body">
-                                                <span class="avatar rounded-circle bg-primary mb-2">
-                                                    <i class="ti ti-calendar-share fs-16"></i>
-                                                </span>
-                                    <h6 class="fs-13 fw-medium text-default mb-1">Attendance Overview</h6>
-                                    <h3 class="mb-3">120/154</h3>
-                                    <a href="attendance-employee.html" class="link-default">View Details</a>
+                                    <span class="avatar rounded-circle bg-primary mb-2">
+                                        <i class="ti ti-users fs-16"></i>
+                                    </span>
+                                    <h6 class="fs-13 fw-medium text-default mb-1">Active / Total Users</h6>
+                                    <h3 class="mb-3">{{.Stats.ActiveUsers}} / {{.Stats.TotalUsers}}</h3>
+                                    <span class="text-success fs-12 fw-medium"><i class="ti ti-circle-filled fs-8"></i> Live Accounts</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3 col-sm-6 d-flex">
                             <div class="card flex-fill">
                                 <div class="card-body">
-                                                <span class="avatar rounded-circle bg-secondary mb-2">
-                                                    <i class="ti ti-browser fs-16"></i>
-                                                </span>
-                                    <h6 class="fs-13 fw-medium text-default mb-1">Total No of Project's</h6>
-                                    <h3 class="mb-3">90/125</h3>
-                                    <a href="projects.html" class="link-default">View All</a>
+                                    <span class="avatar rounded-circle bg-success mb-2">
+                                        <i class="ti ti-user-check fs-16"></i>
+                                    </span>
+                                    <h6 class="fs-13 fw-medium text-default mb-1">Verified Users</h6>
+                                    <h3 class="mb-3">{{.Stats.VerifiedUsers}}</h3>
+                                    <span class="text-muted fs-12">Confirmed Email</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3 col-sm-6 d-flex">
                             <div class="card flex-fill">
                                 <div class="card-body">
-                                                <span class="avatar rounded-circle bg-info mb-2">
-                                                    <i class="ti ti-users-group fs-16"></i>
-                                                </span>
-                                    <h6 class="fs-13 fw-medium text-default mb-1">Total No of Clients</h6>
-                                    <h3 class="mb-3">69/86</h3>
-                                    <a href="clients.html" class="link-default">View All</a>
+                                    <span class="avatar rounded-circle bg-info mb-2">
+                                        <i class="ti ti-user-plus fs-16"></i>
+                                    </span>
+                                    <h6 class="fs-13 fw-medium text-default mb-1">New Users (Month)</h6>
+                                    <h3 class="mb-3">{{.Stats.NewUsersThisMonth}}</h3>
+                                    <span class="text-muted fs-12">{{.Stats.NewUsersThisWeek}} this week</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3 col-sm-6 d-flex">
                             <div class="card flex-fill">
                                 <div class="card-body">
-                                                <span class="avatar rounded-circle bg-pink mb-2">
-                                                    <i class="ti ti-checklist fs-16"></i>
-                                                </span>
-                                    <h6 class="fs-13 fw-medium text-default mb-1">Total No of Tasks</h6>
-                                    <h3 class="mb-3">96/100</h3>
-                                    <a href="tasks.html" class="link-default">View All</a>
+                                    <span class="avatar rounded-circle bg-purple mb-2">
+                                        <i class="ti ti-database fs-16"></i>
+                                    </span>
+                                    <h6 class="fs-13 fw-medium text-default mb-1">System Backups</h6>
+                                    <h3 class="mb-3">{{.Stats.SuccessfulBackups}} / {{.Stats.TotalBackups}}</h3>
+                                    <a href="#" class="link-default menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/backup" data-title="Backup" data-parameter="" data-name="Backup" data-popup-status="0" data-popup-width="1000" data-content-div="content">Manage Backups</a>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3 col-sm-6 d-flex">
                             <div class="card flex-fill">
                                 <div class="card-body">
-                                                <span class="avatar rounded-circle bg-purple mb-2">
-                                                    <i class="ti ti-moneybag fs-16"></i>
-                                                </span>
-                                    <h6 class="fs-13 fw-medium text-default mb-1">Earnings</h6>
-                                    <h3 class="mb-3">$21,445</h3>
-                                    <a href="expenses.html" class="link-default">View All</a>
+                                    <span class="avatar rounded-circle bg-secondary mb-2">
+                                        <i class="ti ti-mail-check fs-16"></i>
+                                    </span>
+                                    <h6 class="fs-13 fw-medium text-default mb-1">Sent Emails</h6>
+                                    <h3 class="mb-3">{{.Stats.TotalEmailsSent}}</h3>
+                                    <span class="text-success fs-12">Dispatched</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3 col-sm-6 d-flex">
                             <div class="card flex-fill">
                                 <div class="card-body">
-                                                <span class="avatar rounded-circle bg-danger mb-2">
-                                                    <i class="ti ti-browser fs-16"></i>
-                                                </span>
-                                    <h6 class="fs-13 fw-medium text-default mb-1">Profit This Week</h6>
-                                    <h3 class="mb-3">$5,544</h3>
-                                    <a href="purchase-transaction.html" class="link-default">View All</a>
+                                    <span class="avatar rounded-circle bg-warning mb-2">
+                                        <i class="ti ti-mail-forward fs-16"></i>
+                                    </span>
+                                    <h6 class="fs-13 fw-medium text-default mb-1">Pending Emails</h6>
+                                    <h3 class="mb-3">{{.Stats.PendingEmails}}</h3>
+                                    <span class="text-warning fs-12">In Queue</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3 col-sm-6 d-flex">
                             <div class="card flex-fill">
                                 <div class="card-body">
-                                                <span class="avatar rounded-circle bg-success mb-2">
-                                                    <i class="ti ti-users-group fs-16"></i>
-                                                </span>
-                                    <h6 class="fs-13 fw-medium text-default mb-1">Job Applicants</h6>
-                                    <h3 class="mb-3">98</h3>
-                                    <a href="job-list.html" class="link-default">View All</a>
+                                    <span class="avatar rounded-circle bg-pink mb-2">
+                                        <i class="ti ti-message-check fs-16"></i>
+                                    </span>
+                                    <h6 class="fs-13 fw-medium text-default mb-1">Sent SMS</h6>
+                                    <h3 class="mb-3">{{.Stats.TotalSmsSent}}</h3>
+                                    <span class="text-success fs-12">Dispatched</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3 col-sm-6 d-flex">
                             <div class="card flex-fill">
                                 <div class="card-body">
-                                                <span class="avatar rounded-circle bg-dark mb-2">
-                                                    <i class="ti ti-user-star fs-16"></i>
-                                                </span>
-                                    <h6 class="fs-13 fw-medium text-default mb-1">New Hire</h6>
-                                    <h3 class="mb-3">45/48</h3>
-                                    <a href="candidates.html" class="link-default">View All</a>
+                                    <span class="avatar rounded-circle bg-dark mb-2">
+                                        <i class="ti ti-message-dots fs-16"></i>
+                                    </span>
+                                    <h6 class="fs-13 fw-medium text-default mb-1">Pending SMS</h6>
+                                    <h3 class="mb-3">{{.Stats.PendingSms}}</h3>
+                                    <span class="text-warning fs-12">In Queue</span>
                                 </div>
                             </div>
                         </div>
@@ -626,277 +624,90 @@
 
             <div class="row">
 
-                <!-- Jobs Applicants -->
+                <!-- System Activity Audit Trail -->
                 <div class="col-xxl-4 d-flex">
                     <div class="card flex-fill">
                         <div class="card-header pb-2 d-flex align-items-center justify-content-between flex-wrap">
-                            <h5 class="mb-2">Jobs Applicants</h5>
-                            <a href="job-list.html" class="btn btn-light btn-md mb-2">View All</a>
+                            <h5 class="mb-2">Recent System Activities</h5>
+                            <a href="#" class="btn btn-light btn-md mb-2 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/activity-logs" data-title="Activity Logs" data-parameter="" data-name="Activity Logs" data-popup-status="0" data-popup-width="1000" data-content-div="content">View All</a>
                         </div>
-                        <div class="card-body">
-                            <ul class="nav nav-tabs tab-style-1 nav-justified d-sm-flex d-block p-0 mb-4"
-                                role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <a class="nav-link fw-medium" data-bs-toggle="tab" data-bs-target="#openings"
-                                       aria-current="page" href="#openings" aria-selected="true"
-                                       role="tab">Openings</a>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <a class="nav-link fw-medium active" data-bs-toggle="tab"
-                                       data-bs-target="#applicants" href="#applicants" aria-selected="false"
-                                       tabindex="-1" role="tab">Applicants</a>
-                                </li>
-                            </ul>
-                            <div class="tab-content">
-                                <div class="tab-pane fade" id="openings">
-                                    <div class="d-flex align-items-center justify-content-between mb-4">
-                                        <div class="d-flex align-items-center">
-                                            <a href="#" class="avatar overflow-hidden flex-shrink-0 bg-gray-100">
-                                                <img src="assets/img/icons/apple.svg"
-                                                     class="img-fluid rounded-circle w-auto h-auto" alt="img">
-                                            </a>
-                                            <div class="ms-2 overflow-hidden">
-                                                <p class="text-dark fw-medium text-truncate mb-0"><a
-                                                            href="#">Senior IOS Developer</a></p>
-                                                <span class="fs-12">No of Openings : 25 </span>
-                                            </div>
-                                        </div>
-                                        <a href="#"
-                                           class="btn btn-light btn-sm p-0 btn-icon d-flex align-items-center justify-content-center"><i
-                                                    class="ti ti-edit"></i></a>
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-between mb-4">
-                                        <div class="d-flex align-items-center">
-                                            <a href="#" class="avatar overflow-hidden flex-shrink-0 bg-gray-100">
-                                                <img src="assets/img/icons/php.svg" class="img-fluid w-auto h-auto"
-                                                     alt="img">
-                                            </a>
-                                            <div class="ms-2 overflow-hidden">
-                                                <p class="text-dark fw-medium text-truncate mb-0"><a
-                                                            href="#">Junior PHP Developer</a></p>
-                                                <span class="fs-12">No of Openings : 20 </span>
-                                            </div>
-                                        </div>
-                                        <a href="#"
-                                           class="btn btn-light btn-sm p-0 btn-icon d-flex align-items-center justify-content-center"><i
-                                                    class="ti ti-edit"></i></a>
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-between mb-4">
-                                        <div class="d-flex align-items-center">
-                                            <a href="#" class="avatar overflow-hidden flex-shrink-0 bg-gray-100">
-                                                <img src="assets/img/icons/react.svg"
-                                                     class="img-fluid w-auto h-auto" alt="img">
-                                            </a>
-                                            <div class="ms-2 overflow-hidden">
-                                                <p class="text-dark fw-medium text-truncate mb-0"><a
-                                                            href="#">Junior React Developer </a></p>
-                                                <span class="fs-12">No of Openings : 30 </span>
-                                            </div>
-                                        </div>
-                                        <a href="#"
-                                           class="btn btn-light btn-sm p-0 btn-icon d-flex align-items-center justify-content-center"><i
-                                                    class="ti ti-edit"></i></a>
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-between mb-0">
-                                        <div class="d-flex align-items-center">
-                                            <a href="#" class="avatar overflow-hidden flex-shrink-0 bg-gray-100">
-                                                <img src="assets/img/icons/laravel-icon.svg"
-                                                     class="img-fluid w-auto h-auto" alt="img">
-                                            </a>
-                                            <div class="ms-2 overflow-hidden">
-                                                <p class="text-dark fw-medium text-truncate mb-0"><a
-                                                            href="#">Senior Laravel Developer</a></p>
-                                                <span class="fs-12">No of Openings : 40 </span>
-                                            </div>
-                                        </div>
-                                        <a href="#"
-                                           class="btn btn-light btn-sm p-0 btn-icon d-flex align-items-center justify-content-center"><i
-                                                    class="ti ti-edit"></i></a>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade show active" id="applicants">
-                                    <div class="d-flex align-items-center justify-content-between mb-4">
-                                        <div class="d-flex align-items-center">
-                                            <a href="#" class="avatar overflow-hidden flex-shrink-0">
-                                                <img src="assets/img/users/user-09.jpg"
-                                                     class="img-fluid rounded-circle" alt="img">
-                                            </a>
-                                            <div class="ms-2 overflow-hidden">
-                                                <p class="text-dark fw-medium text-truncate mb-0"><a href="#">Brian
-                                                        Villalobos</a></p>
-                                                <span class="fs-13 d-inline-flex align-items-center">Exp : 5+
-                                                                Years<i
-                                                            class="ti ti-circle-filled fs-4 mx-2 text-primary"></i>USA</span>
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-secondary badge-xs">UI/UX Designer</span>
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-between mb-4">
-                                        <div class="d-flex align-items-center">
-                                            <a href="#" class="avatar overflow-hidden flex-shrink-0">
-                                                <img src="assets/img/users/user-32.jpg"
-                                                     class="img-fluid rounded-circle" alt="img">
-                                            </a>
-                                            <div class="ms-2 overflow-hidden">
-                                                <p class="text-dark fw-medium text-truncate mb-0"><a
-                                                            href="#">Anthony Lewis</a></p>
-                                                <span class="fs-13 d-inline-flex align-items-center">Exp : 4+
-                                                                Years<i
-                                                            class="ti ti-circle-filled fs-4 mx-2 text-primary"></i>USA</span>
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-info badge-xs">Python Developer</span>
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-between mb-4">
-                                        <div class="d-flex align-items-center">
-                                            <a href="#" class="avatar overflow-hidden flex-shrink-0">
-                                                <img src="assets/img/users/user-32.jpg"
-                                                     class="img-fluid rounded-circle" alt="img">
-                                            </a>
-                                            <div class="ms-2 overflow-hidden">
-                                                <p class="text-dark fw-medium text-truncate mb-0"><a
-                                                            href="#">Stephan Peralt</a></p>
-                                                <span class="fs-13 d-inline-flex align-items-center">Exp : 6+
-                                                                Years<i
-                                                            class="ti ti-circle-filled fs-4 mx-2 text-primary"></i>USA</span>
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-pink badge-xs">Android Developer</span>
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-between mb-0">
-                                        <div class="d-flex align-items-center">
-                                            <a href="#"
-                                               class="avatar overflow-hidden flex-shrink-0">
-                                                <img src="assets/img/users/user-34.jpg"
-                                                     class="img-fluid rounded-circle" alt="img">
-                                            </a>
-                                            <div class="ms-2 overflow-hidden">
-                                                <p class="text-dark fw-medium text-truncate mb-0"><a
-                                                            href="#">Doglas Martini</a></p>
-                                                <span class="fs-13 d-inline-flex align-items-center">Exp : 2+
-                                                                Years<i
-                                                            class="ti ti-circle-filled fs-4 mx-2 text-primary"></i>USA</span>
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-purple badge-xs">React Developer</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- /Jobs Applicants -->
-
-                <!-- Employees -->
-                <div class="col-xxl-4 col-xl-6 d-flex">
-                    <div class="card flex-fill">
-                        <div class="card-header pb-2 d-flex align-items-center justify-content-between flex-wrap">
-                            <h5 class="mb-2">Employees</h5>
-                            <a href="employees.html" class="btn btn-light btn-md mb-2">View All</a>
-                        </div>
-                        <div class="card-body p-0 employee-table">
+                        <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-nowrap mb-0">
                                     <tbody>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <a href="#" class="avatar">
-                                                    <img src="assets/img/users/user-32.jpg"
-                                                         class="img-fluid rounded-circle" alt="img">
-                                                </a>
-                                                <div class="ms-2">
-                                                    <h6 class="fw-medium"><a href="#">Anthony
-                                                            Lewis</a></h6>
-                                                    <span class="fs-12">Finance</span>
+                                        {{range .RecentActivities}}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-sm rounded-circle bg-primary-transparent text-primary me-2 d-flex align-items-center justify-content-center">
+                                                        <i class="ti ti-activity fs-14"></i>
+                                                    </span>
+                                                    <div>
+                                                        <h6 class="fw-medium mb-0 fs-13">{{.Activity}}</h6>
+                                                        <span class="fs-11 text-muted">{{if .TableName}}Table: {{.TableName}}{{end}} {{if .IPAddress}}&bull; {{.IPAddress}}{{end}}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-end">
-                                                            <span class="badge badge-secondary-transparent badge-xs">
-                                                                Finance
-                                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <a href="#" class="avatar">
-                                                    <img src="assets/img/users/user-09.jpg"
-                                                         class="img-fluid rounded-circle" alt="img">
-                                                </a>
-                                                <div class="ms-2">
-                                                    <h6 class="fw-medium"><a href="#">Brian Villalobos</a></h6>
-                                                    <span class="fs-12">PHP Developer</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-end">
-                                                            <span
-                                                                    class="badge badge-danger-transparent badge-xs">Development</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <a href="#" class="avatar">
-                                                    <img src="assets/img/users/user-01.jpg"
-                                                         class="img-fluid rounded-circle" alt="img">
-                                                </a>
-                                                <div class="ms-2">
-                                                    <h6 class="fw-medium"><a href="#">Stephan Peralt</a></h6>
-                                                    <span class="fs-12">Executive</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-end">
-                                            <span class="badge badge-info-transparent badge-xs">Marketing</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <a href="#" class="avatar">
-                                                    <img src="assets/img/users/user-34.jpg"
-                                                         class="img-fluid rounded-circle" alt="img">
-                                                </a>
-                                                <div class="ms-2">
-                                                    <h6 class="fw-medium"><a href="#">Doglas
-                                                            Martini</a></h6>
-                                                    <span class="fs-12">Project Manager</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-end">
-                                            <span class="badge badge-purple-transparent badge-xs">Manager</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="border-0">
-                                            <div class="d-flex align-items-center">
-                                                <a href="#" class="avatar">
-                                                    <img src="assets/img/users/user-37.jpg"
-                                                         class="img-fluid rounded-circle" alt="img">
-                                                </a>
-                                                <div class="ms-2">
-                                                    <h6 class="fw-medium"><a href="#">Anthony
-                                                            Lewis</a></h6>
-                                                    <span class="fs-12">UI/UX Designer</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="border-0 text-end">
-                                                            <span class="badge badge-pink-transparent badge-xs">UI/UX
-                                                                Design</span>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="fs-11 text-muted">{{.CreatedAt.Format "02 Jan 15:04"}}</div>
+                                            </td>
+                                        </tr>
+                                        {{else}}
+                                        <tr>
+                                            <td colspan="2" class="text-center text-muted py-4">No recent activity records</td>
+                                        </tr>
+                                        {{end}}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- /Employees -->
+                <!-- /System Activity Audit Trail -->
+
+                <!-- Recent User Logins -->
+                <div class="col-xxl-4 col-xl-6 d-flex">
+                    <div class="card flex-fill">
+                        <div class="card-header pb-2 d-flex align-items-center justify-content-between flex-wrap">
+                            <h5 class="mb-2">Recent User Logins</h5>
+                            <a href="#" class="btn btn-light btn-md mb-2 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/login-history" data-title="Login History" data-parameter="" data-name="Login History" data-popup-status="0" data-popup-width="1000" data-content-div="content">View All</a>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-nowrap mb-0">
+                                    <tbody>
+                                        {{range .RecentLogins}}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-sm rounded-circle bg-info-transparent text-info me-2 d-flex align-items-center justify-content-center">
+                                                        <i class="ti ti-user fs-14"></i>
+                                                    </span>
+                                                    <div>
+                                                        <h6 class="fw-medium mb-0 fs-13">{{if .UserName}}{{.UserName}}{{else}}User #{{.UserId}}{{end}}</h6>
+                                                        <span class="fs-11 text-muted">{{.IpAddress}}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="badge {{if eq .LogOutStatus 0}}badge-success-transparent{{else}}badge-secondary-transparent{{end}} badge-xs">
+                                                    {{if eq .LogOutStatus 0}}Active{{else}}Ended{{end}}
+                                                </span>
+                                                <div class="fs-11 text-muted mt-1">{{.CreatedAt.Format "02 Jan 15:04"}}</div>
+                                            </td>
+                                        </tr>
+                                        {{else}}
+                                        <tr>
+                                            <td colspan="2" class="text-center text-muted py-4">No login sessions recorded yet</td>
+                                        </tr>
+                                        {{end}}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Recent User Logins -->
 
                 <!-- Todo -->
                 <div class="col-xxl-4 col-xl-6 d-flex">

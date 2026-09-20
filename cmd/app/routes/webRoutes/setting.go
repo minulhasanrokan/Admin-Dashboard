@@ -45,4 +45,12 @@ func SettingRoutes(web *echo.Group, appData *applicationData.Application) {
 	settings.GET("/backup/list", handler.BackupList, appData.Middleware.CheckPermission("settings.system.other.settings"))
 	settings.POST("/backup/list", handler.BackupList, appData.Middleware.CheckPermission("settings.system.other.settings"))
 	settings.GET("/backup/download/:uuid", handler.BackupDownload, appData.Middleware.CheckPermission("settings.system.other.settings"))
+
+	settings.GET("/activity-logs", handler.ActivityLogPage, appData.Middleware.CheckPermission("settings.system.other.settings"))
+	settings.GET("/activity-logs/list", handler.ActivityLogList, appData.Middleware.CheckPermission("settings.system.other.settings"))
+	settings.POST("/activity-logs/list", handler.ActivityLogList, appData.Middleware.CheckPermission("settings.system.other.settings"))
+
+	settings.GET("/login-history", handler.LoginHistoryPage, appData.Middleware.CheckPermission("settings.system.other.settings"))
+	settings.GET("/login-history/list", handler.LoginHistoryList, appData.Middleware.CheckPermission("settings.system.other.settings"))
+	settings.POST("/login-history/list", handler.LoginHistoryList, appData.Middleware.CheckPermission("settings.system.other.settings"))
 }
