@@ -97,6 +97,14 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	viewData["CategoryRouteAction"] = categoryRouteAction
 	viewData["RouteAction"] = routeAction
 
+	if _, exists := viewData["ConfigData"]; !exists || viewData["ConfigData"] == nil {
+		if c != nil {
+			if cfgVal := c.Get("config"); cfgVal != nil {
+				viewData["ConfigData"] = cfgVal
+			}
+		}
+	}
+
 	var csrfToken string
 
 	if token := c.Get("csrf"); token != nil {

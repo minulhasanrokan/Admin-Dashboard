@@ -304,7 +304,7 @@
                                 </div>
                                 <div class="col-md-8">
                                     <select class="select" id="smtp_encryption" name="smtp_encryption">
-                                        <option value="">Select Encryption</option>
+                                        <option value="" {{if eq $.EmailSetting.GetSmtpEncryption ""}}selected{{end}}>Select Encryption</option>
                                         {{range .EmailSetting.GetSmtpEncryptionProtocols}}
                                         <option value="{{.Value}}" {{if eq $.EmailSetting.GetSmtpEncryption .Value}}selected{{end}}>{{.Label}}</option>
                                         {{end}}
@@ -378,7 +378,7 @@
                                 </div>
                                 <div class="col-md-8">
                                     <select class="select" id="aws_region" name="aws_region">
-                                        <option value="">Select AWS Region</option>
+                                        <option value="" {{if eq $.EmailSetting.GetAwsRegion ""}}selected{{end}}>Select AWS Region</option>
                                         {{range .EmailSetting.GetAwsRegions}}
                                         <option value="{{.Value}}" {{if eq $.EmailSetting.GetAwsRegion .Value}}selected{{end}}>{{.Label}}</option>
                                         {{end}}

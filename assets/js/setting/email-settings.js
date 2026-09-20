@@ -111,6 +111,14 @@ function bindEmailSettingsEvents() {
         }
     });
 
+    $("#modal_smtp").off("shown.bs.modal.select2").on("shown.bs.modal.select2", function () {
+        initEmailSelect2();
+    });
+
+    $("#modal_ses").off("shown.bs.modal.select2").on("shown.bs.modal.select2", function () {
+        initEmailSelect2();
+    });
+
     $("#send_test_email_btn").off("click").on("click", async function () {
         await sendTestEmail();
     });

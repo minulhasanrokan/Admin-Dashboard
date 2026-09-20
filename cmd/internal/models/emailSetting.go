@@ -84,7 +84,7 @@ func (e EmailSetting) GetSmtpEncryption() string {
 	if e.SmtpEncryption != nil && *e.SmtpEncryption != "" {
 		return *e.SmtpEncryption
 	}
-	return "tls"
+	return ""
 }
 
 func (e EmailSetting) GetAwsAccessKeyId() string {
@@ -105,7 +105,7 @@ func (e EmailSetting) GetAwsRegion() string {
 	if e.AwsRegion != nil && *e.AwsRegion != "" {
 		return *e.AwsRegion
 	}
-	return "us-east-1"
+	return ""
 }
 
 func (e EmailSetting) GetAwsConfigSet() string {

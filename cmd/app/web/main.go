@@ -99,6 +99,13 @@ func main() {
 
 	e.Use(session.Middleware(sessionStore))
 
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Set("config", cfg)
+			return next(c)
+		}
+	})
+
 	web := e.Group("/")
 	webRoute.MainRoute(web, data)
 
