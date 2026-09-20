@@ -83,11 +83,10 @@ type Config struct {
 }
 
 func Init() (*Config, error) {
-	err := godotenv.Load()
-
-	if err != nil {
-
-		return nil, err
+	for _, envFile := range []string{".env", "../.env", "../../.env", "../../../.env"} {
+		if err := godotenv.Load(envFile); err == nil {
+			break
+		}
 	}
 
 	mailSMTPPort, err := helpers.StrToInt(os.Getenv("MAIL_SMTP_PORT"))
@@ -214,6 +213,11 @@ func Init() (*Config, error) {
 		queueWorkerMaxTries = 5
 	}
 
+	webCsp := os.Getenv("WEB_CONTENT_SECURITY_POLICY")
+	if webCsp == "" {
+		webCsp = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; frame-src 'none'; media-src 'self'; manifest-src 'self';"
+	}
+
 	cfg := &Config{
 		AppKey:                   os.Getenv("APP_KEY"),
 		AppName:                  os.Getenv("APP_NAME"),
@@ -257,7 +261,7 @@ func Init() (*Config, error) {
 		WebXSSProtection:         os.Getenv("WEB_SECURE_XSS"),
 		WebContentTypeNosniff:    os.Getenv("WEB_SECURE_NOSNIFF"),
 		WebXFrameOptions:         os.Getenv("WEB_SECURE_FRAME_OPTIONS"),
-		WebContentSecurityPolicy: os.Getenv("WEB_CONTENT_SECURITY_POLICY"),
+		WebContentSecurityPolicy: webCsp,
 		WebHSTSMaxAge:            webHstsMaxAge,
 		WebHSTSExcludeSubdomains: webHstsExclude,
 		WebHSTSPreloadEnabled:    webHstsPreload,

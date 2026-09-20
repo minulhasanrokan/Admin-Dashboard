@@ -19,7 +19,7 @@ func setupTestApp() (*echo.Echo, *config.Config) {
 		WebXSSProtection:         "1; mode=block",
 		WebContentTypeNosniff:    "nosniff",
 		WebXFrameOptions:         "DENY",
-		WebContentSecurityPolicy: "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';",
+		WebContentSecurityPolicy: "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; frame-src 'none'; media-src 'self'; manifest-src 'self';",
 		WebReferrerPolicy:        "strict-origin-when-cross-origin",
 		WebCookieName:            "_csrf",
 		WebCookiePath:            "/",
@@ -57,21 +57,34 @@ func TestSecurityHeaders(t *testing.T) {
 	}
 
 	// Verify CSP
+	// Verify Strict CSP
 	csp := rec.Header().Get("Content-Security-Policy")
 	if csp == "" {
 		t.Errorf("missing Content-Security-Policy header")
 	}
+	if !strings.Contains(csp, "default-src 'none'") {
+		t.Errorf("Strict CSP must have default-src 'none', got: %s", csp)
+	}
 	if strings.Contains(csp, "'unsafe-inline'") {
-		t.Errorf("Content-Security-Policy should NOT contain 'unsafe-inline', got: %s", csp)
+		t.Errorf("Strict CSP must NOT contain 'unsafe-inline', got: %s", csp)
 	}
 	if !strings.Contains(csp, "script-src 'self'") {
-		t.Errorf("Content-Security-Policy missing script-src 'self'")
+		t.Errorf("Strict CSP missing script-src 'self'")
 	}
 	if !strings.Contains(csp, "style-src 'self'") {
-		t.Errorf("Content-Security-Policy missing style-src 'self'")
+		t.Errorf("Strict CSP missing style-src 'self'")
 	}
 	if !strings.Contains(csp, "object-src 'none'") {
-		t.Errorf("Content-Security-Policy missing object-src 'none'")
+		t.Errorf("Strict CSP missing object-src 'none'")
+	}
+	if !strings.Contains(csp, "frame-ancestors 'none'") {
+		t.Errorf("Strict CSP missing frame-ancestors 'none'")
+	}
+	if !strings.Contains(csp, "form-action 'self'") {
+		t.Errorf("Strict CSP missing form-action 'self'")
+	}
+	if !strings.Contains(csp, "base-uri 'self'") {
+		t.Errorf("Strict CSP missing base-uri 'self'")
 	}
 
 	// Verify X-Frame-Options
