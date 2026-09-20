@@ -1,0 +1,376 @@
+<link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/css/profile.css">
+<div class="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
+    <div class="my-auto mb-2">
+        <h2 class="mb-1">My Profile</h2>
+        <nav>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="{{.ConfigData.AppBaseUrl}}/dashboard"><i class="ti ti-smart-home"></i></a>
+                </li>
+                <li class="breadcrumb-item">User</li>
+                <li class="breadcrumb-item active" aria-current="page">My Profile</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="head-icons ms-2">
+        <a href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i class="ti ti-chevrons-up"></i></a>
+    </div>
+</div>
+<div id="profile-wrapper">
+    <ul class="nav nav-tabs nav-tabs-solid bg-transparent border-bottom mb-3" id="profile-top-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a href="#pane-overview" class="nav-link active profile-nav-trigger" id="tab-overview" data-bs-toggle="tab" data-bs-target="#pane-overview" data-target-pane="pane-overview" role="tab" aria-controls="pane-overview" aria-selected="true">
+                <i class="ti ti-user-circle me-2"></i>Profile Overview
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a href="#pane-edit" class="nav-link profile-nav-trigger" id="tab-edit" data-bs-toggle="tab" data-bs-target="#pane-edit" data-target-pane="pane-edit" role="tab" aria-controls="pane-edit" aria-selected="false">
+                <i class="ti ti-edit me-2"></i>Edit Profile
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a href="#pane-password" class="nav-link profile-nav-trigger" id="tab-password" data-bs-toggle="tab" data-bs-target="#pane-password" data-target-pane="pane-password" role="tab" aria-controls="pane-password" aria-selected="false">
+                <i class="ti ti-lock me-2"></i>Change Password
+            </a>
+        </li>
+    </ul>
+    <div class="row" id="profile-view-container">
+        <div class="col-xl-4 col-lg-5 mb-4">
+            <div class="card profile-card">
+                <div class="card-body text-center pt-4 pb-3">
+                    <div class="profile-avatar-wrapper">
+                        {{if .User.Photo}}
+                            <img src="{{.ConfigData.AppBaseUrl}}/file/user/{{.User.Photo}}" alt="User Photo" class="profile-avatar-img" id="profile-card-avatar">
+                        {{else if .SessionData.Photo}}
+                            <img src="{{.ConfigData.AppBaseUrl}}/file/user/{{.SessionData.Photo}}" alt="User Photo" class="profile-avatar-img" id="profile-card-avatar">
+                        {{end}}
+                        <span class="profile-status-dot" title="Active"></span>
+                        <button type="button" class="profile-avatar-upload-btn" id="btn-trigger-photo-upload" title="Change Profile Photo">
+                            <i class="ti ti-camera"></i>
+                        </button>
+                        <input type="file" id="profile_photo_input" class="d-none" accept="image/png,image/jpeg,image/webp,image/jpg">
+                    </div>
+                    <h5 class="fw-bold mb-1" id="profile-card-name"> {{if .User.Name}}{{.User.Name}}{{else}}{{.SessionData.UserName}}{{end}}</h5>
+                    <p class="text-muted fs-12 mb-2">@{{.User.UserName}}</p>
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-3 flex-wrap">
+                        <span class="profile-badge-role">
+                            <i class="ti ti-shield-check me-1"></i>System Admin
+                        </span>
+                        <span class="profile-badge-active">
+                            <i class="ti ti-circle-filled fs-8"></i>Active
+                        </span>
+                        {{if .User.Verified}}
+                            <span class="profile-badge-verified">
+                                <i class="ti ti-badge-check"></i>Verified
+                            </span>
+                        {{end}}
+                    </div>
+                    <div class="border-top pt-3 text-start">
+                        <div class="profile-info-row">
+                            <span class="profile-info-label"><i class="ti ti-id"></i>User ID</span>
+                            <span class="profile-info-val">{{if .User.UserId}}{{.User.UserId}}{{else}}-{{end}}</span>
+                        </div>
+                        <div class="profile-info-row">
+                            <span class="profile-info-label"><i class="ti ti-mail"></i>Email</span>
+                            <span class="profile-info-val">{{if .User.Email}}{{.User.Email}}{{else}}-{{end}}</span>
+                        </div>
+                        <div class="profile-info-row">
+                            <span class="profile-info-label"><i class="ti ti-phone"></i>Mobile</span>
+                            <span class="profile-info-val" id="profile-detail-mobile">{{if .User.Mobile}}{{.User.Mobile}}{{else}}-{{end}}</span>
+                        </div>
+                        <div class="profile-info-row">
+                            <span class="profile-info-label"><i class="ti ti-calendar"></i>Member Since</span>
+                            <span class="profile-info-val">{{if .User.CreatedAt}}{{.User.CreatedAt.Format "02 Jan, 2006"}}{{else}}-{{end}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-8 col-lg-7">
+            <div class="tab-content" id="profile-tab-content">
+                <div class="tab-pane fade show active profile-tab-pane" id="pane-overview" role="tabpanel" aria-labelledby="tab-overview">
+                    <div class="card profile-card mb-4">
+                        <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between py-3">
+                            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+                                <i class="ti ti-user text-primary"></i>Personal Information
+                            </h5>
+                            <button type="button" class="btn btn-sm btn-outline-primary profile-nav-trigger tab-switcher-btn" data-target-pane="pane-edit">
+                                <i class="ti ti-edit me-1"></i>Edit
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <div class="profile-info-label mb-1"><i class="ti ti-user"></i>Full Name</div>
+                                    <div class="fw-bold text-dark fs-14" id="profile-detail-name">{{if .User.Name}}{{.User.Name}}{{else}}-{{end}}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="profile-info-label mb-1"><i class="ti ti-at"></i>Username</div>
+                                    <div class="fw-bold text-dark fs-14">{{if .User.UserName}}{{.User.UserName}}{{else}}-{{end}}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="profile-info-label mb-1"><i class="ti ti-mail"></i>Email Address</div>
+                                    <div class="fw-bold text-dark fs-14">{{if .User.Email}}{{.User.Email}}{{else}}-{{end}}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="profile-info-label mb-1"><i class="ti ti-phone"></i>Contact Number</div>
+                                    <div class="fw-bold text-dark fs-14">{{if .User.Mobile}}{{.User.Mobile}}{{else}}-{{end}}</div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="profile-info-label mb-1"><i class="ti ti-map-pin"></i>Address</div>
+                                    <div class="fw-medium text-dark fs-14" id="profile-detail-address">{{if .User.Address}}{{.User.Address}}{{else}}No address provided{{end}}</div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="profile-info-label mb-1"><i class="ti ti-notes"></i>About / Bio</div>
+                                    <div class="fw-medium text-dark fs-14" id="profile-detail-details">{{if .User.Details}}{{.User.Details}}{{end}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card profile-card">
+                        <div class="card-header bg-transparent border-bottom py-3">
+                            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+                                <i class="ti ti-shield-lock text-primary"></i>Account & Activity Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <div class="profile-info-label mb-1"><i class="ti ti-id-badge"></i>Account Role</div>
+                                    <div class="fw-bold text-dark fs-14">Super Administrator</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="profile-info-label mb-1"><i class="ti ti-circle-check"></i>Verification Status</div>
+                                    <div class="fw-bold text-dark fs-14">
+                                        {{if .User.Verified}}
+                                            <span class="text-success"><i class="ti ti-check me-1"></i>Verified</span>
+                                        {{else}}
+                                            <span class="text-warning"><i class="ti ti-alert-circle me-1"></i>Unverified</span>
+                                        {{end}}
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="profile-info-label mb-1"><i class="ti ti-clock-hour-4"></i>Last Login</div>
+                                    <div class="fw-bold text-dark fs-14">{{if .User.LastLogin}}{{.User.LastLogin.Format "02 Jan, 2006 03:04 PM"}}{{else}}Currently Active{{end}}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="profile-info-label mb-1"><i class="ti ti-device-desktop"></i>Last Login IP</div>
+                                    <div class="fw-bold text-dark fs-14">{{if .User.LastLoginIP}}{{.User.LastLoginIP}}{{else}}127.0.0.1{{end}}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="profile-info-label mb-1"><i class="ti ti-lock-access"></i>Password Last Changed</div>
+                                    <div class="fw-bold text-dark fs-14">{{if .User.PasswordChangeDate}}{{.User.PasswordChangeDate.Format "02 Jan, 2006"}}{{else}}Initial Setup{{end}}</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="profile-info-label mb-1"><i class="ti ti-calendar-due"></i>Password Expiry Date</div>
+                                    <div class="fw-bold text-dark fs-14">{{if .User.PasswordExpireDate}}{{.User.PasswordExpireDate.Format "02 Jan, 2006"}}{{else}}Never Expires{{end}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade profile-tab-pane" id="pane-edit" role="tabpanel" aria-labelledby="tab-edit">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="border-bottom mb-3 pb-3">
+                                <h4>Edit Profile Information</h4>
+                            </div>
+                            <form action="#" id="form-edit-profile">
+                                <div class="border-bottom mb-3">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div>
+                                                <h6 class="mb-3">Basic Information</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="row align-items-center mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label mb-md-0" for="name">Name <span class="color-red">*</span></label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input tabindex="1" value="{{if .User.Name}}{{.User.Name}}{{else}}{{.SessionData.UserName}}{{end}}" type="text" name="name" id="name" minlength="3" maxlength="100" class="form-control">
+                                                    <div class="invalid-feedback" id="error_msg_name"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row align-items-center mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label mb-md-0" for="username">Username</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">@</span>
+                                                        <input type="text" class="form-control bg-light" id="username" value="{{.User.UserName}}" readonly disabled>
+                                                    </div>
+                                                    <small class="text-muted fs-11">Username cannot be changed</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row align-items-center mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label mb-md-0" for="email">Email</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="ti ti-mail"></i></span>
+                                                        <input type="email" class="form-control bg-light" id="email" value="{{.User.Email}}" readonly disabled>
+                                                    </div>
+                                                    <small class="text-muted fs-11">Primary account email</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row align-items-center mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label mb-md-0" for="mobile">Mobile</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="ti ti-phone"></i></span>
+                                                        <input tabindex="2" type="text" value="{{if .User.Mobile}}{{.User.Mobile}}{{end}}" name="mobile" id="mobile" maxlength="20" placeholder="01700000000" class="form-control">
+                                                    </div>
+                                                    <div class="invalid-feedback" id="error_msg_mobile"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="border-bottom mb-3">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div>
+                                                <h6 class="mb-3">Address & Bio Information</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="row align-items-center mb-3">
+                                                <div class="col-md-2">
+                                                    <label class="form-label mb-md-0" for="address">Address</label>
+                                                </div>
+                                                <div class="col-md-10">
+                                                    <input tabindex="3" value="{{if .User.Address}}{{.User.Address}}{{end}}" type="text" name="address" id="address" minlength="5" maxlength="200" class="form-control" placeholder="Street address, City, Country">
+                                                    <div class="invalid-feedback" id="error_msg_address"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="row align-items-center mb-3">
+                                                <div class="col-md-2">
+                                                    <label class="form-label mb-md-0" for="details">About / Bio</label>
+                                                </div>
+                                                <div class="col-md-10">
+                                                    <textarea tabindex="4" name="details" id="details" rows="4" maxlength="1000" class="form-control" placeholder="Brief introduction about yourself...">{{if .User.Details}}{{.User.Details}}{{end}}</textarea>
+                                                    <div class="invalid-feedback" id="error_msg_details"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center justify-content-end gap-2">
+                                    <button tabindex="5" type="button" class="btn btn-light profile-nav-trigger tab-switcher-btn" data-target-pane="pane-overview">Cancel</button>
+                                    <button tabindex="6" type="button" class="btn btn-primary" id="profile_setting_button">
+                                        <i class="ti ti-device-floppy me-1"></i>Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade profile-tab-pane" id="pane-password" role="tabpanel" aria-labelledby="tab-password">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="border-bottom mb-3 pb-3">
+                                <h4>Change Account Password</h4>
+                            </div>
+                            <div class="profile-password-guide mb-4">
+                                <h6 class="fw-bold fs-13 mb-2"><i class="ti ti-info-circle me-1 text-primary"></i>Password Guidelines:</h6>
+                                <ul>
+                                    <li>Minimum {{.UserRole.PasswordMinLength}} characters in length</li>
+                                    <li>Include at least one uppercase and one lowercase letter</li>
+                                    <li>Include at least one numeric digit (0-9)</li>
+                                    <li>Include at least one special character (!@#$%^&*)</li>
+                                </ul>
+                            </div>
+                            <form action="#" id="form-change-password">
+                                <div class="border-bottom mb-3">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="row align-items-center mb-3">
+                                                <div class="col-md-3">
+                                                    <label class="form-label mb-md-0" for="current_password">Current Password <span class="color-red">*</span></label>
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="ti ti-lock"></i></span>
+                                                        <input tabindex="7" type="password" class="form-control" id="current_password" name="current_password" minlength="6" maxlength="50" placeholder="Enter current password">
+                                                        <button type="button" class="input-group-text toggle-password-btn" data-input-id="current_password">
+                                                            <i class="ti ti-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="invalid-feedback" id="error_msg_current_password"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="row align-items-center mb-3">
+                                                <div class="col-md-3">
+                                                    <label class="form-label mb-md-0" for="password">New Password <span class="color-red">*</span></label>
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="ti ti-key"></i></span>
+                                                        <input tabindex="8" type="password" class="form-control" id="password" name="new_password" minlength="{{.UserRole.PasswordMinLength}}" maxlength="{{.UserRole.PasswordMaxLength}}" placeholder="Enter new password">
+                                                        <button type="button" class="input-group-text toggle-password-btn" data-input-id="password">
+                                                            <i class="ti ti-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="invalid-feedback" id="error_msg_password"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="row align-items-center mb-3">
+                                                <div class="col-md-3">
+                                                    <label class="form-label mb-md-0" for="confirm_password">Confirm Password <span class="color-red">*</span></label>
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="ti ti-key"></i></span>
+                                                        <input tabindex="9" type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="{{.UserRole.PasswordMinLength}}" maxlength="{{.UserRole.PasswordMaxLength}}" placeholder="Confirm new password">
+                                                        <button type="button" class="input-group-text toggle-password-btn" data-input-id="confirm_password">
+                                                            <i class="ti ti-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="invalid-feedback" id="error_msg_confirm_password"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center justify-content-end gap-2">
+                                    <button tabindex="10" type="button" class="btn btn-light profile-nav-trigger tab-switcher-btn" data-target-pane="pane-overview">Cancel</button>
+                                    <button tabindex="11" type="button" class="btn btn-primary" id="password_change_button">
+                                        <i class="ti ti-shield-check me-1"></i>Update Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{.ConfigData.AssetBaseUrl}}/assets/js/user/profile.js"></script>

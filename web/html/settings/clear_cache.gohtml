@@ -1,0 +1,36 @@
+{{ template "include/breadcrumb" . }}
+{{ template "settings/include/setting_menu" . }}
+<div class="row" id="clear-cache-view">
+    <div class="col-xl-3 theiaStickySidebar">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-column list-group settings-list">
+                    <a href="#" class="d-inline-flex align-items-center rounded active py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/clear-cache" data-title="Clear Cache" data-parameter="" data-name="Clear Cache" data-popup-status="0" data-popup-width="1000" data-content-div="content"><i class="ti ti-arrow-badge-right me-2"></i>Clear Cache</a>
+                    <a href="#" class="d-inline-flex align-items-center rounded py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/backup" data-title="Backup" data-parameter="" data-name="Backup" data-popup-status="0" data-popup-width="1000" data-content-div="content">Backup</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-9" id="clear-cache-view-details">
+        <div class="card">
+            <div class="card-header px-0 mx-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h4>Clear Cache</h4>
+                </div>
+            </div>
+            <form action="#" id="clear-cache-view-form">
+                <div class="card-body pb-0 ">
+                    <div class="cache-content">
+                        <p class="fs-14 text-dark mb-3"> <span class="me-2"><i class="ti ti-info-circle text-danger"></i></span>Clearing the cache may
+                            improve performance but will remove temporary files, stored preferences, and
+                            cached data from websites and applications.</p>
+                        <div class="d-flex align-items-center justify-content-end mb-3">
+                            <a href="#" type="button" id="clear_cache_button" class="btn btn-primary">Clear Cache</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="{{.ConfigData.AssetBaseUrl}}/assets/js/setting/clear-cache.js"></script>

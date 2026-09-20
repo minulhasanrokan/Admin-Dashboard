@@ -1,0 +1,2 @@
+GroupKey,Name,Key,Url,Title,Action,Details,Icon,ShortOrder,Status
+settings,App Settings,settings.system,/settings/system,System Settings,settings.system.view,Manage basic application system settings,ti ti-automation,1,1

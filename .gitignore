@@ -1,0 +1,46 @@
+# Environment & Secrets
+.env
+*.env
+!.env.example
+
+# Binaries & Executables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+web.exe
+worker.exe
+
+# IDE & Editor Settings
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Storage Data (Backups, Cache, Sessions, Temp)
+storage/backup/*
+!storage/backup/.gitignore
+storage/cache/*
+!storage/cache/.gitignore
+storage/sessions/*
+!storage/sessions/.gitignore
+storage/logs/*
+!storage/logs/.gitignore
+
+# Test & Coverage Artifacts
+*.out
+*.test
+coverage.txt
+
+# Operating System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

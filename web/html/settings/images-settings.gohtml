@@ -1,0 +1,244 @@
+{{ template "include/breadcrumb" . }}
+{{ template "settings/include/setting_menu" . }}
+<div class="row" id="system-images">
+    <div class="col-xl-3 theiaStickySidebar">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-column list-group settings-list">
+                    <a href="#" class="d-inline-flex align-items-center rounded py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/business-settings" data-title="Business Settings" data-parameter="" data-name="Business Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content">Business Settings</a>
+                    <a href="#" class="d-inline-flex align-items-center rounded active py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/images-settings" data-title="Images Settings" data-parameter="" data-name="Images Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content"><i class="ti ti-arrow-badge-right me-2"></i>Images Settings</a>
+                    <a href="#" class="d-inline-flex align-items-center rounded py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/authentication-settings" data-title="Authentication Settings" data-parameter="" data-name="Authentication Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content">Authentication Settings</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-9" id="system-images-details">
+        <div class="card">
+            <div class="card-body">
+                <div class="border-bottom mb-3 pb-3">
+                    <h4>Images Settings</h4>
+                </div>
+                <form action="#" id="images-settings-form">
+                    <div class="border-bottom mb-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center flex-wrap row-gap-3 bg-light w-100 rounded p-3 mb-4">
+                                    <div class="d-flex align-items-center justify-content-center avatar avatar-xxl bg-white rounded border border-dashed me-2 flex-shrink-0 text-dark frames px-2">
+                                        <img id="logo_image" data-original-src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.Logo}}" src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.Logo}}" class="img-fluid" alt="Logo">
+                                    </div>
+                                    <div class="profile-upload">
+                                        <div class="mb-2">
+                                            <h6 class="mb-1">White Logo</h6>
+                                            <p class="fs-12">Recommended image size is 160px x 50px</p>
+                                        </div>
+                                        <div class="profile-uploader d-flex align-items-center">
+                                            <div class="drag-upload-btn btn btn-sm btn-primary me-2">
+                                                Change
+                                                <input data-max-size="5" accept="image/*" type="file" id="logo" name="logo" class="form-control image-sign">
+                                            </div>
+                                            <a href="#" data-input="logo" class="btn btn-light btn-sm image-cancel">Cancel</a>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" id="error_msg_logo"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center flex-wrap row-gap-3 bg-light w-100 rounded p-3 mb-4">
+                                    <div class="d-flex align-items-center justify-content-center avatar bg-dark avatar-xxl rounded border border-dashed me-2 px-2 flex-shrink-0 text-dark frames">
+                                        <img id="logo_white_image" data-original-src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LogoWhite}}" src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LogoWhite}}" class="img-fluid text-white" alt="Logo White">
+                                    </div>
+                                    <div class="profile-upload">
+                                        <div class="mb-2">
+                                            <h6 class="mb-1">Dark Logo</h6>
+                                            <p class="fs-12">Recommended image size is 160px x 50px</p>
+                                        </div>
+                                        <div class="profile-uploader d-flex align-items-center">
+                                            <div class="drag-upload-btn btn btn-sm btn-primary me-2">
+                                                Change
+                                                <input data-max-size="5" accept="image/*" id="logo_white" name="logo_white" type="file" class="form-control image-sign">
+                                            </div>
+                                            <a href="#" data-input="logo_white" class="btn btn-light btn-sm image-cancel">Cancel</a>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" id="error_msg_logo_white"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center flex-wrap row-gap-3 bg-light w-100 rounded p-3 mb-4">
+                                    <div class="d-flex align-items-center justify-content-center avatar avatar-xxl bg-white rounded border border-dashed me-2 p-3 flex-shrink-0 text-dark frames">
+                                        <img id="logo_small_image" data-original-src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LogoSmall}}" src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LogoSmall}}" class="img-fluid" alt="Logo Small">
+                                    </div>
+                                    <div class="profile-upload">
+                                        <div class="mb-2">
+                                            <h6 class="mb-1">White Mini Logo</h6>
+                                            <p class="fs-12">Recommended image size is 80px x 80px</p>
+                                        </div>
+                                        <div class="profile-uploader d-flex align-items-center">
+                                            <div class="drag-upload-btn btn btn-sm btn-primary me-2">
+                                                Change
+                                                <input data-max-size="5" accept="image/*" id="logo_small" name="logo_small" type="file" class="form-control image-sign">
+                                            </div>
+                                            <a href="#" data-input="logo_small" class="btn btn-light btn-sm image-cancel">Cancel</a>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" id="error_msg_logo_small"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center flex-wrap row-gap-3 bg-light w-100 rounded p-3 mb-4">
+                                    <div class="d-flex align-items-center justify-content-center avatar avatar-xxl bg-white rounded border border-dashed me-2 p-3 flex-shrink-0 text-dark frames">
+                                        <img id="logo_dark_small_image" data-original-src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LogoDarkSmall}}" src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LogoDarkSmall}}" class="img-fluid" alt="Logo Dark Small">
+                                    </div>
+                                    <div class="profile-upload">
+                                        <div class="mb-2">
+                                            <h6 class="mb-1">Dark Mini Logo</h6>
+                                            <p class="fs-12">Recommended image size is 80px x 80px</p>
+                                        </div>
+                                        <div class="profile-uploader d-flex align-items-center">
+                                            <div class="drag-upload-btn btn btn-sm btn-primary me-2">
+                                                Upload
+                                                <input data-max-size="5" accept="image/*" id="logo_dark_small" name="logo_dark_small" type="file" class="form-control image-sign">
+                                            </div>
+                                            <a href="#" data-input="logo_dark_small" class="btn btn-light btn-sm image-cancel">Cancel</a>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" id="error_msg_logo_dark_small"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center flex-wrap row-gap-3 bg-light w-100 rounded p-3 mb-4">
+                                    <div class="d-flex align-items-center justify-content-center avatar avatar-xxl rounded bg-white p-3 border border-dashed me-2 flex-shrink-0 text-dark frames">
+                                        <img id="icon_image" data-original-src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.Icon}}" src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.Icon}}" class="img-fluid" alt="Icon">
+                                    </div>
+                                    <div class="profile-upload">
+                                        <div class="mb-2">
+                                            <h6 class="mb-1">Favicon</h6>
+                                            <p class="fs-12">Recommended image size is 128px x 128px</p>
+                                        </div>
+                                        <div class="profile-uploader d-flex align-items-center">
+                                            <div class="drag-upload-btn btn btn-sm btn-primary me-2">
+                                                Change
+                                                <input data-max-size="5" accept="image/*" id="icon" name="icon" type="file" class="form-control image-sign">
+                                            </div>
+                                            <a href="#" data-input="icon" class="btn btn-light btn-sm image-cancel">Cancel</a>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" id="error_msg_icon"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center flex-wrap row-gap-3 bg-light w-100 rounded p-3 mb-4">
+                                    <div class="d-flex align-items-center justify-content-center avatar avatar-xxl rounded bg-white p-3 border border-dashed me-2 flex-shrink-0 text-dark frames">
+                                        <img id="apple_icon_image" data-original-src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.AppleIcon}}" src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.AppleIcon}}" class="img-fluid" alt="Apple Icon">
+                                    </div>
+                                    <div class="profile-upload">
+                                        <div class="mb-2">
+                                            <h6 class="mb-1">Apple Icon</h6>
+                                            <p class="fs-12">Recommended image size is 180px x 180px</p>
+                                        </div>
+                                        <div class="profile-uploader d-flex align-items-center">
+                                            <div class="drag-upload-btn btn btn-sm btn-primary me-2">
+                                                Change
+                                                <input data-max-size="5" accept="image/*" id="apple_icon" name="apple_icon" type="file" class="form-control image-sign">
+                                            </div>
+                                            <a href="#" data-input="apple_icon" class="btn btn-light btn-sm image-cancel">Cancel</a>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" id="error_msg_apple_icon"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center flex-wrap row-gap-3 bg-light w-100 rounded p-3 mb-4">
+                                    <div class="d-flex align-items-center justify-content-center avatar avatar-xxl rounded bg-white p-3 border border-dashed me-2 flex-shrink-0 text-dark frames">
+                                        <img id="login_bg_image" data-original-src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LoginBg}}" src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LoginBg}}" class="img-fluid" alt="Login Bg Image">
+                                    </div>
+                                    <div class="profile-upload">
+                                        <div class="mb-2">
+                                            <h6 class="mb-1">Auth Background</h6>
+                                            <p class="fs-12">Recommended image size is 630px x 734px</p>
+                                        </div>
+                                        <div class="profile-uploader d-flex align-items-center">
+                                            <div class="drag-upload-btn btn btn-sm btn-primary me-2">
+                                                Change
+                                                <input data-max-size="5" accept="image/*" id="login_bg" name="login_bg" type="file" class="form-control image-sign">
+                                            </div>
+                                            <a data-input="login_bg" href="#" class="btn btn-light btn-sm image-cancel">Cancel</a>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" id="error_msg_login_bg"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center flex-wrap row-gap-3 bg-light w-100 rounded p-3 mb-4">
+                                    <div class="d-flex align-items-center justify-content-center avatar avatar-xxl rounded bg-white p-3 border border-dashed me-2 flex-shrink-0 text-dark frames">
+                                        <img id="forgot_password_bg_image" data-original-src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.ForgotPasswordBg}}" src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.ForgotPasswordBg}}" class="img-fluid" alt="Forgot Password Bg Image">
+                                    </div>
+                                    <div class="profile-upload">
+                                        <div class="mb-2">
+                                            <h6 class="mb-1">Forgot Password Background</h6>
+                                            <p class="fs-12">Recommended image size is 630px x 734px</p>
+                                        </div>
+                                        <div class="profile-uploader d-flex align-items-center">
+                                            <div class="drag-upload-btn btn btn-sm btn-primary me-2">
+                                                Change
+                                                <input data-max-size="5" accept="image/*" id="forgot_password_bg" name="forgot_password_bg" type="file" class="form-control image-sign">
+                                            </div>
+                                            <a data-input="forgot_password_bg" href="#" class="btn btn-light btn-sm image-cancel">Cancel</a>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" id="error_msg_forgot_password_bg"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center flex-wrap row-gap-3 bg-light w-100 rounded p-3 mb-4">
+                                    <div class="d-flex align-items-center justify-content-center avatar avatar-xxl rounded bg-white p-3 border border-dashed me-2 flex-shrink-0 text-dark frames">
+                                        <img id="registration_bg_image" data-original-src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.RegistrationBg}}" src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.RegistrationBg}}" class="img-fluid" alt="Registration Bg Image">
+                                    </div>
+                                    <div class="profile-upload">
+                                        <div class="mb-2">
+                                            <h6 class="mb-1">Registration Background</h6>
+                                            <p class="fs-12">Recommended image size is 630px x 734px</p>
+                                        </div>
+                                        <div class="profile-uploader d-flex align-items-center">
+                                            <div class="drag-upload-btn btn btn-sm btn-primary me-2">
+                                                Change
+                                                <input data-max-size="5" accept="image/*" id="registration_bg" name="registration_bg" type="file" class="form-control image-sign">
+                                            </div>
+                                            <a data-input="registration_bg" href="#" class="btn btn-light btn-sm image-cancel">Cancel</a>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" id="error_msg_registration_bg"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center flex-wrap row-gap-3 bg-light w-100 rounded p-3 mb-4">
+                                    <div class="d-flex align-items-center justify-content-center avatar avatar-xxl rounded bg-white p-3 border border-dashed me-2 flex-shrink-0 text-dark frames">
+                                        <img id="verification_bg_image" data-original-src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.VerificationBg}}" src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.VerificationBg}}" class="img-fluid" alt="Verification Bg Image">
+                                    </div>
+                                    <div class="profile-upload">
+                                        <div class="mb-2">
+                                            <h6 class="mb-1">Verification Background</h6>
+                                            <p class="fs-12">Recommended image size is 630px x 734px</p>
+                                        </div>
+                                        <div class="profile-uploader d-flex align-items-center">
+                                            <div class="drag-upload-btn btn btn-sm btn-primary me-2">
+                                                Change
+                                                <input data-max-size="5" accept="image/*" id="verification_bg" name="verification_bg" type="file" class="form-control image-sign">
+                                            </div>
+                                            <a data-input="verification_bg" href="#" class="btn btn-light btn-sm image-cancel">Cancel</a>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" id="error_msg_verification_bg"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-end">
+                        <button tabindex="15" type="button" id="images_setting_button" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{.ConfigData.AssetBaseUrl}}/assets/js/setting/images-settings.js"></script>

@@ -1,0 +1,25 @@
+{{ define "include/dashboard/horizontal-menu" }}
+    <div class="sidebar sidebar-horizontal" id="horizontal-menu">
+        <div class="sidebar-menu">
+            <div class="main-menu">
+                <ul class="nav-menu">
+                    {{ range .MenuTree }}
+                        <li class="submenu">
+                            <a href="#">
+                                <i class="{{ .Icon }}"></i> <span>{{ .Title }}</span>
+                                <span class="menu-arrow"></span>
+                            </a>
+                            <ul>
+                                {{ range .Categories }}
+                                    <li>
+                                        <a href="#" class="menu-link" data-url="{{ .Url }}" data-title="{{ .Title }}" data-parameter="" data-name="{{ .Name }}" data-popup-status="0" data-popup-width="1000" data-content-div="content">{{ .Title }}</a>
+                                    </li>
+                                {{ end }}
+                            </ul>
+                        </li>
+                    {{ end }}
+                </ul>
+            </div>
+        </div>
+    </div>
+{{ end }}

@@ -1,0 +1,57 @@
+{{ define "include/dashboard/two-col-sidebar" }}
+    <div class="two-col-sidebar" id="two-col-sidebar">
+        <div class="sidebar sidebar-twocol">
+            <div class="twocol-mini">
+                <a href="{{.ConfigData.AppBaseUrl}}/dashboard" class="logo-small">
+                    <img src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LogoSmall}}" alt="{{.SystemSetting.Name}}">
+                </a>
+                <div class="sidebar-left slimscroll">
+                    <div class="nav flex-column align-items-center nav-pills" id="sidebar-tabs" role="tablist"
+                         aria-orientation="vertical">
+                        {{ range .MenuTree }}
+                            <a href="#v-pills-{{ .Key }}" class="nav-link" title="{{ .Title }}" data-bs-toggle="tab" data-bs-target="#v-pills-{{ .Key }}">
+                                <i class="{{ .Icon }}"></i>
+                            </a>
+                        {{ end }}
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-right">
+                <div class="sidebar-logo mb-4">
+                    <a href="{{.ConfigData.AppBaseUrl}}/dashboard" class="logo logo-normal">
+                        <img src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.Logo}}" alt="{{.SystemSetting.Name}}">
+                    </a>
+                    <a href="{{.ConfigData.AppBaseUrl}}/dashboard" class="dark-logo">
+                        <img src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LogoWhite}}" alt="{{.SystemSetting.Name}}">
+                    </a>
+                </div>
+                <div class="sidebar-scroll">
+                    <h6 class="mb-3">Welcome to {{.SystemSetting.Name}}</h6>
+                    <a href="#" class="d-block text-center rounded bg-light p-3 mb-4 text-decoration-none menu-link" data-url="{{.ConfigData.AppBaseUrl}}/profile" data-title="My Profile" data-parameter="" data-name="My Profile" data-popup-status="0" data-popup-width="1000" data-content-div="content">
+                        <div class="avatar avatar-lg online mb-3">
+                            <img src="{{.ConfigData.AppBaseUrl}}/file/user/{{.SessionData.Photo}}" alt="{{.SessionData.UserName}}" class="img-fluid rounded-circle">
+                        </div>
+                        <h6 class="fs-12 fw-normal mb-1 text-dark">{{.SessionData.UserName}}</h6>
+                        <p class="fs-10 text-muted mb-0">System Admin</p>
+                    </a>
+                    <div class="tab-content" id="v-pills-tabContent">
+                        {{ range .MenuTree }}
+                            <div class="tab-pane fade" id="v-pills-{{ .Key }}">
+                                <ul>
+                                    <li class="menu-title"><span>{{ .Title }}</span></li>
+                                    <ul>
+                                        {{ range .Categories }}
+                                            <li>
+                                                <a href="#" class="menu-link" data-url="{{ .Url }}" data-title="{{ .Title }}" data-parameter="" data-name="{{ .Name }}" data-popup-status="0" data-popup-width="1000" data-content-div="content">{{ .Title }}</a>
+                                            </li>
+                                        {{ end }}
+                                    </ul>
+                                </ul>
+                            </div>
+                        {{ end }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{{ end }}

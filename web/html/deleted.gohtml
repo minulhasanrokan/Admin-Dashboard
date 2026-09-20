@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+        <title>Data Already Deleted | {{.SystemSetting.Name}} - {{.SystemSetting.Title}}</title>
+        <link rel="shortcut icon" type="image/x-icon" href="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.Icon}}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.AppleIcon}}">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/plugins/icons/feather/feather.css">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/plugins/tabler-icons/tabler-icons.min.css">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/plugins/fontawesome/css/fontawesome.min.css">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/plugins/fontawesome/css/all.min.css">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/css/style.css">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/css/common.css">
+    </head>
+    <body class="bg-linear-gradiant">
+        <div class="main-wrapper">
+            <div class="container">
+                <div>
+                    <div class="row justify-content-center align-items-center">
+                        <div class="col-md-8 d-flex justify-content-center align-items-center mx-auto">
+                            <div>
+                                <div class="p-4 text-center">
+                                    <img src="{{.ConfigData.AssetBaseUrl}}/file/system/{{.SystemSetting.Logo}}" alt="{{.SystemSetting.Name}}">
+                                </div>
+                                <div class="error-images mb-5">
+                                    <img src="{{.ConfigData.AssetBaseUrl}}/assets/images/delete.svg" alt="Data Already Deleted">
+                                </div>
+                                <div class="text-center">
+                                    <h1 class="mb-3">Data Already Deleted</h1>
+                                    <p class="fs-16 text-center">The requested data is no longer available or has been removed.</p>
+                                    <div class="d-flex justify-content-center pb-4">
+                                        <a href="{{.ConfigData.AppBaseUrl}}" class="btn btn-primary d-flex align-items-center "><i class="ti ti-arrow-left me-2"></i>Back to Home</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/jquery-3.7.1.min.js"></script>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/bootstrap.bundle.min.js"></script>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/feather.min.js"></script>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/script.js"></script>
+        <script defer src="{{.ConfigData.AssetBaseUrl}}/assets/js/beacon.min.js"></script>
+    </body>
+</html>

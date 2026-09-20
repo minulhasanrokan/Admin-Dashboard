@@ -1,0 +1,89 @@
+{{ template "include/breadcrumb" . }}
+{{ template "settings/include/setting_menu" . }}
+<div class="row" id="user-role-settings-view">
+    <div class="col-xl-3 theiaStickySidebar">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-column list-group settings-list">
+                    <a href="#" class="d-inline-flex align-items-center rounded py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/email-settings" data-title="Email Settings" data-parameter="" data-name="Email Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content">Email Settings</a>
+                    <a href="#" class="d-inline-flex align-items-center rounded py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/sms-settings" data-title="SMS Settings" data-parameter="" data-name="SMS Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content">SMS Settings</a>
+                    <a href="#" class="d-inline-flex align-items-center rounded active py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/user-roles-settings" data-title="User Roles" data-parameter="" data-name="User Roles" data-popup-status="0" data-popup-width="1000" data-content-div="content"><i class="ti ti-arrow-badge-right me-2"></i>User Roles</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-9" id="user-role-settings-edit-details">
+        <div class="card">
+            <div class="card-body">
+                <div class="border-bottom mb-3 pb-3">
+                    <h4>User Role Settings</h4>
+                </div>
+                <form action="#" id="user-role-settings-edit-form">
+                    <div class="border-bottom mb-3">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="row align-items-center mb-3">
+                                    <div class="col-md-5">
+                                        <label class="form-label mb-md-0" for="password_min_length">Password Min Length <span class="color-red">*</span></label>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <input data-min-value="8" data-max-value="20" tabindex="1" value="{{.UserRole.PasswordMinLength}}" type="text" name="password_min_length" id="password_min_length" minlength="1" maxlength="2" class="form-control text-end">
+                                        <div class="invalid-feedback" id="error_msg_password_min_length"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="row align-items-center mb-3">
+                                    <div class="col-md-5">
+                                        <label class="form-label mb-md-0" for="password_max_length">Password Max Length <span class="color-red">*</span></label>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <input data-min-value="8" data-max-value="20" tabindex="1" value="{{.UserRole.PasswordMaxLength}}" type="text" name="password_max_length" id="password_max_length" minlength="1" maxlength="2" class="form-control text-end">
+                                        <div class="invalid-feedback" id="error_msg_password_max_length"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="row align-items-center mb-3">
+                                    <div class="col-md-5">
+                                        <label class="form-label mb-md-0" for="session_time">Session Time (In Minute) <span class="color-red">*</span></label>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <input data-min-value="1" data-max-value="100" tabindex="1" value="{{.UserRole.SessionTime}}" type="text" name="session_time" id="session_time" minlength="1" maxlength="3" class="form-control text-end">
+                                        <div class="invalid-feedback" id="error_msg_session_time"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="row align-items-center mb-3">
+                                    <div class="col-md-5">
+                                        <label data-min-value="1" data-max-value="30" class="form-label mb-md-0" for="session_check_time">Session Check Time (In Minute) <span class="color-red">*</span></label>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <input tabindex="1" value="{{.UserRole.SessionCheckTime}}" type="text" name="session_check_time" id="session_check_time" minlength="1" maxlength="3" class="form-control text-end">
+                                        <div class="invalid-feedback" id="error_msg_session_check_time"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="row align-items-center mb-3">
+                                    <div class="col-md-5">
+                                        <label class="form-label mb-md-0" for="password_expire_days">Password Expire Days (In Days) <span class="color-red">*</span></label>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <input data-min-value="30" data-max-value="365" tabindex="1" value="{{.UserRole.PasswordExpireDays}}" type="text" name="password_expire_days" id="password_expire_days" minlength="1" maxlength="3" class="form-control text-end">
+                                        <div class="invalid-feedback" id="error_msg_password_expire_days"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-end">
+                        <button type="button" tabindex="6" id="user_role_setting_button" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{.ConfigData.AssetBaseUrl}}/assets/js/setting/user-role-settings.js"></script>

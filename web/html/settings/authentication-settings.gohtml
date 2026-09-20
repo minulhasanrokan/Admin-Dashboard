@@ -1,0 +1,147 @@
+{{ template "include/breadcrumb" . }}
+{{ template "settings/include/setting_menu" . }}
+<div class="row" id="authentication-settings-view">
+    <div class="col-xl-3 theiaStickySidebar">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-column list-group settings-list">
+                    <a href="#" class="d-inline-flex align-items-center rounded py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/business-settings" data-title="Business Settings" data-parameter="" data-name="Business Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content">Business Settings</a>
+                    <a href="#" class="d-inline-flex align-items-center rounded py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/images-settings" data-title="Images Settings" data-parameter="" data-name="Images Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content">Images Settings</a>
+                    <a href="#" class="d-inline-flex align-items-center rounded active py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/authentication-settings" data-title="Authentication Settings" data-parameter="" data-name="Authentication Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content"><i class="ti ti-arrow-badge-right me-2"></i>Authentication Settings</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-9" id="authentication-settings-edit-details">
+        <div class="card">
+            <div class="card-body">
+                <div class="border-bottom mb-3 pb-3">
+                    <h4>Authentication Settings</h4>
+                </div>
+                <form action="#" id="authentication-settings-form">
+                    <div class="border-bottom mb-3">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="row row-gap-2 mb-3">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-medium">Allow Registration</h6>
+                                    </div>
+                                    <div class="col-md-6 d-flex align-items-center">
+                                        <div class="form-check form-switch me-3">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="allow_registration" name="allow_registration" {{if .AuthSetting.AllowRegistration}}checked{{end}}>
+                                        </div>
+                                        <div class="form-check form-check-md">
+                                            <input class="form-check-input" type="checkbox" id="invite_only" name="invite_only" {{if .AuthSetting.InviteOnly}}checked{{end}}>
+                                            <label class="form-check-label" for="invite_only">
+                                                Invite Only
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row row-gap-2 mb-3">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-medium">Verification Required</h6>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="verification_required" name="verification_required" {{if .AuthSetting.VerificationRequired}}checked{{end}}>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row row-gap-2 mb-3">
+                                    <div class="col-md-6 d-flex">
+                                        <div class="d-flex align-items-center">
+                                            <h6 class="fw-medium">Verification Expired (In Minutes) <span class="color-red">*</span></h6>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="verification_expired" name="verification_expired" value="{{.AuthSetting.VerificationExpired}}" minlength="1" maxlength="5">
+                                        <div class="invalid-feedback" id="error_msg_verification_expired"></div>
+                                    </div>
+                                </div>
+                                <div class="row row-gap-2 mb-3">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-medium">Referral System</h6>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="referral_system" name="referral_system" {{if .AuthSetting.ReferralSystem}}checked{{end}}>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row row-gap-2 mb-3">
+                                    <div class="col-md-6 d-flex">
+                                        <div class="d-flex align-items-center">
+                                            <h6 class="fw-medium">Login Type</h6>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex align-items-center">
+                                        <div class="form-check me-3">
+                                            <input class="form-check-input" type="radio" name="login_type" id="login_type_mobile" value="mobile" {{if eq .AuthSetting.LoginType "mobile"}}checked{{end}}>
+                                            <label class="form-check-label" for="login_type_mobile">
+                                                Mobile
+                                            </label>
+                                        </div>
+                                        <div class="form-check me-3">
+                                            <input class="form-check-input" type="radio" name="login_type" id="login_type_email" value="email" {{if or (eq .AuthSetting.LoginType "email") (not .AuthSetting.LoginType)}}checked{{end}}>
+                                            <label class="form-check-label" for="login_type_email">
+                                                Email
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row row-gap-2 mb-3">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-medium">Password</h6>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="password_required" name="password_required" {{if .AuthSetting.PasswordRequired}}checked{{end}}>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row row-gap-2 mb-3">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-medium">OTP System</h6>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="otp_system" name="otp_system" {{if .AuthSetting.OtpSystem}}checked{{end}}>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row row-gap-2 mb-3">
+                                    <div class="col-md-6 d-flex">
+                                        <div class="d-flex align-items-center">
+                                            <h6 class="fw-medium">OTP Type</h6>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex align-items-center">
+                                        <div class="form-check me-3">
+                                            <input class="form-check-input" type="radio" name="otp_type" id="otp_type_sms" value="sms" {{if eq .AuthSetting.OtpType "sms"}}checked{{end}}>
+                                            <label class="form-check-label" for="otp_type_sms">
+                                                SMS OTP
+                                            </label>
+                                        </div>
+                                        <div class="form-check me-3">
+                                            <input class="form-check-input" type="radio" name="otp_type" id="otp_type_email" value="email" {{if or (eq .AuthSetting.OtpType "email") (not .AuthSetting.OtpType)}}checked{{end}}>
+                                            <label class="form-check-label" for="otp_type_email">
+                                                Email OTP
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-end">
+                        <button type="button" class="btn btn-outline-light border me-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/business-settings" data-title="Business Settings" data-parameter="" data-name="Business Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="authentication_setting_button">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{.ConfigData.AssetBaseUrl}}/assets/js/setting/authentication-settings.js"></script>

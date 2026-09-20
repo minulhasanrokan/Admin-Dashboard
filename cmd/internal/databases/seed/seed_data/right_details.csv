@@ -1,0 +1,4 @@
+CategoryKey,Name,Url,Title,Action,Details,PopupStatus,Width,Icon,ShortOrder,Status
+settings.system,Basic Settings,/settings/business-settings,Basic Settings,settings.system.basic.settings,Basic Settings,0,1000,ti ti-eye,1,1
+settings.system,System Settings,/settings/email-settings,System Settings,settings.system.system.settings,System Settings,0,1000,ti ti-eye,2,1
+settings.system,Other Settings,/settings/clear-cache,Other Settings,settings.system.other.settings,Other Settings,0,1000,ti ti-eye,3,1

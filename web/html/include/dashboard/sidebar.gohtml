@@ -1,0 +1,74 @@
+{{ define "include/dashboard/sidebar" }}
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <a href="{{.ConfigData.AppBaseUrl}}/dashboard" class="logo logo-normal">
+                <img src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.Logo}}" alt="{{.SystemSetting.Name}}">
+            </a>
+            <a href="{{.ConfigData.AppBaseUrl}}/dashboard" class="logo-small">
+                <img src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LogoSmall}}" alt="{{.SystemSetting.Name}}">
+            </a>
+            <a href="{{.ConfigData.AppBaseUrl}}/dashboard" class="dark-logo">
+                <img src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LogoWhite}}" alt="{{.SystemSetting.Name}}">
+            </a>
+        </div>
+        <div class="modern-profile p-3 pb-0">
+            <a href="#" class="d-block text-center rounded bg-light p-3 mb-4 user-profile text-decoration-none menu-link" data-url="{{.ConfigData.AppBaseUrl}}/profile" data-title="My Profile" data-parameter="" data-name="My Profile" data-popup-status="0" data-popup-width="1000" data-content-div="content">
+                <div class="avatar avatar-lg online mb-3">
+                    <img src="{{.ConfigData.AppBaseUrl}}/file/user/{{.SessionData.Photo}}" alt="{{.SessionData.UserName}}" class="img-fluid rounded-circle">
+                </div>
+                <h6 class="fs-12 fw-normal mb-1 text-dark">{{.SessionData.UserName}}</h6>
+                <p class="fs-10 text-muted mb-0">System Admin</p>
+            </a>
+        </div>
+        <div class="sidebar-header p-3 pb-0 pt-2">
+            <a href="#" class="text-center rounded bg-light p-2 mb-4 sidebar-profile d-flex align-items-center text-decoration-none menu-link" data-url="{{.ConfigData.AppBaseUrl}}/profile" data-title="My Profile" data-parameter="" data-name="My Profile" data-popup-status="0" data-popup-width="1000" data-content-div="content">
+                <div class="avatar avatar-md onlin">
+                    <img src="{{.ConfigData.AppBaseUrl}}/file/user/{{.SessionData.Photo}}" alt="{{.SessionData.UserName}}" class="img-fluid rounded-circle">
+                </div>
+                <div class="text-start sidebar-profile-info ms-2">
+                    <h6 class="fs-12 fw-normal mb-1 text-dark">{{.SessionData.UserName}}</h6>
+                    <p class="fs-10 text-muted mb-0">System Admin</p>
+                </div>
+            </a>
+            <div class="d-flex align-items-center justify-content-between menu-item mb-3">
+                <div class="me-0">
+                    <a href="javascript:void(0);" class="btn btn-menubar"><i class="ti ti-calendar"></i></a>
+                </div>
+                <div class="me-3">
+                    <a href="javascript:void(0);" class="btn btn-menubar position-relative"><i class="ti ti-message"></i></a>
+                </div>
+                <div class="me-3 notification-item">
+                    <a href="javascript:void(0);" class="btn btn-menubar position-relative me-1"><i class="ti ti-bell"></i><span class="notification-status-dot"></span></a>
+                </div>
+                <div class="me-0">
+                    <a href="javascript:void(0);" class="btn btn-menubar"><i class="ti ti-message"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-inner slimscroll">
+            <div id="sidebar-menu" class="sidebar-menu">
+                <ul>
+                    <li>
+                        <ul>
+                            {{ range .MenuTree }}
+                                <li class="submenu">
+                                    <a href="#">
+                                        <i class="{{ .Icon }}"></i> <span>{{ .Title }}</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        {{ range .Categories }}
+                                            <li>
+                                                <a href="#" class="menu-link" data-url="{{ .Url }}" data-title="{{ .Title }}" data-parameter="" data-name="{{ .Name }}" data-popup-status="0" data-popup-width="1000" data-content-div="content">{{ .Title }}</a>
+                                            </li>
+                                        {{ end }}
+                                    </ul>
+                                </li>
+                            {{ end }}
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{{ end }}

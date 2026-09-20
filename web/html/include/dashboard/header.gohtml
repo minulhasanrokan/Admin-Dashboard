@@ -1,0 +1,152 @@
+{{ define "include/dashboard/header" }}
+    <div class="header">
+        <div class="main-header">
+            <div class="header-left">
+                <a href="{{.ConfigData.AppBaseUrl}}/dashboard" class="logo">
+                    <img src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.Logo}}" alt="{{.SystemSetting.Name}}">
+                </a>
+                <a href="{{.ConfigData.AppBaseUrl}}/dashboard" class="dark-logo">
+                    <img src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.LogoWhite}}" alt="{{.SystemSetting.Name}}">
+                </a>
+            </div>
+            <a id="mobile_btn" class="mobile_btn" href="#sidebar">
+                <span class="bar-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </a>
+            <div class="header-user">
+                <div class="nav user-menu nav-list">
+                    <div class="me-auto d-flex align-items-center" id="header-search">
+                        <a id="toggle_btn" href="#" class="btn btn-menubar me-2">
+                            <i class="ti ti-arrow-bar-to-left"></i>
+                        </a>
+                    </div>
+                    <div class="sidebar sidebar-horizontal" id="horizontal-single">
+                        <div class="sidebar-menu">
+                            <div class="main-menu">
+                                <ul class="nav-menu">
+                                    {{ range .MenuTree }}
+                                        <li class="submenu">
+                                            <a href="#">
+                                                <i class="{{ .Icon }}"></i> <span>{{ .Title }}</span>
+                                                <span class="menu-arrow"></span>
+                                            </a>
+                                            <ul>
+                                                {{ range .Categories }}
+                                                    <li>
+                                                        <a href="#" class="menu-link" data-url="{{ .Url }}" data-title="{{ .Title }}" data-parameter="" data-name="{{ .Name }}" data-popup-status="0" data-popup-width="1000" data-content-div="content">{{ .Title }}</a>
+                                                    </li>
+                                                {{ end }}
+                                            </ul>
+                                        </li>
+                                    {{ end }}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="me-2">
+                            <a href="#" class="btn btn-menubar btnFullscreen">
+                                <i class="ti ti-maximize"></i>
+                            </a>
+                        </div>
+                        <div class="me-2">
+                            <a href="#" class="btn btn-menubar position-relative">
+                                <i class="ti ti-calendar"></i>
+                            </a>
+                        </div>
+                        <div class="me-2">
+                            <a href="#" class="btn btn-menubar position-relative">
+                                <i class="ti ti-message"></i>
+                            </a>
+                        </div>
+                        <div class="me-2">
+                            <a href="#" class="btn btn-menubar">
+                                <i class="ti ti-mail"></i>
+                            </a>
+                        </div>
+                        <div class="me-2 notification_item">
+                            <a href="#" class="btn btn-menubar position-relative me-1" id="notification_popup" data-bs-toggle="dropdown">
+                                <i class="ti ti-bell"></i>
+                                <span class="notification-status-dot"></span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end notification-dropdown p-4">
+                                <div class="d-flex align-items-center justify-content-between border-bottom p-0 pb-3 mb-3">
+                                    <h4 class="notification-title">Notifications (2)</h4>
+                                    <div class="d-flex align-items-center">
+                                        <a href="#" class="text-primary fs-15 me-3 lh-1">Mark all as read</a>
+                                    </div>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="d-flex flex-column">
+                                        <div class="border-bottom mb-3 pb-3">
+                                            <a href="#">
+                                                <div class="d-flex">
+                                                    <span class="avatar avatar-lg me-2 flex-shrink-0">
+                                                        <img src="{{.ConfigData.AppBaseUrl}}/file/user/{{.SessionData.Photo}}" alt="{{.SessionData.UserName}}">
+                                                    </span>
+                                                    <div class="flex-grow-1">
+                                                        <p class="mb-1"><span class="text-dark fw-semibold">Admin</span>
+                                                            system notifications and alerts.</p>
+                                                        <span>Just Now</span>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex p-0">
+                                    <a href="#" class="btn btn-light w-100 me-2">Cancel</a>
+                                    <a href="#" class="btn btn-primary w-100">View All</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown profile-dropdown">
+                            <a href="#" class="dropdown-toggle d-flex align-items-center"
+                               data-bs-toggle="dropdown">
+                                <span class="avatar avatar-md online">
+                                    <img src="{{.ConfigData.AppBaseUrl}}/file/user/{{.SessionData.Photo}}" alt="{{.SessionData.UserName}}" class="img-fluid rounded-circle">
+                                </span>
+                            </a>
+                            <div class="dropdown-menu shadow-none">
+                                <div class="card mb-0">
+                                    <div class="card-header">
+                                        <a href="#" class="d-flex align-items-center text-dark text-decoration-none menu-link" data-url="{{.ConfigData.AppBaseUrl}}/profile" data-title="My Profile" data-parameter="" data-name="My Profile" data-popup-status="0" data-popup-width="1000" data-content-div="content">
+                                            <span class="avatar avatar-lg me-2 avatar-rounded">
+                                                <img src="{{.ConfigData.AppBaseUrl}}/file/user/{{.SessionData.Photo}}" alt="{{.SessionData.UserName}}" class="img-fluid rounded-circle">
+                                            </span>
+                                            <div>
+                                                <h5 class="mb-0">{{.SessionData.UserName}}</h5>
+                                                <p class="fs-12 fw-medium mb-0">System Admin</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="card-body">
+                                        <a class="dropdown-item d-inline-flex align-items-center p-0 py-2 menu-link" href="#" data-url="{{.ConfigData.AppBaseUrl}}/profile" data-title="My Profile" data-parameter="" data-name="My Profile" data-popup-status="0" data-popup-width="1000" data-content-div="content">
+                                            <i class="ti ti-user-circle me-1"></i>My Profile
+                                        </a>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a class="dropdown-item d-inline-flex align-items-center p-0 py-2 logout-link" href="{{.ConfigData.AppBaseUrl}}/logout">
+                                            <i class="ti ti-login me-2"></i>Logout
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="dropdown mobile-user-menu">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <a class="dropdown-item menu-link" href="#" data-url="{{.ConfigData.AppBaseUrl}}/profile" data-title="My Profile" data-parameter="" data-name="My Profile" data-popup-status="0" data-popup-width="1000" data-content-div="content">My Profile</a>
+                    <a class="dropdown-item" href="{{.ConfigData.AppBaseUrl}}/settings/system">Settings</a>
+                    <a class="dropdown-item logout-link" href="{{.ConfigData.AppBaseUrl}}/logout">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{{ end }}

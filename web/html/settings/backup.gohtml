@@ -1,0 +1,90 @@
+{{ template "include/breadcrumb" . }}
+{{ template "settings/include/setting_menu" . }}
+<div class="row" id="backup-view">
+    <div class="col-xl-3 theiaStickySidebar">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-column list-group settings-list">
+                    <a href="#" class="d-inline-flex align-items-center rounded py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/clear-cache" data-title="Clear Cache" data-parameter="" data-name="Clear Cache" data-popup-status="0" data-popup-width="1000" data-content-div="content">Clear Cache</a>
+                    <a href="#" class="d-inline-flex align-items-center rounded active py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/backup" data-title="Backup" data-parameter="" data-name="Backup" data-popup-status="0" data-popup-width="1000" data-content-div="content"><i class="ti ti-arrow-badge-right me-2"></i>Backup</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-9" id="backup-view-details">
+        <div class="card">
+            <div class="card-body">
+                <div class="border-bottom mb-3 pb-3">
+                    <h4>Backup</h4>
+                </div>
+                <form action="#" id="backup-settings-form">
+                    <div class="border-bottom mb-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row align-items-center mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-md-0" for="backup">Backup Type <span class="color-red">*</span></label>
+                                        <input name="backup_type" id="backup_type" type="hidden" value="">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div id="backup_container">
+                                            <select tabindex="1" class="select" name="backup" id="backup">
+                                                <option value="">Select</option>
+                                            </select>
+                                        </div>
+                                        <div class="invalid-feedback" id="error_msg_backup"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row align-items-center mb-3">
+                                    <div class="col-md-12">
+                                        <div class="d-flex align-items-center justify-content-end">
+                                            <button tabindex="2" type="button" id="backup_setting_button" class="btn btn-primary">Generate Backup</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="card border rounded-3 shadow-xs mt-4">
+                    <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between flex-wrap gap-3 py-3 px-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar avatar-sm bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center w-34 h-34">
+                                <i class="ti ti-database-cog fs-16"></i>
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h6 class="mb-0 fw-bold text-dark fs-14">Backup History</h6>
+                                    <span class="badge bg-primary-transparent text-primary rounded-pill fs-11 fw-semibold px-2 py-1" id="backup_total_badge">0 Records</span>
+                                </div>
+                                <span class="text-muted fs-12">Manage and download your database and files backups</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <div class="input-group input-group-sm rounded-2 w-220 h-34">
+                                <span class="input-group-text bg-light border-end-0 text-muted ps-2 pe-1 d-flex align-items-center h-34"><i class="ti ti-search fs-13"></i></span>
+                                <input type="text" id="ag_quick_filter" class="form-control border-start-0 bg-light fs-12 h-34" placeholder="Search backups...">
+                                <button type="button" class="btn btn-light border border-start-0 text-muted d-none align-items-center justify-content-center h-34" id="btn_ag_search_clear" title="Clear">
+                                    <i class="ti ti-x fs-11"></i>
+                                </button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-white border rounded-2 text-dark d-inline-flex align-items-center justify-content-center px-3 h-34" id="btn_refresh_ag_grid" title="Reset all filters and reload">
+                                <i class="ti ti-rotate-clockwise fs-13 me-1 text-muted"></i><span class="fs-12 fw-medium">Reset</span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-white border rounded-2 fs-12 fw-medium text-dark d-inline-flex align-items-center justify-content-center px-3 h-34" id="btn_ag_export_csv" title="Export to CSV">
+                                <i class="ti ti-file-spreadsheet me-1 text-success fs-14"></i>Export
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="backup_ag_grid" class="ag-theme-quartz custom-ag-grid ag-grid-height-350"></div>
+                    </div>
+                    {{ template "include/grid-footer" . }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{.ConfigData.AssetBaseUrl}}/assets/js/setting/backup.js"></script>

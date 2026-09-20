@@ -1,0 +1,25 @@
+{{ define "settings/include/setting_menu" }}
+    <ul class="nav nav-tabs nav-tabs-solid bg-transparent border-bottom mb-3">
+        {{range .RightDetails}}
+            {{if eq .RightAction "settings.system.basic.settings"}}
+                <li class="nav-item">
+                    <a href="#" class="nav-link menu-link {{if eq .RightAction $.RouteAction}}active{{end}}" data-url="{{$.ConfigData.AppBaseUrl}}/settings/business-settings" data-title="Website Settings" data-parameter="" data-name="Website Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content">
+                        <i class="ti ti-world-cog me-2"></i>Basic Settings
+                    </a>
+                </li>
+            {{else if eq .RightAction "settings.system.system.settings"}}
+                <li class="nav-item">
+                    <a href="#" class="nav-link menu-link {{if eq .RightAction $.RouteAction}}active{{end}}" data-url="{{$.ConfigData.AppBaseUrl}}/settings/email-settings" data-title="System Settings" data-parameter="" data-name="System Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content">
+                        <i class="ti ti-server-cog me-2"></i>System Settings
+                    </a>
+                </li>
+            {{else if eq .RightAction "settings.system.other.settings"}}
+                <li class="nav-item">
+                    <a href="#" class="nav-link menu-link {{if eq .RightAction $.RouteAction}}active{{end}}" data-url="{{$.ConfigData.AppBaseUrl}}/settings/clear-cache" data-title="Other Settings" data-parameter="" data-name="Other Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content">
+                        <i class="ti ti-settings-2 me-2"></i>Other Settings
+                    </a>
+                </li>
+            {{end}}
+        {{end}}
+    </ul>
+{{ end }}

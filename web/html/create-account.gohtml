@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+        <meta name="_csrf" content="{{ ._csrf }}">
+        <title>Create Account | {{.SystemSetting.Name}} - {{.SystemSetting.Title}}</title>
+        <link rel="shortcut icon" type="image/x-icon" href="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.Icon}}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.AppleIcon}}">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/plugins/icons/feather/feather.css">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/plugins/tabler-icons/tabler-icons.min.css">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/plugins/fontawesome/css/fontawesome.min.css">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/plugins/fontawesome/css/all.min.css">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/css/style.css">
+        <link rel="stylesheet" href="{{.ConfigData.AssetBaseUrl}}/assets/css/common.css">
+    </head>
+    <body class="bg-white">
+        {{ template "include/loader" . }}
+        <div class="main-wrapper">
+            <div class="container-fluid">
+                <div class="w-100 overflow-hidden position-relative flex-wrap d-block vh-100">
+                    <div class="row">
+                        <div class="col-lg-5">
+                            <div class="d-lg-flex align-items-center justify-content-center d-none flex-wrap vh-100 bg-primary-transparent">
+                                <div>
+                                    <img src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.RegistrationBg}}" alt="Create new Account">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7 col-md-12 col-sm-12">
+                            <div class="row justify-content-center align-items-center vh-100 overflow-auto flex-wrap ">
+                                <div class="col-md-7 mx-auto vh-100">
+                                    <form action="#" class="vh-100">
+                                        <div class="vh-100 d-flex flex-column justify-content-between p-4 pb-0">
+                                            <div class=" mx-auto mb-5 text-center">
+                                                <img src="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.Logo}}" alt="{{.SystemSetting.Name}}">
+                                            </div>
+                                             <div class="">
+                                                <div class="text-center mb-3">
+                                                    <h2 class="mb-2">Sign Up</h2>
+                                                    <p class="mb-0">Please enter your details to sign up</p>
+                                                </div>
+                                                {{if and .AuthSetting (not .AuthSetting.AllowRegistration)}}
+                                                    <div class="alert alert-warning text-center" role="alert">
+                                                        <i class="ti ti-info-circle me-1"></i> New user registration is currently closed.
+                                                    </div>
+                                                    <div class="text-center mt-3">
+                                                        <a href="{{.ConfigData.AppBaseUrl}}/login" class="btn btn-primary w-100">Back to Sign In</a>
+                                                    </div>
+                                                {{else}}
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Name</label>
+                                                        <div class="input-group">
+                                                            <input autocomplete="off" type="text" name="name" id="name" minlength="3" maxlength="100" value="" class="form-control" tabindex="1" required>
+                                                            <span class="input-group-text border-start-0">
+                                                                <i class="ti ti-user"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div class="invalid-feedback" id="error_msg_name"></div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Email Address</label>
+                                                        <div class="input-group">
+                                                            <input autocomplete="off" type="text" tabindex="2" name="email" minlength="5" maxlength="100" id="email" value="" class="form-control">
+                                                            <span class="input-group-text border-start-0">
+                                                                <i class="ti ti-mail"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div class="invalid-feedback" id="error_msg_email"></div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Mobile Number</label>
+                                                        <div class="input-group">
+                                                            <input autocomplete="off" type="text" tabindex="3" name="mobile" minlength="11" maxlength="14" id="mobile" value="" class="form-control">
+                                                            <span class="input-group-text border-start-0">
+                                                                <i class="ti ti-phone"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div class="invalid-feedback" id="error_msg_mobile"></div>
+                                                    </div>
+                                                    {{if and .AuthSetting .AuthSetting.InviteOnly}}
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Invitation Code <span class="color-red">*</span></label>
+                                                        <div class="input-group">
+                                                            <input autocomplete="off" type="text" tabindex="3" name="invite_code" id="invite_code" minlength="1" maxlength="50" value="" class="form-control" placeholder="Enter invite code">
+                                                            <span class="input-group-text border-start-0">
+                                                                <i class="ti ti-ticket"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div class="invalid-feedback" id="error_msg_invite_code"></div>
+                                                    </div>
+                                                    {{end}}
+                                                    {{if or (not .AuthSetting) .AuthSetting.PasswordRequired}}
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Password</label>
+                                                        <div class="input-group">
+                                                            <input autocomplete="off" type="password" tabindex="4" name="password" minlength="{{.UserRole.PasswordMinLength}}" maxlength="{{.UserRole.PasswordMaxLength}}" id="password" value="" class="form-control">
+                                                            <span class="input-group-text border-start-0">
+                                                                <i id="eye_btn_password" class="ti ti-eye-off"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div class="invalid-feedback" id="error_msg_password"></div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Confirm Password</label>
+                                                        <div class="input-group">
+                                                            <input autocomplete="off" type="password" tabindex="5" name="confirm_password" minlength="{{.UserRole.PasswordMinLength}}" maxlength="{{.UserRole.PasswordMaxLength}}" id="confirm_password" value="" class="form-control">
+                                                            <span class="input-group-text border-start-0">
+                                                                <i id="eye_btn_c_password" class="ti ti-eye-off"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div class="invalid-feedback" id="error_msg_confirm_password"></div>
+                                                    </div>
+                                                    {{end}}
+                                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="form-check form-check-md mb-0">
+                                                                <input autocomplete="off" class="form-check-input" tabindex="6" name="terms_privacy" id="terms_privacy" type="checkbox">
+                                                                <label for="terms_privacy" class="form-check-label text-dark mt-0">Agree to <span class="text-primary"><a target="_blank" href="{{.ConfigData.AppBaseUrl}}/privacy-policy" class="hover-a">Terms & Privacy</a></span></label>
+                                                                <div class="invalid-feedback" id="error_msg_terms_privacy"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <button type="button" tabindex="7" id="sign_up"
+                                                                class="btn btn-primary w-100">Sign Up
+                                                        </button>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <h6 class="fw-normal text-dark mb-0">Already have an account?
+                                                            <a href="{{.ConfigData.AppBaseUrl}}/login" tabindex="8" class="hover-a">Sign In</a>
+                                                        </h6>
+                                                    </div>
+                                                {{end}}
+                                            </div>
+                                            <div class="mt-5 pb-4 text-center">
+                                                <p class="mb-0 text-gray-9">{{.SystemSetting.CopyRight}}</p>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/jquery-3.7.1.min.js"></script>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/axios.min.js"></script>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/bootstrap.bundle.min.js"></script>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/feather.min.js"></script>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/script.js"></script>
+        <script defer src="{{.ConfigData.AssetBaseUrl}}/assets/js/beacon.min.js"></script>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/notify.js"></script>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/config.js"></script>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/common.js"></script>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/form_validation.js"></script>
+        <script src="{{.ConfigData.AssetBaseUrl}}/assets/js/user/create-account.js"></script>
+    </body>
+</html>

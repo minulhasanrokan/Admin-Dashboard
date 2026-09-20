@@ -1,0 +1,136 @@
+{{ template "include/breadcrumb" . }}
+{{ template "settings/include/setting_menu" . }}
+<div class="row" id="sms-settings-view">
+    <div class="col-xl-3 theiaStickySidebar">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-column list-group settings-list">
+                    <a href="#" class="d-inline-flex align-items-center rounded py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/email-settings" data-title="Email Settings" data-parameter="" data-name="Email Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content">Email Settings</a>
+                    <a href="#" class="d-inline-flex align-items-center rounded active py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/sms-settings" data-title="SMS Settings" data-parameter="" data-name="SMS Settings" data-popup-status="0" data-popup-width="1000" data-content-div="content"><i class="ti ti-arrow-badge-right me-2"></i>SMS Settings</a>
+                    <a href="#" class="d-inline-flex align-items-center rounded py-2 px-3 menu-link" data-url="{{.ConfigData.AppBaseUrl}}/settings/user-roles-settings" data-title="User Roles" data-parameter="" data-name="User Roles" data-popup-status="0" data-popup-width="1000" data-content-div="content">User Roles</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-9" id="sms-settings-edit-details">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center border-bottom mb-3 pb-3">
+                    <h4 class="mb-0">SMS API Settings</h4>
+                    <button type="button" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center" id="test_sms_modal_button" data-bs-toggle="modal" data-bs-target="#test_sms_modal">
+                        <i class="ti ti-send me-1"></i> Send Test SMS
+                    </button>
+                </div>
+                <form action="#" id="sms-settings-edit-form">
+                    <div class="border-bottom mb-3 pb-3">
+                        <div class="card bg-light border mb-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="avatar avatar-xl p-2 me-3 bg-white rounded shadow-sm flex-shrink-0">
+                                            <i class="ti ti-message-dots fs-24 text-primary"></i>
+                                        </span>
+                                        <div>
+                                            <h5 class="mb-1">SSLCommerz / SSL Wireless SMS Gateway</h5>
+                                            <p class="text-muted mb-0 small">Official SSL Wireless v3 REST API for single and OTP notification messaging.</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="status" name="status" {{if .SmsSetting.Status}}checked{{end}}>
+                                            <label class="form-check-label fw-medium ms-1" for="status">Enabled</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="sms_driver" id="sms_driver" value="sslcommerz">
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label" for="ssl_api_url">API URL <span class="color-red">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="ti ti-link"></i></span>
+                                    <input tabindex="1" value="{{.SmsSetting.SslApiUrl}}" type="text" name="ssl_api_url" id="ssl_api_url" minlength="10" maxlength="255" class="form-control" placeholder="https://smsplus.sslwireless.com/api/v3/send-sms">
+                                </div>
+                                <div class="invalid-feedback" id="error_msg_ssl_api_url"></div>
+                                <small class="text-muted">Default v3 endpoint: <code>https://smsplus.sslwireless.com/api/v3/send-sms</code></small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="ssl_api_token">API Token <span class="color-red">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="ti ti-key"></i></span>
+                                    <input tabindex="2" value="{{.SmsSetting.SslApiToken}}" type="password" name="ssl_api_token" id="ssl_api_token" minlength="5" maxlength="255" class="form-control" placeholder="Enter SSL Wireless API Token">
+                                    <span class="input-group-text cursor-pointer" id="toggle_token_visibility">
+                                        <i class="ti ti-eye" id="token_eye_icon"></i>
+                                    </span>
+                                </div>
+                                <div class="invalid-feedback" id="error_msg_ssl_api_token"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="ssl_sid">SID (Sender ID / Stakeholder ID) <span class="color-red">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="ti ti-id"></i></span>
+                                    <input tabindex="3" value="{{.SmsSetting.SslSid}}" type="text" name="ssl_sid" id="ssl_sid" minlength="2" maxlength="100" class="form-control" placeholder="e.g. NON_MASKING or Approved Brand">
+                                </div>
+                                <div class="invalid-feedback" id="error_msg_ssl_sid"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="ssl_csms_id_prefix">CSMS ID Prefix</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="ti ti-hash"></i></span>
+                                    <input tabindex="4" value="{{.SmsSetting.SslCsmsIdPrefix}}" type="text" name="ssl_csms_id_prefix" id="ssl_csms_id_prefix" maxlength="20" class="form-control" placeholder="e.g. ADM">
+                                </div>
+                                <div class="invalid-feedback" id="error_msg_ssl_csms_id_prefix"></div>
+                                <small class="text-muted">Unique prefix for Client SMS transaction tracking.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-end">
+                        <button type="button" tabindex="5" id="sms_setting_button" class="btn btn-primary">
+                            <i class="ti ti-device-floppy me-1"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="test_sms_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="test_sms_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="test_sms_modal_label"><i class="ti ti-send me-1"></i> Send Test SMS via SSLCommerz</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="test_sms_alert" class="alert d-none" role="alert"></div>
+                <div class="mb-3">
+                    <label class="form-label" for="test_mobile">Recipient Mobile Number <span class="color-red">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="ti ti-phone"></i></span>
+                        <input type="text" class="form-control" id="test_mobile" name="test_mobile" placeholder="01XXXXXXXXX or 8801XXXXXXXXX">
+                    </div>
+                    <div class="invalid-feedback" id="error_msg_test_mobile"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="test_message">SMS Message <span class="color-red">*</span></label>
+                    <textarea class="form-control" id="test_message" name="test_message" rows="3" placeholder="Enter test message content...">This is a test message from Admin Dashboard via SSLCommerz SMS Gateway.</textarea>
+                    <div class="invalid-feedback" id="error_msg_test_message"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary d-inline-flex align-items-center" id="send_test_sms_btn">
+                    <i class="ti ti-send me-1"></i> Send SMS
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{.ConfigData.AssetBaseUrl}}/assets/js/setting/sms-settings.js"></script>

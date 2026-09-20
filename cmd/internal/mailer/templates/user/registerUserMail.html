@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+{{define "subject"}}Verify your {{.AppName}} account{{end}}
+{{define "htmlBody"}}
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Verify your {{.AppName}} account</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background: #f6f6f6;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 40px auto;
+                    background: #ffffff;
+                    padding: 30px;
+                    border-radius: 8px;
+                }
+                h1 { color: #333; }
+                p { color: #555; line-height: 1.6; }
+                .btn {
+                    display: inline-block;
+                    padding: 12px 20px;
+                    background: #4CAF50;
+                    color: #fff;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    margin: 20px 0;
+                }
+                .footer {
+                    margin-top: 30px;
+                    font-size: 12px;
+                    color: #888;
+                }
+                .url-text {
+                    word-break: break-all;
+                }
+                .token-box {
+                    background: #f1f1f1;
+                    padding: 12px;
+                    border-radius: 6px;
+                    font-weight: bold;
+                    font-size: 24px;
+                    letter-spacing: 6px;
+                    text-align: center;
+                    color: #333;
+                    margin: 15px 0;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+            <h1>Email Verification</h1>
+            <p>Hi {{.Meta.Name}},</p>
+            <p>Thanks for creating an account at <b>{{.AppName}}</b>. Please verify your email address by entering the OTP code below or clicking the button.</p>
+            <p><strong>Your OTP Verification Code:</strong></p>
+            <div class="token-box">{{.Meta.Token}}</div>
+            <a class="btn" href="{{.Meta.FrontendUrl}}"> Verify Account</a>
+            <p>If the button doesn't work, copy and paste this link:</p>
+            <p class="url-text">{{.Meta.FrontendUrl}}</p>
+            <div class="footer">
+                <p>This code will expire in {{.Meta.ExpiresAt}}.</p>
+                <p>Regards,<br>{{.AppName}} Team</p>
+            </div>
+        </div>
+        </body>
+    </html>
+{{end}}
