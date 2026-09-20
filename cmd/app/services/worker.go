@@ -8,6 +8,9 @@ import (
 )
 
 func (s *Service) ProcessPendingEmails(ctx context.Context, batchSize int, maxTries int) (int, error) {
+	if s.Db == nil || s.Db.GetDb() == nil {
+		return 0, nil
+	}
 
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
 
@@ -52,6 +55,9 @@ func (s *Service) ProcessPendingEmails(ctx context.Context, batchSize int, maxTr
 }
 
 func (s *Service) ProcessPendingSms(ctx context.Context, batchSize int, maxTries int) (int, error) {
+	if s.Db == nil || s.Db.GetDb() == nil {
+		return 0, nil
+	}
 
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
 
