@@ -1,0 +1,96 @@
+{{ template "include/breadcrumb" . }}
+<div class="row" id="designation-view">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pb-3 mb-3 border-bottom">
+                    <div>
+                        <h4 class="mb-1">Designations</h4>
+                        <span class="text-muted fs-13">Manage company designation titles, codes, and operational status</span>
+                    </div>
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <button type="button" class="btn btn-primary d-inline-flex align-items-center" id="btn_open_add_modal">
+                            <i class="ti ti-plus me-1 fs-16"></i>Add Designation
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card border rounded-3 shadow-xs">
+                    <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between flex-wrap gap-3 py-3 px-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar avatar-sm bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center w-34 h-34">
+                                <i class="ti ti-briefcase fs-16"></i>
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h6 class="mb-0 fw-bold text-dark fs-14">Designations List</h6>
+                                    <span class="badge bg-primary-transparent text-primary rounded-pill fs-11 fw-semibold px-2 py-1" id="designation_total_badge">0 Records</span>
+                                </div>
+                                <span class="text-muted fs-12">Total registered employee designations</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <div class="input-group input-group-sm rounded-2 w-220 h-34">
+                                <span class="input-group-text bg-light border-end-0 text-muted ps-2 pe-1 d-flex align-items-center h-34"><i class="ti ti-search fs-13"></i></span>
+                                <input type="text" id="ag_quick_filter" class="form-control border-start-0 bg-light fs-12 h-34" placeholder="Search designations...">
+                                <button type="button" class="btn btn-light border border-start-0 text-muted d-none align-items-center justify-content-center h-34" id="btn_ag_search_clear" title="Clear">
+                                    <i class="ti ti-x fs-11"></i>
+                                </button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-white border rounded-2 text-dark d-inline-flex align-items-center justify-content-center px-3 h-34" id="btn_refresh_ag_grid" title="Reset all filters and reload">
+                                <i class="ti ti-rotate-clockwise fs-13 me-1 text-muted"></i><span class="fs-12 fw-medium">Reset</span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-white border rounded-2 fs-12 fw-medium text-dark d-inline-flex align-items-center justify-content-center px-3 h-34" id="btn_ag_export_csv" title="Export to CSV">
+                                <i class="ti ti-file-spreadsheet me-1 text-success fs-14"></i>Export
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="designation_ag_grid" class="ag-theme-quartz custom-ag-grid ag-grid-height-450"></div>
+                    </div>
+                    {{ template "include/grid-footer" . }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Designation Modal -->
+<div class="modal fade" id="modal_designation_form" tabindex="-1" aria-labelledby="modal_designation_title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_designation_title">Add Designation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="form_designation">
+                <input type="hidden" id="designation_id" name="id" value="">
+                <input type="hidden" name="_csrf" value="{{._csrf}}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="designation_name" class="form-label">Designation Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="designation_name" name="name" required placeholder="e.g. Senior Software Engineer">
+                    </div>
+                    <div class="mb-3">
+                        <label for="designation_title" class="form-label">Display Title</label>
+                        <input type="text" class="form-control" id="designation_title" name="title" placeholder="e.g. Lead Developer">
+                    </div>
+                    <div class="mb-3">
+                        <label for="designation_code" class="form-label">Code</label>
+                        <input type="text" class="form-control" id="designation_code" name="code" placeholder="e.g. SSE-01">
+                    </div>
+                    <div class="mb-3">
+                        <label for="designation_details" class="form-label">Details / Description</label>
+                        <textarea class="form-control" id="designation_details" name="details" rows="3" placeholder="Enter optional details..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn_save_designation">Save Designation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="{{.ConfigData.AppBaseUrl}}/assets/js/reference/designation.js"></script>

@@ -56,5 +56,6 @@ func MainRoute(g *echo.Group, appData *applicationData.Application) {
 	ProfileRoutes(web, appData)
 	DashboardRoutes(web, appData)
 	SettingRoutes(web, appData)
+	ReferenceRoutes(web, appData)
 	CommonRoutes(web, appData)
 }
