@@ -22,6 +22,18 @@ $(document).on("click", ".menu-link", function (e) {
     openMenu($this.data("url"), $this.data("title"), $this.data("data") || "", $this.data("name"), Number($this.data("popup-status")), Number($this.data("popup-width")), $this.data("content-div")).then();
 });
 
+$(document).on("click", ".btn-grid-menu-action", function (e) {
+    e.preventDefault();
+    let $this = $(this);
+    let url = $this.data("url");
+    let title = $this.data("title");
+    let popupStatus = Number($this.data("popup-status"));
+    let width = Number($this.data("popup-width"));
+    if (typeof window.get_new_page === "function") {
+        window.get_new_page(url, title, "", "", popupStatus, width);
+    }
+});
+
 async function openMenu(url, title, data, name, popupStatus, popupWidth, contentDiv) {
 
     let systemName = document.querySelector('meta[name="system_name"]')?.getAttribute('content');

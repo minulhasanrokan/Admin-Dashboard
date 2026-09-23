@@ -85,41 +85,41 @@
                         let out = '<div class="d-flex align-items-center">';
 
                         // View
-                        out += '<a href="#" class="text-info me-2" title="View" onclick="get_new_page(\'/reference/designation/view\',\'View Designation\',\'' + targetId + '\',\'' + titleValue + '\',1,1000);"><i class="ti ti-eye fs-16"></i></a>';
+                        out += '<a href="#" class="text-info me-2 btn-grid-row-action" title="View" data-url="/reference/designation/view" data-title="View Designation" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-eye fs-16"></i></a>';
 
                         // Edit
                         if ((full.process_status == 2 || full.process_status == 3 || full.process_status == '0' || full.process_status == '')) {
                             if (full.process_status == 3 || full.process_status == 2 || full.actual_status != 4) {
-                                out += '<a href="#" class="text-primary me-2" title="Edit" onclick="get_new_page(\'/reference/designation/edit\',\'Edit Designation\',\'' + targetId + '\',\'' + titleValue + '\',1,1000);"><i class="ti ti-edit fs-16"></i></a>';
+                                out += '<a href="#" class="text-primary me-2 btn-grid-row-action" title="Edit" data-url="/reference/designation/edit" data-title="Edit Designation" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-edit fs-16"></i></a>';
                             }
                         }
 
                         // Delete
                         if ((full.process_status == 2 || full.process_status == 3 || full.process_status == '0' || full.process_status == '')) {
                             if (full.process_status == 3 || full.process_status == 2 || full.actual_status != 3) {
-                                out += '<a href="#" class="text-danger me-2" title="Delete" onclick="get_new_page(\'/reference/designation/delete\',\'Delete Designation\',\'' + targetId + '\',\'' + titleValue + '\',1,1000);"><i class="ti ti-trash fs-16"></i></a>';
+                                out += '<a href="#" class="text-danger me-2 btn-grid-row-action" title="Delete" data-url="/reference/designation/delete" data-title="Delete Designation" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-trash fs-16"></i></a>';
                             }
                         }
 
                         // Sent To Checker
                         if (full.process_status != 3 && full.process_status != 1 && full.actual_status != 5 && full.actual_status != 6) {
-                            out += '<a href="#" class="text-primary me-2" title="Sent To Checker" onclick="get_new_page(\'/reference/designation/stc\',\'Sent To Checker\',\'' + targetId + '\',\'' + titleValue + '\',1,1000);"><i class="ti ti-arrow-forward-up fs-16"></i></a>';
+                            out += '<a href="#" class="text-primary me-2 btn-grid-row-action" title="Sent To Checker" data-url="/reference/designation/stc" data-title="Sent To Checker" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-arrow-forward-up fs-16"></i></a>';
                         }
 
                         // Verify
                         let canVerify = (typeof window.duty_carry_out[full.checker] !== 'undefined' || 1 == window.super_admin_status);
                         if (full.process_status == 1 && canVerify) {
-                            out += '<a href="#" class="text-success me-2" title="Verify" onclick="get_new_page(\'/reference/designation/verify\',\'Verify Designation\',\'' + targetId + '\',\'' + titleValue + '\',1,1000);"><i class="ti ti-check fs-16"></i></a>';
+                            out += '<a href="#" class="text-success me-2 btn-grid-row-action" title="Verify" data-url="/reference/designation/verify" data-title="Verify Designation" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-check fs-16"></i></a>';
                         }
 
                         // Active
                         if ((full.process_status == 3 || full.process_status == 2 || full.actual_status == 5) && full.status == 0) {
-                            out += '<a href="#" class="text-success me-2" title="Activate" onclick="get_new_page(\'/reference/designation/active\',\'Active Designation\',\'' + targetId + '\',\'' + titleValue + '\',1,1000);"><i class="ti ti-lock-open fs-16"></i></a>';
+                            out += '<a href="#" class="text-success me-2 btn-grid-row-action" title="Activate" data-url="/reference/designation/active" data-title="Active Designation" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-lock-open fs-16"></i></a>';
                         }
 
                         // Deactive
                         if ((full.process_status == 3 || full.process_status == 2 || full.actual_status == 6) && full.status == 1) {
-                            out += '<a href="#" class="text-warning me-2" title="Deactivate" onclick="get_new_page(\'/reference/designation/deactivate\',\'Deactivate Designation\',\'' + targetId + '\',\'' + titleValue + '\',1,1000);"><i class="ti ti-lock fs-16"></i></a>';
+                            out += '<a href="#" class="text-warning me-2 btn-grid-row-action" title="Deactivate" data-url="/reference/designation/deactivate" data-title="Deactivate Designation" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-lock fs-16"></i></a>';
                         }
 
                         out += '</div>';
@@ -211,7 +211,7 @@
                         if (!msg) return '<span class="text-muted">-</span>';
                         let safeName = encodeURIComponent(full.designation_name || full.name || '');
                         let safeId = full.uuid || full.id;
-                        return `<span class="text-primary cursor-pointer text-truncate d-inline-block mw-100" onclick="return_message_history('${safeName}','${safeId}','designations')" title="${msg}">${msg}</span>`;
+                        return `<span class="text-primary cursor-pointer text-truncate d-inline-block mw-100 btn-message-history" data-name="${safeName}" data-id="${safeId}" data-table="designations" title="${msg}">${msg}</span>`;
                     }
                 },
                 {
@@ -526,6 +526,42 @@
                     let msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Status update failed';
                     showNotify('danger', msg);
                 });
+        });
+
+        // Delegated click handler for row action buttons
+        $(document).off('click.designationRow', '.btn-grid-row-action').on('click.designationRow', '.btn-grid-row-action', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let url = $(this).data('url');
+            let title = $(this).data('title');
+            let id = $(this).data('id');
+            let name = $(this).data('name');
+            if (typeof window.get_new_page === 'function') {
+                window.get_new_page(url, title, id, name, 1, 1000);
+            }
+        });
+
+        // Delegated click handler for audit message popup
+        $(document).off('click.designationMsg', '.btn-message-history').on('click.designationMsg', '.btn-message-history', function (e) {
+            e.preventDefault();
+            let name = $(this).data('name');
+            let id = $(this).data('id');
+            let table = $(this).data('table') || 'designations';
+            if (typeof window.return_message_history === 'function') {
+                window.return_message_history(name, id, table);
+            }
+        });
+
+        // Delegated click handler for top grid menu action buttons
+        $(document).off('click.designationMenu', '.btn-grid-menu-action').on('click.designationMenu', '.btn-grid-menu-action', function (e) {
+            e.preventDefault();
+            let url = $(this).data('url');
+            let title = $(this).data('title');
+            let popupStatus = $(this).data('popup-status');
+            let width = $(this).data('popup-width');
+            if (typeof window.get_new_page === 'function') {
+                window.get_new_page(url, title, '', '', popupStatus, width);
+            }
         });
     }
 })(jQuery);
