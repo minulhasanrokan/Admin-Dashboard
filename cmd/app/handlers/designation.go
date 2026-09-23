@@ -460,7 +460,12 @@ func (h Handler) DesignationStc(c echo.Context) error {
 	notifyTypeStr := c.FormValue("notify_type")
 	notifyType, _ := strconv.ParseUint(notifyTypeStr, 10, 64)
 	if notifyType == 0 {
-		notifyType = 1
+		authSetting, _ := h.Service.AuthenticationSetting()
+		if authSetting != nil && strings.ToLower(authSetting.OtpType) == "sms" {
+			notifyType = 2
+		} else {
+			notifyType = 1
+		}
 	}
 
 	remarks := strings.TrimSpace(c.FormValue("remarks"))

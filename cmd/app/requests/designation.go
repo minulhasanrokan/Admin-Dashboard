@@ -86,7 +86,7 @@ type DeleteDesignationRequest struct {
 
 type SentToCheckerDesignationRequest struct {
 	Checker    uint64 `param:"checker" json:"checker" form:"checker" query:"checker" validate:"required"`
-	NotifyType uint64 `param:"notify_type" json:"notify_type" form:"notify_type" query:"notify_type" validate:"required"`
+	NotifyType uint64 `param:"notify_type" json:"notify_type" form:"notify_type" query:"notify_type"`
 	Remarks    string `param:"remarks" json:"remarks" form:"remarks" query:"remarks" validate:"max=250"`
 }
 

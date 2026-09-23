@@ -198,6 +198,14 @@ func (s *Service) DeleteDesignationWithReason(identifier requests.UUIDRequest, r
 }
 
 func (s *Service) SentToCheckerDesignation(identifier requests.UUIDRequest, checker uint64, notifyType uint64, remarks string) (*models.Designation, error) {
+	if notifyType == 0 {
+		authSetting, _ := s.AuthenticationSetting()
+		if authSetting != nil && strings.ToLower(authSetting.OtpType) == "sms" {
+			notifyType = 2
+		} else {
+			notifyType = 1
+		}
+	}
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
 	return repository.SentToCheckerDesignation(identifier, checker, notifyType, remarks)
 }
