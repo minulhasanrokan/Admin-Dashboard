@@ -9,6 +9,7 @@ import (
 	"admin-dashboard/cmd/internal/session"
 	"encoding/json"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -35,9 +36,12 @@ func (h Handler) DesignationPage(c echo.Context) error {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
 
+	checkerUsers, _ := h.Service.GetCheckerUserList()
+
 	html, err := webResponse.RenderHTML(c, "reference/designation", map[string]any{
 		"RightDetails": rightDetails,
 		"RouteAction":  userSess.RouteAction,
+		"CheckerUsers": checkerUsers,
 	})
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
@@ -113,34 +117,70 @@ func (h Handler) DesignationList(c echo.Context) error {
 }
 
 func (h Handler) DesignationAdd(c echo.Context) error {
-	name := c.FormValue("name")
-	title := c.FormValue("title")
-	code := c.FormValue("code")
-	details := c.FormValue("details")
+	req := new(requests.CreateDesignationRequest)
+	_ = c.Bind(req)
 
+	name := strings.TrimSpace(req.GetName())
 	if name == "" {
 		return webResponse.SendBadRequestResponse(c, "Designation name is required", nil)
 	}
+	if len(name) > 150 {
+		return webResponse.SendBadRequestResponse(c, "Designation name must not exceed 150 characters", nil)
+	}
 
-	err := h.Service.CreateDesignation(name, title, code, details)
+	code := strings.TrimSpace(req.GetCode())
+	if code == "" {
+		return webResponse.SendBadRequestResponse(c, "Designation code is required", nil)
+	}
+	if len(code) > 50 {
+		return webResponse.SendBadRequestResponse(c, "Designation code must not exceed 50 characters", nil)
+	}
+
+	title := strings.TrimSpace(req.GetTitle())
+	if title == "" {
+		title = name
+	}
+	if len(title) > 150 {
+		return webResponse.SendBadRequestResponse(c, "Designation title must not exceed 150 characters", nil)
+	}
+
+	details := strings.TrimSpace(req.GetDetails())
+
+	// Check duplicate name
+	isDupName, err := h.Service.CheckDuplicateDesignationName(name, 0)
+	if err != nil {
+		return webResponse.SendInternalServerErrorResponse(c, err)
+	}
+	if isDupName {
+		return webResponse.SendBadRequestResponse(c, "Duplicate Name Found", nil)
+	}
+
+	// Check duplicate code
+	isDupCode, err := h.Service.CheckDuplicateDesignationCode(code, 0)
+	if err != nil {
+		return webResponse.SendInternalServerErrorResponse(c, err)
+	}
+	if isDupCode {
+		return webResponse.SendBadRequestResponse(c, "Duplicate Code Found", nil)
+	}
+
+	d, err := h.Service.CreateDesignation(name, title, code, details)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
 
-	return webResponse.SendSuccessResponse(c, "Designation created successfully", nil)
+	_ = h.Service.CreateUserActivity(c, constants.ActivityAdd, "designations", d.Id, "Add Designation Information")
+
+	return webResponse.SendSuccessResponse(c, "Saved Successfully", d)
 }
 
 func (h Handler) DesignationDetailsPage(c echo.Context) error {
-
 	var uUId requests.UUIDRequest
-
 	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
-
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
 
 	d, err := h.Service.GetDesignationByIdOrUUID(uUId)
-
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
@@ -151,20 +191,15 @@ func (h Handler) DesignationDetailsPage(c echo.Context) error {
 }
 
 func (h Handler) DesignationEditPage(c echo.Context) error {
-
 	var uUId requests.UUIDRequest
-
 	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
-
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
 
 	d, err := h.Service.GetDesignationByIdOrUUID(uUId)
-
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
-
 	if d == nil {
 		return webResponse.SendNotFoundResponse(c, "Designation not found", nil)
 	}
@@ -173,26 +208,71 @@ func (h Handler) DesignationEditPage(c echo.Context) error {
 }
 
 func (h Handler) DesignationEdit(c echo.Context) error {
-
 	var uUId requests.UUIDRequest
-
 	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
-
 		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	name := c.FormValue("name")
-	title := c.FormValue("title")
-	code := c.FormValue("code")
-	details := c.FormValue("details")
+	existing, err := h.Service.GetDesignationByIdOrUUID(uUId)
+	if err != nil || existing == nil {
+		return webResponse.SendNotFoundResponse(c, "Designation not found", nil)
+	}
 
-	err := h.Service.UpdateDesignation(uUId, name, title, code, details)
+	req := new(requests.UpdateDesignationRequest)
+	_ = c.Bind(req)
 
+	name := strings.TrimSpace(req.GetName())
+	if name == "" {
+		return webResponse.SendBadRequestResponse(c, "Designation name is required", nil)
+	}
+	if len(name) > 150 {
+		return webResponse.SendBadRequestResponse(c, "Designation name must not exceed 150 characters", nil)
+	}
+
+	code := strings.TrimSpace(req.GetCode())
+	if code == "" {
+		return webResponse.SendBadRequestResponse(c, "Designation code is required", nil)
+	}
+	if len(code) > 50 {
+		return webResponse.SendBadRequestResponse(c, "Designation code must not exceed 50 characters", nil)
+	}
+
+	title := strings.TrimSpace(req.GetTitle())
+	if title == "" {
+		title = name
+	}
+	if len(title) > 150 {
+		return webResponse.SendBadRequestResponse(c, "Designation title must not exceed 150 characters", nil)
+	}
+
+	details := strings.TrimSpace(req.GetDetails())
+
+	// Check duplicate name excluding current record ID
+	isDupName, err := h.Service.CheckDuplicateDesignationName(name, existing.Id)
+	if err != nil {
+		return webResponse.SendInternalServerErrorResponse(c, err)
+	}
+	if isDupName {
+		return webResponse.SendBadRequestResponse(c, "Duplicate Name Found", nil)
+	}
+
+	// Check duplicate code excluding current record ID
+	isDupCode, err := h.Service.CheckDuplicateDesignationCode(code, existing.Id)
+	if err != nil {
+		return webResponse.SendInternalServerErrorResponse(c, err)
+	}
+	if isDupCode {
+		return webResponse.SendBadRequestResponse(c, "Duplicate Code Found", nil)
+	}
+
+	updated, des, err := h.Service.UpdateDesignation(uUId, name, title, code, details)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
 
-	return webResponse.SendSuccessResponse(c, "Designation updated successfully", nil)
+	_ = h.Service.CreateUserActivity(c, constants.ActivityEdit, "designations", updated.Id, des)
+
+	return webResponse.SendSuccessResponse(c, "Updated Successfully", updated)
 }
 
 func (h Handler) DesignationDeletePage(c echo.Context) error {
@@ -200,21 +280,30 @@ func (h Handler) DesignationDeletePage(c echo.Context) error {
 }
 
 func (h Handler) DesignationDelete(c echo.Context) error {
-
 	var uUId requests.UUIDRequest
-
 	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
-
 		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err := h.Service.DeleteDesignation(uUId)
+	reason := strings.TrimSpace(c.FormValue("delete_reason"))
+	if reason == "" {
+		reason = strings.TrimSpace(c.FormValue("reason"))
+	}
+	if reason == "" {
+		return webResponse.SendBadRequestResponse(c, "Delete reason is required", nil)
+	}
+	if len(reason) > 250 {
+		return webResponse.SendBadRequestResponse(c, "Delete reason must not exceed 250 characters", nil)
+	}
 
+	d, err := h.Service.DeleteDesignationWithReason(uUId, reason)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
 
-	return webResponse.SendSuccessResponse(c, "Designation deleted successfully", nil)
+	_ = h.Service.CreateUserActivity(c, constants.ActivityDelete, "designations", d.Id, "Delete Designation Information")
+
+	return webResponse.SendSuccessResponse(c, "Deleted Successfully", nil)
 }
 
 func (h Handler) DesignationStcPage(c echo.Context) error {
@@ -223,19 +312,35 @@ func (h Handler) DesignationStcPage(c echo.Context) error {
 
 func (h Handler) DesignationStc(c echo.Context) error {
 	var uUId requests.UUIDRequest
-
 	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
-
 		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err := h.Service.SetDesignationChecker(uUId, 1)
+	checkerStr := c.FormValue("checker")
+	checker, _ := strconv.ParseUint(checkerStr, 10, 64)
+	if checker == 0 {
+		return webResponse.SendBadRequestResponse(c, "Checker user is required", nil)
+	}
 
+	notifyTypeStr := c.FormValue("notify_type")
+	notifyType, _ := strconv.ParseUint(notifyTypeStr, 10, 64)
+	if notifyType == 0 {
+		notifyType = 1
+	}
+
+	remarks := strings.TrimSpace(c.FormValue("remarks"))
+	if len(remarks) > 250 {
+		return webResponse.SendBadRequestResponse(c, "Remarks must not exceed 250 characters", nil)
+	}
+
+	d, err := h.Service.SentToCheckerDesignation(uUId, checker, notifyType, remarks)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
 
-	return webResponse.SendSuccessResponse(c, "Designation sent to checker", nil)
+	_ = h.Service.CreateUserActivity(c, "1", "designations", d.Id, "Sent To Checker Designation Information")
+
+	return webResponse.SendSuccessResponse(c, "Sent To Checker Successfully", nil)
 }
 
 func (h Handler) DesignationVerifyPage(c echo.Context) error {
@@ -244,19 +349,32 @@ func (h Handler) DesignationVerifyPage(c echo.Context) error {
 
 func (h Handler) DesignationVerify(c echo.Context) error {
 	var uUId requests.UUIDRequest
-
 	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
-
 		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err := h.Service.SetDesignationChecker(uUId, 2)
+	verifyTypeStr := c.FormValue("verify_type")
+	verifyType, _ := strconv.Atoi(verifyTypeStr)
 
+	returnReason := strings.TrimSpace(c.FormValue("return_reason"))
+	if verifyType == 0 && returnReason == "" {
+		return webResponse.SendBadRequestResponse(c, "Return reason is required", nil)
+	}
+	if len(returnReason) > 250 {
+		return webResponse.SendBadRequestResponse(c, "Return reason must not exceed 250 characters", nil)
+	}
+
+	d, des, err := h.Service.VerifyDesignation(uUId, verifyType, returnReason)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
 
-	return webResponse.SendSuccessResponse(c, "Designation verified successfully", nil)
+	_ = h.Service.CreateUserActivity(c, strconv.Itoa(int(d.ActualStatus)), "designations", d.Id, des)
+
+	if verifyType == 1 {
+		return webResponse.SendSuccessResponse(c, "Approved Successfully", nil)
+	}
+	return webResponse.SendSuccessResponse(c, "Returned Successfully", nil)
 }
 
 func (h Handler) DesignationActivePage(c echo.Context) error {
@@ -265,19 +383,29 @@ func (h Handler) DesignationActivePage(c echo.Context) error {
 
 func (h Handler) DesignationActive(c echo.Context) error {
 	var uUId requests.UUIDRequest
-
 	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
-
 		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err := h.Service.SetDesignationStatus(uUId, 1)
+	reason := strings.TrimSpace(c.FormValue("active_reason"))
+	if reason == "" {
+		reason = strings.TrimSpace(c.FormValue("reason"))
+	}
+	if reason == "" {
+		return webResponse.SendBadRequestResponse(c, "Active reason is required", nil)
+	}
+	if len(reason) > 250 {
+		return webResponse.SendBadRequestResponse(c, "Active reason must not exceed 250 characters", nil)
+	}
 
+	d, err := h.Service.ActiveDesignation(uUId, reason)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
 
-	return webResponse.SendSuccessResponse(c, "Designation activated successfully", nil)
+	_ = h.Service.CreateUserActivity(c, constants.ActivityActivate, "designations", d.Id, "Active Designation Information")
+
+	return webResponse.SendSuccessResponse(c, "Activated Successfully", nil)
 }
 
 func (h Handler) DesignationDeactivatePage(c echo.Context) error {
@@ -286,16 +414,41 @@ func (h Handler) DesignationDeactivatePage(c echo.Context) error {
 
 func (h Handler) DesignationDeactivate(c echo.Context) error {
 	var uUId requests.UUIDRequest
-
 	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
-
 		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err := h.Service.SetDesignationStatus(uUId, 0)
+	reason := strings.TrimSpace(c.FormValue("deactive_reason"))
+	if reason == "" {
+		reason = strings.TrimSpace(c.FormValue("reason"))
+	}
+	if reason == "" {
+		return webResponse.SendBadRequestResponse(c, "Deactive reason is required", nil)
+	}
+	if len(reason) > 250 {
+		return webResponse.SendBadRequestResponse(c, "Deactive reason must not exceed 250 characters", nil)
+	}
+
+	d, err := h.Service.DeactiveDesignation(uUId, reason)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
 
-	return webResponse.SendSuccessResponse(c, "Designation deactivated successfully", nil)
+	_ = h.Service.CreateUserActivity(c, constants.ActivityDeactivate, "designations", d.Id, "Deactive Designation Information")
+
+	return webResponse.SendSuccessResponse(c, "Deactivated Successfully", nil)
+}
+
+func (h Handler) DesignationHistory(c echo.Context) error {
+	var uUId requests.UUIDRequest
+	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
+		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
+	}
+
+	histories, err := h.Service.GetDesignationHistory(uUId)
+	if err != nil {
+		return webResponse.SendInternalServerErrorResponse(c, err)
+	}
+
+	return webResponse.SendSuccessResponse(c, "Designation history", histories)
 }

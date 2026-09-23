@@ -8,27 +8,38 @@ import (
 	"strings"
 )
 
+type DesignationRow struct {
+	Id                uint64 `json:"id"`
+	UUID              string `json:"uuid"`
+	Name              string `json:"name"`
+	DesignationName   string `json:"designation_name"`
+	Title             string `json:"title"`
+	DesignationTitle  string `json:"designation_title"`
+	Code              string `json:"code"`
+	DesignationCode   string `json:"designation_code"`
+	Details           string `json:"details"`
+	DesignationDetails string `json:"designation_details"`
+	Status            int    `json:"status"`
+	StatusText        string `json:"status_text"`
+	ActualStatus      uint64 `json:"actual_status"`
+	OpStatusText      string `json:"op_status_text"`
+	ProcessStatus     uint64 `json:"process_status"`
+	ProcessStatusText string `json:"process_status_text"`
+	Message           string `json:"message"`
+	Checker           uint64 `json:"checker"`
+	CheckerText       string `json:"checker_text"`
+	NotifyType        uint64 `json:"notify_type"`
+	Remarks           string `json:"remarks"`
+	CreatedAt         string `json:"created_at"`
+	FormattedDate     string `json:"formatted_date"`
+}
+
 func (s *Service) GetDesignationList(params repositories.BackupFilterParams) (map[string]interface{}, error) {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
 
 	list, total, err := repository.GetDesignations(params)
 	if err != nil {
 		return nil, err
-	}
-
-	type DesignationRow struct {
-		Id            uint64 `json:"id"`
-		UUID          string `json:"uuid"`
-		Name          string `json:"name"`
-		Title         string `json:"title"`
-		Code          string `json:"code"`
-		Details       string `json:"details"`
-		Status        int    `json:"status"`
-		StatusText    string `json:"status_text"`
-		Checker       uint64 `json:"checker"`
-		CheckerText   string `json:"checker_text"`
-		CreatedAt     string `json:"created_at"`
-		FormattedDate string `json:"formatted_date"`
 	}
 
 	rows := make([]DesignationRow, 0, len(list))
@@ -50,33 +61,79 @@ func (s *Service) GetDesignationList(params repositories.BackupFilterParams) (ma
 			details = *d.Details
 		}
 
-		statusText := "Inactive"
+		statusText := "Deactive"
 		if d.Status == 1 {
 			statusText = "Active"
 		}
 
+		opStatusText := "New Add"
+		switch d.ActualStatus {
+		case 1:
+			opStatusText = "New Add"
+		case 2:
+			opStatusText = "Add-Edit"
+		case 3:
+			opStatusText = "Edit"
+		case 4:
+			opStatusText = "Delete"
+		case 5:
+			opStatusText = "Deactive"
+		case 6:
+			opStatusText = "Active"
+		default:
+			if d.ActualStatus > 0 {
+				opStatusText = "Status " + string(rune('0'+d.ActualStatus))
+			}
+		}
+
+		processStatusText := "Draft"
+		switch d.ProcessStatus {
+		case 0:
+			processStatusText = "Draft"
+		case 1:
+			processStatusText = "Sent to Checker"
+		case 2:
+			processStatusText = "Returned"
+		case 3:
+			processStatusText = "Approved"
+		}
+
 		checkerText := "Pending"
-		if d.Checker == 1 {
-			checkerText = "Sent to Checker"
-		} else if d.Checker == 2 {
-			checkerText = "Verified"
+		if d.Checker > 0 {
+			checkerUser, _ := repository.GetUserByID(d.Checker)
+			if checkerUser != nil && checkerUser.Name != nil {
+				checkerText = *checkerUser.Name
+			} else {
+				checkerText = "Checker Assigned"
+			}
 		}
 
 		dateStr := d.CreatedAt.Format("02 Jan, 2006 15:04:05")
 
 		rows = append(rows, DesignationRow{
-			Id:            d.Id,
-			UUID:          d.UUID.String(),
-			Name:          name,
-			Title:         title,
-			Code:          code,
-			Details:       details,
-			Status:        d.Status,
-			StatusText:    statusText,
-			Checker:       d.Checker,
-			CheckerText:   checkerText,
-			CreatedAt:     dateStr,
-			FormattedDate: dateStr,
+			Id:                 d.Id,
+			UUID:               d.UUID.String(),
+			Name:               name,
+			DesignationName:    name,
+			Title:              title,
+			DesignationTitle:   title,
+			Code:               code,
+			DesignationCode:    code,
+			Details:            details,
+			DesignationDetails: details,
+			Status:             d.Status,
+			StatusText:         statusText,
+			ActualStatus:       d.ActualStatus,
+			OpStatusText:       opStatusText,
+			ProcessStatus:      d.ProcessStatus,
+			ProcessStatusText:  processStatusText,
+			Message:            d.Message,
+			Checker:            d.Checker,
+			CheckerText:        checkerText,
+			NotifyType:         d.NotifyType,
+			Remarks:            d.Remarks,
+			CreatedAt:          dateStr,
+			FormattedDate:      dateStr,
 		})
 	}
 
@@ -91,26 +148,30 @@ func (s *Service) GetDesignationList(params repositories.BackupFilterParams) (ma
 	return result, nil
 }
 
-func (s *Service) GetDesignationById(id uint64) (*models.Designation, error) {
+func (s *Service) CheckDuplicateDesignationName(name string, excludeId uint64) (bool, error) {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
-	return repository.GetDesignationById(id)
+	return repository.CheckDuplicateDesignationName(name, excludeId)
 }
 
-func (s *Service) GetDesignationByIdOrUUID(identifier requests.UUIDRequest) (*models.Designation, error) {
+func (s *Service) CheckDuplicateDesignationCode(code string, excludeId uint64) (bool, error) {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
-	return repository.GetDesignationByIdOrUUID(identifier)
+	return repository.CheckDuplicateDesignationCode(code, excludeId)
 }
 
-func (s *Service) CreateDesignation(name, title, code, details string) error {
+func (s *Service) CreateDesignation(name, title, code, details string) (*models.Designation, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
-		return errors.New("name is required")
+		return nil, errors.New("designation name is required")
 	}
 	title = strings.TrimSpace(title)
 	if title == "" {
 		title = name
 	}
 	code = strings.TrimSpace(code)
+	if code == "" {
+		return nil, errors.New("designation code is required")
+	}
+	details = strings.TrimSpace(details)
 
 	d := &models.Designation{
 		Name:    &name,
@@ -118,51 +179,47 @@ func (s *Service) CreateDesignation(name, title, code, details string) error {
 		Code:    &code,
 		Details: &details,
 	}
-	d.Status = 1
 
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
-	return repository.CreateDesignation(d)
+	if err := repository.CreateDesignation(d); err != nil {
+		return nil, err
+	}
+	return d, nil
 }
 
-func (s *Service) UpdateDesignation(identifier requests.UUIDRequest, name, title, code, details string) error {
+func (s *Service) UpdateDesignation(identifier requests.UUIDRequest, name, title, code, details string) (*models.Designation, string, error) {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
-	existing, err := repository.GetDesignationByIdOrUUID(identifier)
-	if err != nil {
-		return err
-	}
-	if existing == nil {
-		return errors.New("designation not found")
-	}
-
-	name = strings.TrimSpace(name)
-	if name != "" {
-		existing.Name = &name
-	}
-	title = strings.TrimSpace(title)
-	if title != "" {
-		existing.Title = &title
-	}
-	code = strings.TrimSpace(code)
-	existing.Code = &code
-	details = strings.TrimSpace(details)
-	existing.Details = &details
-
-	return repository.UpdateDesignation(existing)
+	return repository.UpdateDesignationData(identifier, name, title, code, details)
 }
 
-func (s *Service) DeleteDesignation(identifier requests.UUIDRequest) error {
+func (s *Service) DeleteDesignationWithReason(identifier requests.UUIDRequest, reason string) (*models.Designation, error) {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
-	return repository.DeleteDesignation(identifier)
+	return repository.DeleteDesignationWithReason(identifier, reason)
 }
 
-func (s *Service) SetDesignationStatus(identifier requests.UUIDRequest, status int) error {
+func (s *Service) SentToCheckerDesignation(identifier requests.UUIDRequest, checker uint64, notifyType uint64, remarks string) (*models.Designation, error) {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
-	return repository.UpdateDesignationStatus(identifier, status)
+	return repository.SentToCheckerDesignation(identifier, checker, notifyType, remarks)
 }
 
-func (s *Service) SetDesignationChecker(identifier requests.UUIDRequest, checker uint64) error {
+func (s *Service) VerifyDesignation(identifier requests.UUIDRequest, verifyType int, returnReason string) (*models.Designation, string, error) {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
-	return repository.UpdateDesignationChecker(identifier, checker)
+	return repository.VerifyDesignation(identifier, verifyType, returnReason)
+}
+
+func (s *Service) DeactiveDesignation(identifier requests.UUIDRequest, reason string) (*models.Designation, error) {
+	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
+	return repository.DeactiveDesignation(identifier, reason)
+}
+
+func (s *Service) ActiveDesignation(identifier requests.UUIDRequest, reason string) (*models.Designation, error) {
+	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
+	return repository.ActiveDesignation(identifier, reason)
+}
+
+func (s *Service) GetDesignationByIdOrUUID(identifier requests.UUIDRequest) (*models.Designation, error) {
+	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
+	return repository.GetDesignationByIdOrUUID(identifier)
 }
 
 func (s *Service) GetDesignationHistory(identifier requests.UUIDRequest) ([]models.DesignationHistory, error) {
@@ -172,4 +229,24 @@ func (s *Service) GetDesignationHistory(identifier requests.UUIDRequest) ([]mode
 		return repository.GetDesignationHistories(0)
 	}
 	return repository.GetDesignationHistories(d.Id)
+}
+
+func (s *Service) GetCheckerUserList() ([]map[string]interface{}, error) {
+	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
+	users, err := repository.GetCheckerUserList()
+	if err != nil {
+		return nil, err
+	}
+	result := make([]map[string]interface{}, 0, len(users))
+	for _, u := range users {
+		name := ""
+		if u.Name != nil {
+			name = *u.Name
+		}
+		result = append(result, map[string]interface{}{
+			"id":   u.Id,
+			"name": name,
+		})
+	}
+	return result, nil
 }

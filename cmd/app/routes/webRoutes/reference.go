@@ -44,4 +44,5 @@ func ReferenceRoutes(web *echo.Group, appData *applicationData.Application) {
 	reference.POST("/designation/deactivate", handler.DesignationList, appData.Middleware.CheckPermission("reference.designation.deactivate"))
 	reference.GET("/designation/deactivate/:uuid", handler.DesignationDeactivatePage, appData.Middleware.CheckPermission("reference.designation.deactivate"))
 	reference.POST("/designation/deactivate/:uuid", handler.DesignationDeactivate, appData.Middleware.CheckPermission("reference.designation.deactivate"))
+	reference.GET("/designation/history/:uuid", handler.DesignationHistory, appData.Middleware.CheckPermission("reference.designation.view"))
 }
