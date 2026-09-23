@@ -1,0 +1,7 @@
+{{ define "include/grid-menu" }}
+    {{range .RightDetails}}
+        <button onclick="get_new_page('{{.RightURL}}','{{.RightTitle}}','','','{{.RightPopupStatus}}','{{.RightWidth}}');" type="button" class="btn btn-primary d-inline-flex align-items-center me-2 mb-1 shadow-xs">
+            <i class="{{.RightIcon}} me-1 fs-15"></i>&nbsp;{{.RightName}}
+        </button>
+    {{end}}
+{{ end }}
