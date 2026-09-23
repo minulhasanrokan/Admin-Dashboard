@@ -14,6 +14,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type GridRightItem struct {
+	ActionName  string `json:"r_action_name"`
+	SortName    string `json:"r_sort_name"`
+	Title       string `json:"r_title"`
+	RouteUrl    string `json:"r_route_name"`
+	Icon        string `json:"r_icon"`
+	PopupStatus int    `json:"popup_status"`
+	Width       int    `json:"width"`
+}
+
 func (h Handler) DesignationPage(c echo.Context) error {
 	userSess, _, err := session.GetUserSession(c)
 	if err != nil || userSess.IsEmpty() || !userSess.IsActive {
@@ -36,12 +46,91 @@ func (h Handler) DesignationPage(c echo.Context) error {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
 
+	var gridRight []GridRightItem
+	for _, r := range rightDetails {
+		act := strings.TrimSpace(r.RightAction)
+		if strings.HasSuffix(act, ".add") || strings.EqualFold(r.RightName, "add") {
+			continue
+		}
+
+		shortAction := "view"
+		sortName := "View"
+		icon := r.RightIcon
+
+		if strings.HasSuffix(act, ".view") {
+			shortAction = "view"
+			sortName = "View"
+			if icon == "" {
+				icon = "ti ti-eye"
+			}
+		} else if strings.HasSuffix(act, ".edit") {
+			shortAction = "edit"
+			sortName = "Edit"
+			if icon == "" {
+				icon = "ti ti-edit"
+			}
+		} else if strings.HasSuffix(act, ".delete") {
+			shortAction = "delete"
+			sortName = "Del"
+			if icon == "" {
+				icon = "ti ti-trash"
+			}
+		} else if strings.HasSuffix(act, ".stc") {
+			shortAction = "sent_to_checker"
+			sortName = "STC"
+			if icon == "" {
+				icon = "ti ti-arrow-forward-up"
+			}
+		} else if strings.HasSuffix(act, ".verify") {
+			shortAction = "verify"
+			sortName = "Ver"
+			if icon == "" {
+				icon = "ti ti-check"
+			}
+		} else if strings.HasSuffix(act, ".active") {
+			shortAction = "active"
+			sortName = "Act"
+			if icon == "" {
+				icon = "ti ti-lock-open"
+			}
+		} else if strings.HasSuffix(act, ".deactivate") {
+			shortAction = "deactive"
+			sortName = "Deact"
+			if icon == "" {
+				icon = "ti ti-lock"
+			}
+		}
+
+		popupStatus := r.RightPopupStatus
+		if popupStatus == 0 {
+			popupStatus = 1
+		}
+		width := r.RightWidth
+		if width == 0 {
+			width = 1000
+		}
+
+		gridRight = append(gridRight, GridRightItem{
+			ActionName:  shortAction,
+			SortName:    sortName,
+			Title:       r.RightTitle,
+			RouteUrl:    r.RightURL,
+			Icon:        icon,
+			PopupStatus: popupStatus,
+			Width:       width,
+		})
+	}
+
+	gridRightJSON, _ := json.Marshal(gridRight)
 	checkerUsers, _ := h.Service.GetCheckerUserList()
 
 	html, err := webResponse.RenderHTML(c, "reference/designation", map[string]any{
-		"RightDetails": rightDetails,
-		"RouteAction":  userSess.RouteAction,
-		"CheckerUsers": checkerUsers,
+		"RightDetails":  rightDetails,
+		"GridRight":     gridRight,
+		"GridRightJSON": string(gridRightJSON),
+		"RouteAction":   userSess.RouteAction,
+		"CheckerUsers":  checkerUsers,
+		"SuperAdmin":    userSess.SuperAdmin,
 	})
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
@@ -55,19 +144,48 @@ func (h Handler) DesignationAddPage(c echo.Context) error {
 }
 
 func (h Handler) DesignationList(c echo.Context) error {
-	pageStr := c.FormValue("page")
-	if pageStr == "" {
-		pageStr = c.QueryParam("page")
+	drawStr := c.FormValue("draw")
+	if drawStr == "" {
+		drawStr = c.QueryParam("draw")
 	}
-	page, _ := strconv.Atoi(pageStr)
 
-	limitStr := c.FormValue("limit")
-	if limitStr == "" {
-		limitStr = c.QueryParam("limit")
+	startStr := c.FormValue("start")
+	if startStr == "" {
+		startStr = c.QueryParam("start")
 	}
-	limit, _ := strconv.Atoi(limitStr)
 
-	search := c.FormValue("search")
+	lengthStr := c.FormValue("length")
+	if lengthStr == "" {
+		lengthStr = c.QueryParam("length")
+	}
+
+	var page, limit int
+	if startStr != "" && lengthStr != "" {
+		start, _ := strconv.Atoi(startStr)
+		length, _ := strconv.Atoi(lengthStr)
+		if length <= 0 {
+			length = 20
+		}
+		limit = length
+		page = (start / length) + 1
+	} else {
+		pageStr := c.FormValue("page")
+		if pageStr == "" {
+			pageStr = c.QueryParam("page")
+		}
+		page, _ = strconv.Atoi(pageStr)
+
+		limitStr := c.FormValue("limit")
+		if limitStr == "" {
+			limitStr = c.QueryParam("limit")
+		}
+		limit, _ = strconv.Atoi(limitStr)
+	}
+
+	search := c.FormValue("search[value]")
+	if search == "" {
+		search = c.FormValue("search")
+	}
 	if search == "" {
 		search = c.QueryParam("search")
 	}
@@ -78,6 +196,9 @@ func (h Handler) DesignationList(c echo.Context) error {
 	}
 
 	orderDir := c.FormValue("order_dir")
+	if orderDir == "" {
+		orderDir = c.FormValue("order[0][dir]")
+	}
 	if orderDir == "" {
 		orderDir = c.QueryParam("order_dir")
 	}
@@ -111,6 +232,20 @@ func (h Handler) DesignationList(c echo.Context) error {
 	res, err := h.Service.GetDesignationList(params)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
+	}
+
+	if drawStr != "" {
+		draw, _ := strconv.Atoi(drawStr)
+		total := res["total"]
+		data := res["data"]
+		return c.JSON(200, map[string]interface{}{
+			"draw":            draw,
+			"recordsTotal":    total,
+			"recordsFiltered": total,
+			"data":            data,
+			"items":           data,
+			"success":         true,
+		})
 	}
 
 	return webResponse.SendSuccessResponse(c, "Designations retrieved successfully", res)

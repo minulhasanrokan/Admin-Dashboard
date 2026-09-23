@@ -14,7 +14,6 @@ func ReferenceRoutes(web *echo.Group, appData *applicationData.Application) {
 
 	// Category route for Designation (sidebar link: /reference/designation)
 	reference.GET("/designation", handler.DesignationPage, appData.Middleware.CheckCategoryPermission("reference.designation"))
-
 	reference.GET("/designation/add", handler.DesignationAddPage, appData.Middleware.CheckPermission("reference.designation.add"))
 	reference.POST("/designation/add", handler.DesignationAdd, appData.Middleware.CheckPermission("reference.designation.add"))
 	reference.GET("/designation/view", handler.DesignationPage, appData.Middleware.CheckPermission("reference.designation.view"))
