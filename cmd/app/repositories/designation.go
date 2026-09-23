@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"admin-dashboard/cmd/app/requests"
 	"admin-dashboard/cmd/internal/models"
 	"strings"
 	"time"
@@ -107,7 +108,7 @@ func (r *Repository) GetDesignationByUUID(uuidStr string) (*models.Designation, 
 	return &d, nil
 }
 
-func (r *Repository) GetDesignationByIdOrUUID(identifier string) (*models.Designation, error) {
+func (r *Repository) GetDesignationByIdOrUUID(identifier requests.UUIDRequest) (*models.Designation, error) {
 	if r.Db == nil || r.Db.GetDb() == nil {
 		return nil, nil
 	}
@@ -155,7 +156,7 @@ func (r *Repository) UpdateDesignation(d *models.Designation) error {
 	return nil
 }
 
-func (r *Repository) DeleteDesignation(identifier string) error {
+func (r *Repository) DeleteDesignation(identifier requests.UUIDRequest) error {
 	if r.Db == nil || r.Db.GetDb() == nil {
 		return nil
 	}
@@ -181,7 +182,7 @@ func (r *Repository) DeleteDesignation(identifier string) error {
 	return nil
 }
 
-func (r *Repository) UpdateDesignationStatus(identifier string, status int) error {
+func (r *Repository) UpdateDesignationStatus(identifier requests.UUIDRequest, status int) error {
 	if r.Db == nil || r.Db.GetDb() == nil {
 		return nil
 	}
@@ -202,7 +203,7 @@ func (r *Repository) UpdateDesignationStatus(identifier string, status int) erro
 	return nil
 }
 
-func (r *Repository) UpdateDesignationChecker(identifier string, checker uint64) error {
+func (r *Repository) UpdateDesignationChecker(identifier requests.UUIDRequest, checker uint64) error {
 	if r.Db == nil || r.Db.GetDb() == nil {
 		return nil
 	}

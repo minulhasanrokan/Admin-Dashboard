@@ -9,3 +9,7 @@ type GetDropdownRequest struct {
 	NotEqualField string `param:"not_equal_field" json:"not_equal_field" form:"not_equal_field" query:"not_equal_field"`
 	NotEqualValue string `param:"not_equal_value" json:"not_equal_value" form:"not_equal_value" query:"not_equal_value"`
 }
+
+type UUIDRequest struct {
+	UUID string `param:"uuid" json:"uuid" form:"uuid" query:"uuid" validate:"required,uuid4"`
+}

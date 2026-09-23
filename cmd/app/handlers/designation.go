@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"admin-dashboard/cmd/app/repositories"
+	"admin-dashboard/cmd/app/requests"
 	"admin-dashboard/cmd/common/response/webResponse"
 	"admin-dashboard/cmd/internal/constants"
 	"admin-dashboard/cmd/internal/dtos"
@@ -11,26 +12,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 )
-
-func extractUUID(c echo.Context) string {
-	uuid := c.Param("uuid")
-	if uuid == "" {
-		uuid = c.Param("id")
-	}
-	if uuid == "" {
-		uuid = c.FormValue("uuid")
-	}
-	if uuid == "" {
-		uuid = c.FormValue("id")
-	}
-	if uuid == "" {
-		uuid = c.QueryParam("uuid")
-	}
-	if uuid == "" {
-		uuid = c.QueryParam("id")
-	}
-	return uuid
-}
 
 func (h Handler) DesignationPage(c echo.Context) error {
 	userSess, _, err := session.GetUserSession(c)
@@ -150,11 +131,16 @@ func (h Handler) DesignationAdd(c echo.Context) error {
 }
 
 func (h Handler) DesignationDetailsPage(c echo.Context) error {
-	id := extractUUID(c)
-	if id == "" {
-		return h.DesignationPage(c)
+
+	var uUId requests.UUIDRequest
+
+	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
+
+		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
-	d, err := h.Service.GetDesignationByIdOrUUID(id)
+
+	d, err := h.Service.GetDesignationByIdOrUUID(uUId)
+
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
@@ -165,23 +151,33 @@ func (h Handler) DesignationDetailsPage(c echo.Context) error {
 }
 
 func (h Handler) DesignationEditPage(c echo.Context) error {
-	id := extractUUID(c)
-	if id == "" {
-		return h.DesignationPage(c)
+
+	var uUId requests.UUIDRequest
+
+	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
+
+		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
-	d, err := h.Service.GetDesignationByIdOrUUID(id)
+
+	d, err := h.Service.GetDesignationByIdOrUUID(uUId)
+
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
+
 	if d == nil {
 		return webResponse.SendNotFoundResponse(c, "Designation not found", nil)
 	}
+
 	return webResponse.SendSuccessResponse(c, "Designation data", d)
 }
 
 func (h Handler) DesignationEdit(c echo.Context) error {
-	id := extractUUID(c)
-	if id == "" {
+
+	var uUId requests.UUIDRequest
+
+	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
+
 		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
@@ -190,7 +186,8 @@ func (h Handler) DesignationEdit(c echo.Context) error {
 	code := c.FormValue("code")
 	details := c.FormValue("details")
 
-	err := h.Service.UpdateDesignation(id, name, title, code, details)
+	err := h.Service.UpdateDesignation(uUId, name, title, code, details)
+
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
@@ -203,12 +200,16 @@ func (h Handler) DesignationDeletePage(c echo.Context) error {
 }
 
 func (h Handler) DesignationDelete(c echo.Context) error {
-	id := extractUUID(c)
-	if id == "" {
+
+	var uUId requests.UUIDRequest
+
+	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
+
 		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err := h.Service.DeleteDesignation(id)
+	err := h.Service.DeleteDesignation(uUId)
+
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
@@ -221,12 +222,15 @@ func (h Handler) DesignationStcPage(c echo.Context) error {
 }
 
 func (h Handler) DesignationStc(c echo.Context) error {
-	id := extractUUID(c)
-	if id == "" {
+	var uUId requests.UUIDRequest
+
+	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
+
 		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err := h.Service.SetDesignationChecker(id, 1)
+	err := h.Service.SetDesignationChecker(uUId, 1)
+
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
@@ -239,12 +243,15 @@ func (h Handler) DesignationVerifyPage(c echo.Context) error {
 }
 
 func (h Handler) DesignationVerify(c echo.Context) error {
-	id := extractUUID(c)
-	if id == "" {
+	var uUId requests.UUIDRequest
+
+	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
+
 		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err := h.Service.SetDesignationChecker(id, 2)
+	err := h.Service.SetDesignationChecker(uUId, 2)
+
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
@@ -257,12 +264,15 @@ func (h Handler) DesignationActivePage(c echo.Context) error {
 }
 
 func (h Handler) DesignationActive(c echo.Context) error {
-	id := extractUUID(c)
-	if id == "" {
+	var uUId requests.UUIDRequest
+
+	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
+
 		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err := h.Service.SetDesignationStatus(id, 1)
+	err := h.Service.SetDesignationStatus(uUId, 1)
+
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
@@ -275,12 +285,14 @@ func (h Handler) DesignationDeactivatePage(c echo.Context) error {
 }
 
 func (h Handler) DesignationDeactivate(c echo.Context) error {
-	id := extractUUID(c)
-	if id == "" {
+	var uUId requests.UUIDRequest
+
+	if err := (&echo.DefaultBinder{}).BindPathParams(c, &uUId); err != nil {
+
 		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err := h.Service.SetDesignationStatus(id, 0)
+	err := h.Service.SetDesignationStatus(uUId, 0)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}

@@ -2,6 +2,7 @@ package services
 
 import (
 	"admin-dashboard/cmd/app/repositories"
+	"admin-dashboard/cmd/app/requests"
 	"admin-dashboard/cmd/internal/models"
 	"errors"
 	"strings"
@@ -95,7 +96,7 @@ func (s *Service) GetDesignationById(id uint64) (*models.Designation, error) {
 	return repository.GetDesignationById(id)
 }
 
-func (s *Service) GetDesignationByIdOrUUID(identifier string) (*models.Designation, error) {
+func (s *Service) GetDesignationByIdOrUUID(identifier requests.UUIDRequest) (*models.Designation, error) {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
 	return repository.GetDesignationByIdOrUUID(identifier)
 }
@@ -123,7 +124,7 @@ func (s *Service) CreateDesignation(name, title, code, details string) error {
 	return repository.CreateDesignation(d)
 }
 
-func (s *Service) UpdateDesignation(identifier string, name, title, code, details string) error {
+func (s *Service) UpdateDesignation(identifier requests.UUIDRequest, name, title, code, details string) error {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
 	existing, err := repository.GetDesignationByIdOrUUID(identifier)
 	if err != nil {
@@ -149,22 +150,22 @@ func (s *Service) UpdateDesignation(identifier string, name, title, code, detail
 	return repository.UpdateDesignation(existing)
 }
 
-func (s *Service) DeleteDesignation(identifier string) error {
+func (s *Service) DeleteDesignation(identifier requests.UUIDRequest) error {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
 	return repository.DeleteDesignation(identifier)
 }
 
-func (s *Service) SetDesignationStatus(identifier string, status int) error {
+func (s *Service) SetDesignationStatus(identifier requests.UUIDRequest, status int) error {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
 	return repository.UpdateDesignationStatus(identifier, status)
 }
 
-func (s *Service) SetDesignationChecker(identifier string, checker uint64) error {
+func (s *Service) SetDesignationChecker(identifier requests.UUIDRequest, checker uint64) error {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
 	return repository.UpdateDesignationChecker(identifier, checker)
 }
 
-func (s *Service) GetDesignationHistory(identifier string) ([]models.DesignationHistory, error) {
+func (s *Service) GetDesignationHistory(identifier requests.UUIDRequest) ([]models.DesignationHistory, error) {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
 	d, err := repository.GetDesignationByIdOrUUID(identifier)
 	if err != nil || d == nil {
@@ -172,4 +173,3 @@ func (s *Service) GetDesignationHistory(identifier string) ([]models.Designation
 	}
 	return repository.GetDesignationHistories(d.Id)
 }
-
