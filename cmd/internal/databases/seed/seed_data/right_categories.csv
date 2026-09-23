@@ -1,3 +1,3 @@
 GroupKey,Name,Key,Url,Title,Action,Details,Icon,ShortOrder,Status
 settings,App Settings,settings.system,/settings/system,System Settings,settings.system.view,Manage basic application system settings,ti ti-automation,1,1
-reference,Designation,reference.designation,/reference/designation,Designations,reference.designation.view,Manage Designation,ti ti-designation,1,1
+reference,Designation,reference.designation,/reference/designation,Designations,reference.designation.view,Manage Designation,ti ti-reserved-line,1,1

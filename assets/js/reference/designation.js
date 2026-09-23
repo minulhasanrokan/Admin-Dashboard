@@ -11,7 +11,7 @@
     function initDesignationGrid() {
         designationGrid = initAgDataGrid({
             gridContainer: '#designation_ag_grid',
-            url: '/reference/designation/list',
+            url: '/reference/designation/view',
             exportFileName: 'designations_list',
             defaultOrderCol: 'id',
             defaultOrderDir: 'desc',
@@ -110,20 +110,21 @@
                     cellRenderer: function (params) {
                         let row = params.data;
                         if (!row) return '';
+                        let targetId = row.uuid || row.id;
                         let statusBtn = row.status === 1
-                            ? `<button type="button" class="btn btn-sm btn-icon btn-light text-warning btn-action-deactivate" data-id="${row.id}" title="Deactivate"><i class="ti ti-ban fs-14"></i></button>`
-                            : `<button type="button" class="btn btn-sm btn-icon btn-light text-success btn-action-active" data-id="${row.id}" title="Activate"><i class="ti ti-check fs-14"></i></button>`;
+                            ? `<button type="button" class="btn btn-sm btn-icon btn-light text-warning btn-action-deactivate" data-id="${targetId}" title="Deactivate"><i class="ti ti-ban fs-14"></i></button>`
+                            : `<button type="button" class="btn btn-sm btn-icon btn-light text-success btn-action-active" data-id="${targetId}" title="Activate"><i class="ti ti-check fs-14"></i></button>`;
 
                         return `
                             <div class="d-flex align-items-center gap-1">
-                                <button type="button" class="btn btn-sm btn-icon btn-light text-info btn-action-edit" data-id="${row.id}" data-name="${encodeURIComponent(row.name || '')}" data-title="${encodeURIComponent(row.title || '')}" data-code="${encodeURIComponent(row.code || '')}" data-details="${encodeURIComponent(row.details || '')}" title="Edit">
+                                <button type="button" class="btn btn-sm btn-icon btn-light text-info btn-action-edit" data-id="${targetId}" data-name="${encodeURIComponent(row.name || '')}" data-title="${encodeURIComponent(row.title || '')}" data-code="${encodeURIComponent(row.code || '')}" data-details="${encodeURIComponent(row.details || '')}" title="Edit">
                                     <i class="ti ti-edit fs-14"></i>
                                 </button>
                                 ${statusBtn}
-                                <button type="button" class="btn btn-sm btn-icon btn-light text-primary btn-action-verify" data-id="${row.id}" title="Verify">
+                                <button type="button" class="btn btn-sm btn-icon btn-light text-primary btn-action-verify" data-id="${targetId}" title="Verify">
                                     <i class="ti ti-checks fs-14"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-icon btn-light text-danger btn-action-delete" data-id="${row.id}" title="Delete">
+                                <button type="button" class="btn btn-sm btn-icon btn-light text-danger btn-action-delete" data-id="${targetId}" title="Delete">
                                     <i class="ti ti-trash fs-14"></i>
                                 </button>
                             </div>

@@ -96,6 +96,28 @@ func (r *Repository) GetDesignationById(id uint64) (*models.Designation, error) 
 	return &d, nil
 }
 
+func (r *Repository) GetDesignationByUUID(uuidStr string) (*models.Designation, error) {
+	if r.Db == nil || r.Db.GetDb() == nil {
+		return nil, nil
+	}
+	var d models.Designation
+	if err := r.Db.GetDb().Where("uuid = ? AND delete_status = ?", uuidStr, 0).First(&d).Error; err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
+func (r *Repository) GetDesignationByIdOrUUID(identifier string) (*models.Designation, error) {
+	if r.Db == nil || r.Db.GetDb() == nil {
+		return nil, nil
+	}
+	var d models.Designation
+	if err := r.Db.GetDb().Where("(uuid = ? OR id = ?) AND delete_status = ?", identifier, identifier, 0).First(&d).Error; err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
 func (r *Repository) CreateDesignation(d *models.Designation) error {
 	if r.Db == nil || r.Db.GetDb() == nil {
 		return nil
@@ -103,37 +125,113 @@ func (r *Repository) CreateDesignation(d *models.Designation) error {
 	if d.UUID == uuid.Nil {
 		d.UUID = uuid.New()
 	}
-	return r.Db.GetDb().Create(d).Error
+	if err := r.Db.GetDb().Create(d).Error; err != nil {
+		return err
+	}
+	// Log history
+	hist := models.DesignationHistory{
+		Designation: *d,
+		MainId:      d.Id,
+	}
+	hist.Id = 0
+	_ = r.Db.GetDb().Create(&hist)
+	return nil
 }
 
 func (r *Repository) UpdateDesignation(d *models.Designation) error {
 	if r.Db == nil || r.Db.GetDb() == nil {
 		return nil
 	}
-	return r.Db.GetDb().Save(d).Error
+	if err := r.Db.GetDb().Save(d).Error; err != nil {
+		return err
+	}
+	// Log history
+	hist := models.DesignationHistory{
+		Designation: *d,
+		MainId:      d.Id,
+	}
+	hist.Id = 0
+	_ = r.Db.GetDb().Create(&hist)
+	return nil
 }
 
-func (r *Repository) DeleteDesignation(id uint64) error {
+func (r *Repository) DeleteDesignation(identifier string) error {
 	if r.Db == nil || r.Db.GetDb() == nil {
 		return nil
+	}
+	d, err := r.GetDesignationByIdOrUUID(identifier)
+	if err != nil || d == nil {
+		return err
 	}
 	now := time.Now()
-	return r.Db.GetDb().Model(&models.Designation{}).Where("id = ?", id).Updates(map[string]interface{}{
+	if err := r.Db.GetDb().Model(&models.Designation{}).Where("id = ?", d.Id).Updates(map[string]interface{}{
 		"delete_status": 1,
 		"deleted_at":    now,
-	}).Error
+	}).Error; err != nil {
+		return err
+	}
+	d.DeleteStatus = 1
+	d.DeletedAt = now
+	hist := models.DesignationHistory{
+		Designation: *d,
+		MainId:      d.Id,
+	}
+	hist.Id = 0
+	_ = r.Db.GetDb().Create(&hist)
+	return nil
 }
 
-func (r *Repository) UpdateDesignationStatus(id uint64, status int) error {
+func (r *Repository) UpdateDesignationStatus(identifier string, status int) error {
 	if r.Db == nil || r.Db.GetDb() == nil {
 		return nil
 	}
-	return r.Db.GetDb().Model(&models.Designation{}).Where("id = ?", id).Update("status", status).Error
+	d, err := r.GetDesignationByIdOrUUID(identifier)
+	if err != nil || d == nil {
+		return err
+	}
+	if err := r.Db.GetDb().Model(&models.Designation{}).Where("id = ?", d.Id).Update("status", status).Error; err != nil {
+		return err
+	}
+	d.Status = status
+	hist := models.DesignationHistory{
+		Designation: *d,
+		MainId:      d.Id,
+	}
+	hist.Id = 0
+	_ = r.Db.GetDb().Create(&hist)
+	return nil
 }
 
-func (r *Repository) UpdateDesignationChecker(id uint64, checker uint64) error {
+func (r *Repository) UpdateDesignationChecker(identifier string, checker uint64) error {
 	if r.Db == nil || r.Db.GetDb() == nil {
 		return nil
 	}
-	return r.Db.GetDb().Model(&models.Designation{}).Where("id = ?", id).Update("checker", checker).Error
+	d, err := r.GetDesignationByIdOrUUID(identifier)
+	if err != nil || d == nil {
+		return err
+	}
+	if err := r.Db.GetDb().Model(&models.Designation{}).Where("id = ?", d.Id).Update("checker", checker).Error; err != nil {
+		return err
+	}
+	d.Checker = checker
+	hist := models.DesignationHistory{
+		Designation: *d,
+		MainId:      d.Id,
+	}
+	hist.Id = 0
+	_ = r.Db.GetDb().Create(&hist)
+	return nil
+}
+
+func (r *Repository) GetDesignationHistories(designationId uint64) ([]models.DesignationHistory, error) {
+	var histories []models.DesignationHistory
+	if r.Db == nil || r.Db.GetDb() == nil {
+		return histories, nil
+	}
+	db := r.Db.GetDb().Model(&models.DesignationHistory{})
+	if designationId > 0 {
+		db = db.Where("main_id = ?", designationId)
+	}
+	err := db.Order("id DESC").Limit(100).Find(&histories).Error
+	return histories, err
 }

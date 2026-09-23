@@ -11,8 +11,21 @@ func TestReferenceDesignationRoutesSecurity(t *testing.T) {
 
 	endpoints := []string{
 		"/reference/designation",
+		"/reference/designation/add",
 		"/reference/designation/view",
-		"/reference/designation/list",
+		"/reference/designation/view/test-uuid",
+		"/reference/designation/edit",
+		"/reference/designation/edit/test-uuid",
+		"/reference/designation/delete",
+		"/reference/designation/delete/test-uuid",
+		"/reference/designation/stc",
+		"/reference/designation/stc/test-uuid",
+		"/reference/designation/verify",
+		"/reference/designation/verify/test-uuid",
+		"/reference/designation/active",
+		"/reference/designation/active/test-uuid",
+		"/reference/designation/deactivate",
+		"/reference/designation/deactivate/test-uuid",
 	}
 
 	for _, endpoint := range endpoints {

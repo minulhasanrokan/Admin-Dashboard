@@ -12,6 +12,26 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func extractUUID(c echo.Context) string {
+	uuid := c.Param("uuid")
+	if uuid == "" {
+		uuid = c.Param("id")
+	}
+	if uuid == "" {
+		uuid = c.FormValue("uuid")
+	}
+	if uuid == "" {
+		uuid = c.FormValue("id")
+	}
+	if uuid == "" {
+		uuid = c.QueryParam("uuid")
+	}
+	if uuid == "" {
+		uuid = c.QueryParam("id")
+	}
+	return uuid
+}
+
 func (h Handler) DesignationPage(c echo.Context) error {
 	userSess, _, err := session.GetUserSession(c)
 	if err != nil || userSess.IsEmpty() || !userSess.IsActive {
@@ -43,6 +63,10 @@ func (h Handler) DesignationPage(c echo.Context) error {
 	}
 
 	return webResponse.SendSuccessResponse(c, "Designations", html)
+}
+
+func (h Handler) DesignationAddPage(c echo.Context) error {
+	return h.DesignationPage(c)
 }
 
 func (h Handler) DesignationList(c echo.Context) error {
@@ -125,11 +149,40 @@ func (h Handler) DesignationAdd(c echo.Context) error {
 	return webResponse.SendSuccessResponse(c, "Designation created successfully", nil)
 }
 
-func (h Handler) DesignationEdit(c echo.Context) error {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+func (h Handler) DesignationDetailsPage(c echo.Context) error {
+	id := extractUUID(c)
+	if id == "" {
+		return h.DesignationPage(c)
+	}
+	d, err := h.Service.GetDesignationByIdOrUUID(id)
 	if err != nil {
-		return webResponse.SendBadRequestResponse(c, "Invalid designation ID", nil)
+		return webResponse.SendInternalServerErrorResponse(c, err)
+	}
+	if d == nil {
+		return webResponse.SendNotFoundResponse(c, "Designation not found", nil)
+	}
+	return webResponse.SendSuccessResponse(c, "Designation details", d)
+}
+
+func (h Handler) DesignationEditPage(c echo.Context) error {
+	id := extractUUID(c)
+	if id == "" {
+		return h.DesignationPage(c)
+	}
+	d, err := h.Service.GetDesignationByIdOrUUID(id)
+	if err != nil {
+		return webResponse.SendInternalServerErrorResponse(c, err)
+	}
+	if d == nil {
+		return webResponse.SendNotFoundResponse(c, "Designation not found", nil)
+	}
+	return webResponse.SendSuccessResponse(c, "Designation data", d)
+}
+
+func (h Handler) DesignationEdit(c echo.Context) error {
+	id := extractUUID(c)
+	if id == "" {
+		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
 	name := c.FormValue("name")
@@ -137,7 +190,7 @@ func (h Handler) DesignationEdit(c echo.Context) error {
 	code := c.FormValue("code")
 	details := c.FormValue("details")
 
-	err = h.Service.UpdateDesignation(id, name, title, code, details)
+	err := h.Service.UpdateDesignation(id, name, title, code, details)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
@@ -145,14 +198,17 @@ func (h Handler) DesignationEdit(c echo.Context) error {
 	return webResponse.SendSuccessResponse(c, "Designation updated successfully", nil)
 }
 
+func (h Handler) DesignationDeletePage(c echo.Context) error {
+	return h.DesignationDetailsPage(c)
+}
+
 func (h Handler) DesignationDelete(c echo.Context) error {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		return webResponse.SendBadRequestResponse(c, "Invalid designation ID", nil)
+	id := extractUUID(c)
+	if id == "" {
+		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err = h.Service.DeleteDesignation(id)
+	err := h.Service.DeleteDesignation(id)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
@@ -160,44 +216,17 @@ func (h Handler) DesignationDelete(c echo.Context) error {
 	return webResponse.SendSuccessResponse(c, "Designation deleted successfully", nil)
 }
 
-func (h Handler) DesignationActive(c echo.Context) error {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		return webResponse.SendBadRequestResponse(c, "Invalid designation ID", nil)
-	}
-
-	err = h.Service.SetDesignationStatus(id, 1)
-	if err != nil {
-		return webResponse.SendInternalServerErrorResponse(c, err)
-	}
-
-	return webResponse.SendSuccessResponse(c, "Designation activated successfully", nil)
+func (h Handler) DesignationStcPage(c echo.Context) error {
+	return h.DesignationDetailsPage(c)
 }
 
-func (h Handler) DesignationDeactivate(c echo.Context) error {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		return webResponse.SendBadRequestResponse(c, "Invalid designation ID", nil)
+func (h Handler) DesignationStc(c echo.Context) error {
+	id := extractUUID(c)
+	if id == "" {
+		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err = h.Service.SetDesignationStatus(id, 0)
-	if err != nil {
-		return webResponse.SendInternalServerErrorResponse(c, err)
-	}
-
-	return webResponse.SendSuccessResponse(c, "Designation deactivated successfully", nil)
-}
-
-func (h Handler) DesignationSTC(c echo.Context) error {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		return webResponse.SendBadRequestResponse(c, "Invalid designation ID", nil)
-	}
-
-	err = h.Service.SetDesignationChecker(id, 1)
+	err := h.Service.SetDesignationChecker(id, 1)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
@@ -205,17 +234,56 @@ func (h Handler) DesignationSTC(c echo.Context) error {
 	return webResponse.SendSuccessResponse(c, "Designation sent to checker", nil)
 }
 
+func (h Handler) DesignationVerifyPage(c echo.Context) error {
+	return h.DesignationDetailsPage(c)
+}
+
 func (h Handler) DesignationVerify(c echo.Context) error {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		return webResponse.SendBadRequestResponse(c, "Invalid designation ID", nil)
+	id := extractUUID(c)
+	if id == "" {
+		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
 	}
 
-	err = h.Service.SetDesignationChecker(id, 2)
+	err := h.Service.SetDesignationChecker(id, 2)
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)
 	}
 
 	return webResponse.SendSuccessResponse(c, "Designation verified successfully", nil)
+}
+
+func (h Handler) DesignationActivePage(c echo.Context) error {
+	return h.DesignationDetailsPage(c)
+}
+
+func (h Handler) DesignationActive(c echo.Context) error {
+	id := extractUUID(c)
+	if id == "" {
+		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
+	}
+
+	err := h.Service.SetDesignationStatus(id, 1)
+	if err != nil {
+		return webResponse.SendInternalServerErrorResponse(c, err)
+	}
+
+	return webResponse.SendSuccessResponse(c, "Designation activated successfully", nil)
+}
+
+func (h Handler) DesignationDeactivatePage(c echo.Context) error {
+	return h.DesignationDetailsPage(c)
+}
+
+func (h Handler) DesignationDeactivate(c echo.Context) error {
+	id := extractUUID(c)
+	if id == "" {
+		return webResponse.SendBadRequestResponse(c, "Invalid designation identifier", nil)
+	}
+
+	err := h.Service.SetDesignationStatus(id, 0)
+	if err != nil {
+		return webResponse.SendInternalServerErrorResponse(c, err)
+	}
+
+	return webResponse.SendSuccessResponse(c, "Designation deactivated successfully", nil)
 }

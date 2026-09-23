@@ -95,6 +95,11 @@ func (s *Service) GetDesignationById(id uint64) (*models.Designation, error) {
 	return repository.GetDesignationById(id)
 }
 
+func (s *Service) GetDesignationByIdOrUUID(identifier string) (*models.Designation, error) {
+	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
+	return repository.GetDesignationByIdOrUUID(identifier)
+}
+
 func (s *Service) CreateDesignation(name, title, code, details string) error {
 	name = strings.TrimSpace(name)
 	if name == "" {
@@ -118,9 +123,9 @@ func (s *Service) CreateDesignation(name, title, code, details string) error {
 	return repository.CreateDesignation(d)
 }
 
-func (s *Service) UpdateDesignation(id uint64, name, title, code, details string) error {
+func (s *Service) UpdateDesignation(identifier string, name, title, code, details string) error {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
-	existing, err := repository.GetDesignationById(id)
+	existing, err := repository.GetDesignationByIdOrUUID(identifier)
 	if err != nil {
 		return err
 	}
@@ -144,17 +149,27 @@ func (s *Service) UpdateDesignation(id uint64, name, title, code, details string
 	return repository.UpdateDesignation(existing)
 }
 
-func (s *Service) DeleteDesignation(id uint64) error {
+func (s *Service) DeleteDesignation(identifier string) error {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
-	return repository.DeleteDesignation(id)
+	return repository.DeleteDesignation(identifier)
 }
 
-func (s *Service) SetDesignationStatus(id uint64, status int) error {
+func (s *Service) SetDesignationStatus(identifier string, status int) error {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
-	return repository.UpdateDesignationStatus(id, status)
+	return repository.UpdateDesignationStatus(identifier, status)
 }
 
-func (s *Service) SetDesignationChecker(id uint64, checker uint64) error {
+func (s *Service) SetDesignationChecker(identifier string, checker uint64) error {
 	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
-	return repository.UpdateDesignationChecker(id, checker)
+	return repository.UpdateDesignationChecker(identifier, checker)
 }
+
+func (s *Service) GetDesignationHistory(identifier string) ([]models.DesignationHistory, error) {
+	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
+	d, err := repository.GetDesignationByIdOrUUID(identifier)
+	if err != nil || d == nil {
+		return repository.GetDesignationHistories(0)
+	}
+	return repository.GetDesignationHistories(d.Id)
+}
+
