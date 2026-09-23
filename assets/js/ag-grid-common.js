@@ -625,6 +625,10 @@
 
                         if (payloadData && Array.isArray(payloadData.items)) {
                             items = payloadData.items;
+                        } else if (payloadData && Array.isArray(payloadData.data)) {
+                            items = payloadData.data;
+                        } else if (payloadData && Array.isArray(payloadData.rows)) {
+                            items = payloadData.rows;
                         } else if (Array.isArray(payloadData)) {
                             items = payloadData;
                         }

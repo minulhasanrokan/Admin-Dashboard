@@ -74,6 +74,7 @@ func (s *Service) GetActivityLogList(params repositories.BackupFilterParams) (ma
 	}
 
 	result := map[string]interface{}{
+		"items": rows,
 		"data":  rows,
 		"total": total,
 		"page":  params.Page,
@@ -131,6 +132,7 @@ func (s *Service) GetLoginHistoryList(params repositories.BackupFilterParams) (m
 	}
 
 	result := map[string]interface{}{
+		"items": rows,
 		"data":  rows,
 		"total": total,
 		"page":  params.Page,
