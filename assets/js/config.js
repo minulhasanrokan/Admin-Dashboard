@@ -67,7 +67,7 @@ web.interceptors.request.use(
 
 web.interceptors.response.use(
     function (response) {
-        let newCsrf = response.headers['X-Csrf-Token'];
+        let newCsrf = response.headers['x-csrf-token'] || response.headers['X-Csrf-Token'] || response.data?._csrf || response.data?.CSRF;
 
         if (newCsrf) {
             document.querySelector('meta[name="_csrf"]')?.setAttribute('content', newCsrf);
@@ -78,7 +78,7 @@ web.interceptors.response.use(
         return response;
     },
     function (error) {
-        let newCsrf = error.response?.headers['X-Csrf-Token'];
+        let newCsrf = error.response?.headers['x-csrf-token'] || error.response?.headers['X-Csrf-Token'] || error.response?.data?._csrf || error.response?.data?.CSRF;
 
         if (newCsrf) {
             document.querySelector('meta[name="_csrf"]')?.setAttribute('content', newCsrf);

@@ -12,7 +12,7 @@
                         <span class="text-white-50 fs-11">Suspend designation from active operational usage</span>
                     </div>
                 </div>
-                <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close custom-btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"><i class="ti ti-x text-white"></i></button>
             </div>
             <form id="form_designation_deactive">
                 <input type="hidden" id="deactive_target_id" name="target_id" value="{{if .SingleData}}{{.SingleData.UUID}}{{else if .uuid}}{{.uuid}}{{end}}">

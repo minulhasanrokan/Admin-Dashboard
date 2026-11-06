@@ -13,10 +13,10 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <button type="button" class="btn btn-sm btn-light border rounded-circle w-32 h-32 p-0 d-inline-flex align-items-center justify-content-center btn-open-activity" title="Activity Logs">
+                    <button type="button" class="btn btn-sm btn-light border rounded-circle w-30 h-30 p-0 d-inline-flex align-items-center justify-content-center btn-open-activity" title="Activity Logs">
                         <i class="ti ti-activity fs-14 text-muted"></i>
                     </button>
-                    <button type="button" class="btn btn-sm btn-light border rounded-circle w-32 h-32 p-0 d-inline-flex align-items-center justify-content-center btn-open-history" title="Audit History">
+                    <button type="button" class="btn btn-sm btn-light border rounded-circle w-30 h-30 p-0 d-inline-flex align-items-center justify-content-center btn-open-history" title="Audit History">
                         <i class="ti ti-history fs-14 text-muted"></i>
                     </button>
                     <button type="button" class="btn-close custom-btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"><i class="ti ti-x"></i></button>
@@ -44,7 +44,7 @@
                             </tr>
                             <tr>
                                 <th class="bg-light-subtle ps-4 text-muted fs-12 fw-semibold">Operational Status</th>
-                                <td class="ps-4"><span class="badge bg-primary-transparent text-primary fw-semibold fs-12 px-2 py-1" id="view_op_status">{{if .SingleData}}{{.SingleData.ActualStatus}}{{else if .actual_status}}{{.actual_status}}{{else}}-{{end}}</span></td>
+                                <td class="ps-4"><span class="badge bg-primary-transparent text-primary fw-semibold fs-12 px-2 py-1" id="view_op_status">{{if .op_status_text}}{{.op_status_text}}{{else if .SingleData}}{{.SingleData.ActualStatus}}{{else if .actual_status}}{{.actual_status}}{{else}}-{{end}}</span></td>
                             </tr>
                             <tr>
                                 <th class="bg-light-subtle ps-4 text-muted fs-12 fw-semibold">Status</th>
@@ -52,11 +52,11 @@
                             </tr>
                             <tr>
                                 <th class="bg-light-subtle ps-4 text-muted fs-12 fw-semibold">Process Status</th>
-                                <td id="view_process_status" class="ps-4 text-dark fs-13">{{if .SingleData}}{{.SingleData.ProcessStatus}}{{else if .process_status}}{{.process_status}}{{else}}-{{end}}</td>
+                                <td id="view_process_status" class="ps-4 text-dark fs-13">{{if .process_status_text}}{{.process_status_text}}{{else if .SingleData}}{{.SingleData.ProcessStatus}}{{else if .process_status}}{{.process_status}}{{else}}-{{end}}</td>
                             </tr>
                             <tr>
                                 <th class="bg-light-subtle ps-4 text-muted fs-12 fw-semibold">Checker</th>
-                                <td id="view_checker" class="ps-4 text-dark fs-13">{{if .SingleData}}{{.SingleData.Checker}}{{else if .checker}}{{.checker}}{{else}}-{{end}}</td>
+                                <td id="view_checker" class="ps-4 text-dark fs-13">{{if .checker_name}}{{.checker_name}}{{else if .SingleData}}{{if .SingleData.Checker}}{{.SingleData.Checker}}{{else}}None{{end}}{{else}}None{{end}}</td>
                             </tr>
                             <tr>
                                 <th class="bg-light-subtle ps-4 text-muted fs-12 fw-semibold">Message / Reason</th>

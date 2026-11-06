@@ -63,6 +63,27 @@
         }
     }
 
+    function handleAjaxError(err, defaultMsg) {
+        let msg = defaultMsg || "An unexpected error occurred";
+        if (err && err.response && err.response.data) {
+            let data = err.response.data;
+            if (data.message) {
+                msg = data.message;
+            } else if (data.error) {
+                msg = data.error;
+            }
+            if (Array.isArray(data.errors) && data.errors.length > 0) {
+                let errorItems = data.errors.map(function (e) {
+                    return e.message || e.field || e;
+                }).join(', ');
+                msg += ": " + errorItems;
+            }
+        } else if (err && err.message) {
+            msg = err.message;
+        }
+        showAlertBox({title: "Error", message: msg, type: "danger", sound: "/assets/sounds/error.mp3"});
+    }
+
     function getGridRights() {
 
         let raw = $('#grid_rights_json').val() || '';
@@ -117,39 +138,39 @@
                 let full = params.data;
                 if (!full) return '';
                 let targetId = full.uuid || full.id;
-                let titleValue = encodeURIComponent(full.name);
+                let titleValue = encodeURIComponent(full.name || full.designation_name || '');
+
+                let procStatus = Number(full.process_status);
+                let actStatus = Number(full.actual_status);
+                let recStatus = Number(full.status);
 
                 let canRender = false;
 
                 if (actionName === 'view') {
                     canRender = true;
                 } else if (actionName === 'edit') {
-                    if ((full.process_status === 2 || full.process_status === 3 || full.process_status === '0' || full.process_status === '')) {
-                        if (full.process_status === 3 || full.process_status === 2 || full.actual_status !== 4) {
-                            canRender = true;
-                        }
+                    if ((procStatus === 0 || procStatus === 2 || procStatus === 3) && actStatus !== 4) {
+                        canRender = true;
                     }
                 } else if (actionName === 'delete') {
-                    if ((full.process_status === 2 || full.process_status === 3 || full.process_status === '0' || full.process_status === '')) {
-                        if (full.process_status === 3 || full.process_status === 2 || full.actual_status !== 3) {
-                            canRender = true;
-                        }
+                    if ((procStatus === 0 || procStatus === 2 || procStatus === 3) && actStatus !== 4) {
+                        canRender = true;
                     }
                 } else if (actionName === 'stc') {
-                    if (full.process_status !== 3 && full.process_status !== 1 && full.actual_status !== 5 && full.actual_status !== 6) {
+                    if ((procStatus === 0 || procStatus === 2) && actStatus !== 5 && actStatus !== 6) {
                         canRender = true;
                     }
                 } else if (actionName === 'verify') {
                     let canVerify = (typeof window.duty_carry_out[full.checker] !== 'undefined' || 1 === window.super_admin_status);
-                    if (full.process_status === 1 && canVerify) {
+                    if (procStatus === 1 && canVerify) {
                         canRender = true;
                     }
                 } else if (actionName === 'active') {
-                    if ((full.process_status === 3 || full.process_status === 2 || full.actual_status === 5) && full.status == 0) {
+                    if ((procStatus === 3 || procStatus === 2 || actStatus === 5 || procStatus === 0) && recStatus === 0) {
                         canRender = true;
                     }
                 } else if (actionName === 'deactivate') {
-                    if ((full.process_status === 3 || full.process_status === 2 || full.actual_status === 6) && full.status === 1) {
+                    if ((procStatus === 3 || procStatus === 2 || actStatus === 6 || procStatus === 0) && recStatus === 1) {
                         canRender = true;
                     }
                 } else {
@@ -182,7 +203,8 @@
                 sortable: true,
                 filter: true,
                 cellRenderer: function (params) {
-                    return `<span class="fw-semibold text-dark"><i class="ti ti-briefcase me-1 text-primary"></i>${params.data && params.data.name}</span>`;
+                    let name = (params.data && (params.data.name || params.data.designation_name)) || '-';
+                    return `<span class="fw-semibold text-dark"><i class="ti ti-briefcase me-1 text-primary"></i>${name}</span>`;
                 }
             },
             {
@@ -221,12 +243,14 @@
                     if (typeof window.process_status[full.process_status] !== 'undefined') {
                         statusText = ' ' + window.process_status[full.process_status];
                     }
-                    let actLabel = window.actual_status[params.value] || 'New Add';
+                    let val = Number(params.value);
+                    let actLabel = window.actual_status[val] || 'New Add';
                     let badgeClass = 'bg-primary-transparent text-primary';
-                    if (params.value === 4) badgeClass = 'bg-danger-transparent text-danger';
-                    else if (params.value === 5) badgeClass = 'bg-dark-transparent text-dark';
-                    else if (params.value === 6) badgeClass = 'bg-success-transparent text-success';
-                    else if (params.value === 2) badgeClass = 'bg-warning-transparent text-warning';
+                    if (val === 4) badgeClass = 'bg-danger-transparent text-danger';
+                    else if (val === 5) badgeClass = 'bg-dark-transparent text-dark';
+                    else if (val === 6) badgeClass = 'bg-success-transparent text-success';
+                    else if (val === 2) badgeClass = 'bg-warning-transparent text-warning';
+                    else if (val === 3) badgeClass = 'bg-info-transparent text-info';
                     return `<span class="badge ${badgeClass} fw-semibold">${actLabel}${statusText}</span>`;
                 }
             },
@@ -239,7 +263,7 @@
                 sortable: true,
                 filter: true,
                 cellRenderer: function (params) {
-                    let st = params.value;
+                    let st = Number(params.value);
                     let badgeClass = st === 1 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger';
                     return `<span class="badge ${badgeClass} fw-semibold">${window.data_status[st] || (st === 1 ? 'Active' : 'Deactivate')}</span>`;
                 }
@@ -331,40 +355,40 @@
 
 
     function openAddModal() {
-        openMenu('/reference/designation/add', 'Add Designation', '', 'add', 1, 800, 'popup_1');
+        openMenu('/reference/designation/add', 'Add Designation', '', 'add', 1, 800);
     }
 
     function openEditModal(targetId) {
         currentDesignationUuid = targetId;
-        openMenu('/reference/designation/edit', 'Edit Designation', targetId, 'edit', 1, 800, 'popup_1');
+        openMenu('/reference/designation/edit', 'Edit Designation', targetId, 'edit', 1, 800);
     }
 
     function openViewModal(targetId) {
         currentDesignationUuid = targetId;
-        openMenu('/reference/designation/view', 'Designation Details', targetId, 'view', 1, 800, 'popup_1');
+        openMenu('/reference/designation/view', 'Designation Details', targetId, 'view', 1, 800);
     }
 
     function openDeleteModal(targetId, name) {
         currentDesignationUuid = targetId;
-        openMenu('/reference/designation/delete', 'Delete Designation', targetId, 'delete', 1, 600, 'popup_1');
+        openMenu('/reference/designation/delete', 'Delete Designation', targetId, 'delete', 1, 600);
     }
 
     function openStcModal(targetId, name) {
         currentDesignationUuid = targetId;
-        openMenu('/reference/designation/stc', 'Sent To Checker', targetId, 'stc', 1, 800, 'popup_1');
+        openMenu('/reference/designation/stc', 'Sent To Checker', targetId, 'stc', 1, 800);
     }
 
     function openVerifyModal(targetId, name) {
         currentDesignationUuid = targetId;
-        openMenu('/reference/designation/verify', 'Verify Designation', targetId, 'verify', 1, 800, 'popup_1');
+        openMenu('/reference/designation/verify', 'Verify Designation', targetId, 'verify', 1, 800);
     }
 
     function openStatusModal(actionType, targetId, name) {
         currentDesignationUuid = targetId;
         if (actionType === 'active') {
-            openMenu('/reference/designation/active', 'Active Designation', targetId, 'active', 1, 600, 'popup_1');
+            openMenu('/reference/designation/active', 'Active Designation', targetId, 'active', 1, 600);
         } else {
-            openMenu('/reference/designation/deactivate', 'Deactivate Designation', targetId, 'deactivate', 1, 600, 'popup_1');
+            openMenu('/reference/designation/deactivate', 'Deactivate Designation', targetId, 'deactivate', 1, 600);
         }
     }
 
@@ -516,7 +540,9 @@
                 form_validation({control: "remarks#text#nonmandatory", msg_text: "Remarks"});
                 break;
             case "return_reason":
-                form_validation({control: "return_reason#text#mandatory", msg_text: "Return Reason"});
+                if ($("#return_reason").val() && $("#return_reason").val().trim().length > 0) {
+                    form_validation({control: "return_reason#text#mandatory", msg_text: "Return Reason"});
+                }
                 break;
             case "active_reason":
                 form_validation({control: "active_reason#text#mandatory", msg_text: "Active Reason"});
@@ -528,11 +554,12 @@
     }
 
     async function saveDesignationAdd() {
+        let $btn = $("#btn_save_designation_add");
+        if ($btn.prop("disabled")) return;
 
         let status = form_validation({control: "name#text#mandatory*code#text#mandatory*title#text#mandatory*details#text#nonmandatory", msg_text: "Name*Code*Title*Details"});
 
         if (status === false) {
-
             showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
             return false;
         }
@@ -543,8 +570,9 @@
             return;
         }
 
-        let formData = new FormData();
+        $btn.prop("disabled", true).addClass("disabled");
 
+        let formData = new FormData();
         formData.append("name", $("#name").val());
         formData.append("code", $("#code").val());
         formData.append("title", $("#title").val());
@@ -553,22 +581,25 @@
         try {
             let response = await web.post('/reference/designation/add', formData);
 
-            if (response.status === 200) {
-
+            if (response.status === 200 || response.status === 201) {
                 showAlertBox({title: "Success", message: "Saved Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
                 $('#modal_designation_add').modal('hide');
                 refreshGrid();
             }
         } catch (err) {
+            handleAjaxError(err, "Failed to save designation");
+        } finally {
+            $btn.prop("disabled", false).removeClass("disabled");
         }
     }
 
     async function saveDesignationEdit() {
+        let $btn = $("#btn_update_designation");
+        if ($btn.prop("disabled")) return;
 
         let status = form_validation({control: "name#text#mandatory*code#text#mandatory*title#text#mandatory*details#text#nonmandatory", msg_text: "Name*Code*Title*Details"});
 
         if (status === false) {
-
             showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
             return false;
         }
@@ -579,10 +610,11 @@
             return;
         }
 
+        $btn.prop("disabled", true).addClass("disabled");
+
         let uuid = $('#edit_designation_uuid').val() || currentDesignationUuid;
 
         let formData = new FormData();
-
         formData.append("name", $("#name").val());
         formData.append("code", $("#code").val());
         formData.append("title", $("#title").val());
@@ -592,21 +624,24 @@
             let response = await web.post(`/reference/designation/edit/${uuid}`, formData);
 
             if (response.status === 200) {
-
                 showAlertBox({title: "Success", message: "Updated Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
                 $('#modal_designation_edit').modal('hide');
                 refreshGrid();
             }
         } catch (err) {
+            handleAjaxError(err, "Failed to update designation");
+        } finally {
+            $btn.prop("disabled", false).removeClass("disabled");
         }
     }
 
     async function saveDesignationDelete() {
+        let $btn = $("#btn_confirm_delete");
+        if ($btn.prop("disabled")) return;
 
         let status = form_validation({control: "delete_reason#text#mandatory", msg_text: "Delete Reason"});
 
         if (status === false) {
-
             showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
             return false;
         }
@@ -617,31 +652,35 @@
             return;
         }
 
+        $btn.prop("disabled", true).addClass("disabled");
+
         let uuid = $('#delete_target_id').val() || currentDesignationUuid;
 
         let formData = new FormData();
-
         formData.append("delete_reason", $("#delete_reason").val());
 
         try {
             let response = await web.post(`/reference/designation/delete/${uuid}`, formData);
 
             if (response.status === 200) {
-
                 showAlertBox({title: "Success", message: "Deleted Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
                 $('#modal_designation_delete').modal('hide');
                 refreshGrid();
             }
         } catch (err) {
+            handleAjaxError(err, "Failed to delete designation");
+        } finally {
+            $btn.prop("disabled", false).removeClass("disabled");
         }
     }
 
     async function saveDesignationStc() {
+        let $btn = $("#btn_confirm_stc");
+        if ($btn.prop("disabled")) return;
 
         let status = form_validation({control: "checker#select#mandatory*remarks#text#nonmandatory", msg_text: "Checker User*Remarks"});
 
         if (status === false) {
-
             showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
             return false;
         }
@@ -652,10 +691,11 @@
             return;
         }
 
+        $btn.prop("disabled", true).addClass("disabled");
+
         let uuid = $('#stc_target_id').val() || currentDesignationUuid;
 
         let formData = new FormData();
-
         formData.append("checker", $("#checker").val());
         formData.append("remarks", $("#remarks").val());
 
@@ -663,23 +703,25 @@
             let response = await web.post(`/reference/designation/stc/${uuid}`, formData);
 
             if (response.status === 200) {
-
                 showAlertBox({title: "Success", message: "Sent To Checker Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
                 $('#modal_designation_stc').modal('hide');
                 refreshGrid();
             }
         } catch (err) {
+            handleAjaxError(err, "Failed to send designation to checker");
+        } finally {
+            $btn.prop("disabled", false).removeClass("disabled");
         }
     }
 
     async function saveDesignationVerify(verifyType) {
+        let $btn = verifyType === 0 ? $("#btn_verify_return") : $("#btn_verify_approve");
+        if ($btn.prop("disabled")) return;
 
         if (verifyType === 0) {
-
             let status = form_validation({control: "return_reason#text#mandatory", msg_text: "Return Reason"});
 
             if (status === false) {
-
                 showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
                 return false;
             }
@@ -690,10 +732,11 @@
                 return;
             }
 
+            $btn.prop("disabled", true).addClass("disabled");
+
             let uuid = $('#verify_target_id').val() || currentDesignationUuid;
 
             let formData = new FormData();
-
             formData.append("verify_type", "0");
             formData.append("return_reason", $("#return_reason").val());
 
@@ -701,48 +744,53 @@
                 let response = await web.post(`/reference/designation/verify/${uuid}`, formData);
 
                 if (response.status === 200) {
-
                     showAlertBox({title: "Success", message: "Returned Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
                     $('#modal_designation_verify').modal('hide');
                     refreshGrid();
                 }
             } catch (err) {
+                handleAjaxError(err, "Failed to return designation");
+            } finally {
+                $btn.prop("disabled", false).removeClass("disabled");
             }
 
         } else {
-
             let confirmed = await confirmDialog("Verify Designation", "Are you sure you want to approve this Designation?");
 
             if (!confirmed) {
                 return;
             }
 
+            $btn.prop("disabled", true).addClass("disabled");
+
             let uuid = $('#verify_target_id').val() || currentDesignationUuid;
 
             let formData = new FormData();
-
             formData.append("verify_type", "1");
 
             try {
                 let response = await web.post(`/reference/designation/verify/${uuid}`, formData);
 
                 if (response.status === 200) {
-
                     showAlertBox({title: "Success", message: "Approved Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
                     $('#modal_designation_verify').modal('hide');
                     refreshGrid();
                 }
             } catch (err) {
+                handleAjaxError(err, "Failed to approve designation");
+            } finally {
+                $btn.prop("disabled", false).removeClass("disabled");
             }
         }
     }
 
     async function saveDesignationActive() {
+        let $btn = $("#btn_confirm_active");
+        if ($btn.prop("disabled")) return;
 
         let status = form_validation({control: "active_reason#text#mandatory", msg_text: "Active Reason"});
 
         if (status === false) {
-
             showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
             return false;
         }
@@ -753,31 +801,35 @@
             return;
         }
 
+        $btn.prop("disabled", true).addClass("disabled");
+
         let uuid = $('#active_target_id').val() || currentDesignationUuid;
 
         let formData = new FormData();
-
         formData.append("active_reason", $("#active_reason").val());
 
         try {
             let response = await web.post(`/reference/designation/active/${uuid}`, formData);
 
             if (response.status === 200) {
-
                 showAlertBox({title: "Success", message: "Activated Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
                 $('#modal_designation_active').modal('hide');
                 refreshGrid();
             }
         } catch (err) {
+            handleAjaxError(err, "Failed to activate designation");
+        } finally {
+            $btn.prop("disabled", false).removeClass("disabled");
         }
     }
 
     async function saveDesignationDeactivate() {
+        let $btn = $("#btn_confirm_deactive");
+        if ($btn.prop("disabled")) return;
 
         let status = form_validation({control: "deactivate_reason#text#mandatory", msg_text: "Deactivate Reason"});
 
         if (status === false) {
-
             showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
             return false;
         }
@@ -788,22 +840,25 @@
             return;
         }
 
+        $btn.prop("disabled", true).addClass("disabled");
+
         let uuid = $('#deactive_target_id').val() || currentDesignationUuid;
 
         let formData = new FormData();
-
         formData.append("deactivate_reason", $("#deactivate_reason").val());
 
         try {
             let response = await web.post(`/reference/designation/deactivate/${uuid}`, formData);
 
             if (response.status === 200) {
-
                 showAlertBox({title: "Success", message: "Deactivated Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
                 $('#modal_designation_deactive').modal('hide');
                 refreshGrid();
             }
         } catch (err) {
+            handleAjaxError(err, "Failed to deactivate designation");
+        } finally {
+            $btn.prop("disabled", false).removeClass("disabled");
         }
     }
 
@@ -869,6 +924,10 @@
         $(document).on("submit.designationForm", "#form_designation_stc", async function (e) {
             e.preventDefault();
             await saveDesignationStc();
+        });
+
+        $(document).on("submit.designationForm", "#form_designation_verify", function (e) {
+            e.preventDefault();
         });
 
         $(document).on("submit.designationForm", "#form_designation_active", async function (e) {

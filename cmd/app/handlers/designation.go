@@ -6,6 +6,7 @@ import (
 	"admin-dashboard/cmd/common/response/webResponse"
 	"admin-dashboard/cmd/internal/constants"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -235,24 +236,65 @@ func (h Handler) DesignationDetailsPage(c echo.Context) error {
 		detailsVal = *d.Details
 	}
 
+	opStatusText := "New Add"
+	switch d.ActualStatus {
+	case 1:
+		opStatusText = "New Add"
+	case 2:
+		opStatusText = "Add-Edit"
+	case 3:
+		opStatusText = "Edit"
+	case 4:
+		opStatusText = "Delete"
+	case 5:
+		opStatusText = "Deactivate"
+	case 6:
+		opStatusText = "Active"
+	}
+
+	processStatusText := "Draft"
+	switch d.ProcessStatus {
+	case 0:
+		processStatusText = "Draft"
+	case 1:
+		processStatusText = "Sent to Checker"
+	case 2:
+		processStatusText = "Returned"
+	case 3:
+		processStatusText = "Approved"
+	}
+
+	checkerText := "None"
+	if d.Checker > 0 {
+		checkerUser, _ := h.Service.GetUserByID(d.Checker)
+		if checkerUser != nil && checkerUser.Name != nil {
+			checkerText = *checkerUser.Name
+		} else {
+			checkerText = fmt.Sprintf("User ID %d", d.Checker)
+		}
+	}
+
 	res := map[string]interface{}{
-		"SingleData":     d,
-		"HistoryData":    historyData,
-		"id":             d.Id,
-		"uuid":           d.UUID,
-		"name":           nameVal,
-		"code":           codeVal,
-		"title":          titleVal,
-		"details":        detailsVal,
-		"status":         d.Status,
-		"actual_status":  d.ActualStatus,
-		"process_status": d.ProcessStatus,
-		"checker":        d.Checker,
-		"notify_type":    d.NotifyType,
-		"message":        d.Message,
-		"remarks":        d.Remarks,
-		"created_at":     d.CreatedAt.Format("02 Jan, 2006 15:04:05"),
-		"updated_at":     d.UpdatedAt.Format("02 Jan, 2006 15:04:05"),
+		"SingleData":          d,
+		"HistoryData":         historyData,
+		"id":                  d.Id,
+		"uuid":                d.UUID,
+		"name":                nameVal,
+		"code":                codeVal,
+		"title":               titleVal,
+		"details":             detailsVal,
+		"status":              d.Status,
+		"actual_status":       d.ActualStatus,
+		"op_status_text":      opStatusText,
+		"process_status":      d.ProcessStatus,
+		"process_status_text": processStatusText,
+		"checker":             d.Checker,
+		"checker_name":        checkerText,
+		"notify_type":         d.NotifyType,
+		"message":             d.Message,
+		"remarks":             d.Remarks,
+		"created_at":          d.CreatedAt.Format("02 Jan, 2006 15:04:05"),
+		"updated_at":          d.UpdatedAt.Format("02 Jan, 2006 15:04:05"),
 	}
 
 	html, err := webResponse.RenderHTML(c, "reference/designation/single_view", res)
@@ -414,10 +456,13 @@ func (h Handler) DesignationStcPage(c echo.Context) error {
 
 	historyData, _ := h.Service.GetLastApprovedDesignationHistory(d.Id)
 
-	checkers, _ := h.Service.GetDynamicDropdown(requests.GetDropdownRequest{
-		TableName: "users",
-		FieldName: "id,name",
-	})
+	checkers, err := h.Service.GetCheckerUserList()
+	if err != nil || len(checkers) == 0 {
+		checkers, _ = h.Service.GetDynamicDropdown(requests.GetDropdownRequest{
+			TableName: "users",
+			FieldName: "id,name",
+		})
+	}
 
 	html, err := webResponse.RenderHTML(c, "reference/designation/sent_to_checker", map[string]interface{}{
 		"SingleData":   d,
@@ -488,10 +533,38 @@ func (h Handler) DesignationVerifyPage(c echo.Context) error {
 
 	historyData, _ := h.Service.GetLastApprovedDesignationHistory(d.Id)
 
+	opStatusText := "New Add"
+	switch d.ActualStatus {
+	case 1:
+		opStatusText = "New Add"
+	case 2:
+		opStatusText = "Add-Edit"
+	case 3:
+		opStatusText = "Edit"
+	case 4:
+		opStatusText = "Delete"
+	case 5:
+		opStatusText = "Deactivate"
+	case 6:
+		opStatusText = "Active"
+	}
+
+	checkerText := "None"
+	if d.Checker > 0 {
+		checkerUser, _ := h.Service.GetUserByID(d.Checker)
+		if checkerUser != nil && checkerUser.Name != nil {
+			checkerText = *checkerUser.Name
+		} else {
+			checkerText = fmt.Sprintf("User ID %d", d.Checker)
+		}
+	}
+
 	html, err := webResponse.RenderHTML(c, "reference/designation/verify", map[string]interface{}{
-		"SingleData":  d,
-		"HistoryData": historyData,
-		"uuid":        d.UUID,
+		"SingleData":   d,
+		"HistoryData":  historyData,
+		"OpStatusText": opStatusText,
+		"CheckerName":  checkerText,
+		"uuid":         d.UUID,
 	})
 	if err != nil {
 		return webResponse.SendInternalServerErrorResponse(c, err)

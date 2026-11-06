@@ -70,11 +70,11 @@
                         <div class="row g-2 fs-12">
                             <div class="col-md-6 d-flex align-items-center">
                                 <span class="text-muted fw-semibold me-2">Operation:</span>
-                                <span class="badge bg-primary-transparent text-primary fw-semibold" id="verify_op_status">{{if .SingleData}}{{.SingleData.ActualStatus}}{{else if .actual_status}}{{.actual_status}}{{else}}-{{end}}</span>
+                                <span class="badge bg-primary-transparent text-primary fw-semibold" id="verify_op_status">{{if .OpStatusText}}{{.OpStatusText}}{{else if .SingleData}}{{.SingleData.ActualStatus}}{{else if .actual_status}}{{.actual_status}}{{else}}-{{end}}</span>
                             </div>
                             <div class="col-md-6 d-flex align-items-center">
-                                <span class="text-muted fw-semibold me-2">Maker User:</span>
-                                <span class="text-dark fw-medium" id="verify_maker_by">{{if .SingleData}}{{if .SingleData.Checker}}User ID {{.SingleData.Checker}}{{else}}-{{end}}{{else if .checker}}User ID {{.checker}}{{else}}-{{end}}</span>
+                                <span class="text-muted fw-semibold me-2">Checker User:</span>
+                                <span class="text-dark fw-medium" id="verify_maker_by">{{if .CheckerName}}{{.CheckerName}}{{else if .SingleData}}{{if .SingleData.Checker}}User ID {{.SingleData.Checker}}{{else}}-{{end}}{{else if .checker}}User ID {{.checker}}{{else}}-{{end}}</span>
                             </div>
                             <div class="col-md-6 d-flex align-items-center">
                                 <span class="text-muted fw-semibold me-2">Submission Time:</span>
