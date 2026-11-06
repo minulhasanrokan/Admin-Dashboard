@@ -876,4 +876,37 @@ form .mb-3 {
     background-color: rgba(242, 101, 34, 0.05) !important;
     color: #1e293b !important;
     font-weight: 600;
+}
+
+/* ==========================================================================
+   Fixed Footer Styling
+   ========================================================================== */
+.page-wrapper .footer {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 252px;
+    z-index: 99;
+    background-color: #ffffff !important;
+    border-top: 1px solid #e2e8f0 !important;
+    transition: left 0.2s ease;
+}
+
+.mini-sidebar .page-wrapper .footer {
+    left: 80px;
+}
+
+@media (max-width: 991.98px) {
+    .page-wrapper .footer {
+        left: 0 !important;
+    }
+}
+
+.menu-horizontal .page-wrapper .footer,
+[data-layout="horizontal-single"] .page-wrapper .footer {
+    left: 0 !important;
+}
+
+.page-wrapper {
+    padding-bottom: 58px !important;
 }
