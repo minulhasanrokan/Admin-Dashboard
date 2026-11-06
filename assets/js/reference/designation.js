@@ -63,14 +63,28 @@
         }
     }
 
+    function closeModal(selector) {
+        let el = typeof selector === 'string' ? document.querySelector(selector) : selector;
+        if (el) {
+            let inst = (typeof bootstrap !== 'undefined' && bootstrap.Modal) ? bootstrap.Modal.getInstance(el) : null;
+            if (inst) {
+                inst.hide();
+            } else if (typeof $(el).modal === 'function') {
+                $(el).modal('hide');
+            }
+        }
+    }
+
     function handleAjaxError(err, defaultMsg) {
         let msg = defaultMsg || "An unexpected error occurred";
         if (err && err.response && err.response.data) {
             let data = err.response.data;
-            if (data.message) {
+            if (data.error && typeof data.error === 'string' && data.error.length > 0) {
+                msg = data.error.replace(/^\[ERROR\]\s*(Internal Server Error:\s*)?/i, '');
+            } else if (data.message && data.message !== "Internal Server Error") {
                 msg = data.message;
-            } else if (data.error) {
-                msg = data.error;
+            } else if (data.message) {
+                msg = data.message;
             }
             if (Array.isArray(data.errors) && data.errors.length > 0) {
                 let errorItems = data.errors.map(function (e) {
@@ -312,18 +326,18 @@
             {
                 headerName: '#',
                 isIndexCol: true,
-                width: 48,
-                minWidth: 42,
-                maxWidth: 55,
+                width: 40,
+                minWidth: 34,
+                maxWidth: 48,
                 pinned: 'left',
                 sortable: false,
                 filter: false,
                 resizable: false,
                 suppressSizeToFit: true,
-                headerClass: 'text-center',
-                cellClass: 'text-center text-muted fw-medium'
+                headerClass: 'ag-action-col-header text-center',
+                cellClass: 'ag-action-col-cell d-flex align-items-center justify-content-center text-muted fw-medium'
             },
-            actionsColumnDef,
+            ...actionColumnDefs,
             ...dataColumnDefs
         ];
 
@@ -349,9 +363,7 @@
     }
 
     function refreshGrid() {
-        if (designationGrid && typeof designationGrid.reload === 'function') {
-            designationGrid.reload();
-        } else if (designationGrid && designationGrid.gridApi && typeof designationGrid.gridApi.refreshServerSide === 'function') {
+        if (designationGrid && designationGrid.gridApi) {
             designationGrid.gridApi.refreshServerSide({ purge: true });
         }
     }
@@ -565,7 +577,7 @@
 
     async function saveDesignationAdd() {
         let $btn = $("#btn_save_designation_add");
-        if ($btn.prop("disabled")) return;
+        if ($btn.prop("disabled") || $btn.hasClass("submitting")) return;
 
         let status = form_validation({control: "name#text#mandatory*code#text#mandatory*title#text#mandatory*details#text#nonmandatory", msg_text: "Name*Code*Title*Details"});
 
@@ -574,9 +586,11 @@
             return false;
         }
 
+        $btn.addClass("submitting");
         let confirmed = await confirmDialog("Designation", "Are you sure you want to save the Designation?");
 
         if (!confirmed) {
+            $btn.removeClass("submitting");
             return;
         }
 
@@ -593,19 +607,19 @@
 
             if (response.status === 200 || response.status === 201) {
                 showAlertBox({title: "Success", message: "Saved Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
-                $('#modal_designation_add').modal('hide');
+                closeModal('#modal_designation_add');
                 refreshGrid();
             }
         } catch (err) {
             handleAjaxError(err, "Failed to save designation");
         } finally {
-            $btn.prop("disabled", false).removeClass("disabled");
+            $btn.prop("disabled", false).removeClass("disabled submitting");
         }
     }
 
     async function saveDesignationEdit() {
         let $btn = $("#btn_update_designation");
-        if ($btn.prop("disabled")) return;
+        if ($btn.prop("disabled") || $btn.hasClass("submitting")) return;
 
         let status = form_validation({control: "name#text#mandatory*code#text#mandatory*title#text#mandatory*details#text#nonmandatory", msg_text: "Name*Code*Title*Details"});
 
@@ -614,9 +628,11 @@
             return false;
         }
 
+        $btn.addClass("submitting");
         let confirmed = await confirmDialog("Designation", "Are you sure you want to update the Designation?");
 
         if (!confirmed) {
+            $btn.removeClass("submitting");
             return;
         }
 
@@ -635,19 +651,20 @@
 
             if (response.status === 200) {
                 showAlertBox({title: "Success", message: "Updated Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
-                $('#modal_designation_edit').modal('hide');
+                closeModal('#modal_designation_edit');
                 refreshGrid();
             }
         } catch (err) {
             handleAjaxError(err, "Failed to update designation");
+            refreshGrid();
         } finally {
-            $btn.prop("disabled", false).removeClass("disabled");
+            $btn.prop("disabled", false).removeClass("disabled submitting");
         }
     }
 
     async function saveDesignationDelete() {
         let $btn = $("#btn_confirm_delete");
-        if ($btn.prop("disabled")) return;
+        if ($btn.prop("disabled") || $btn.hasClass("submitting")) return;
 
         let status = form_validation({control: "delete_reason#text#mandatory", msg_text: "Delete Reason"});
 
@@ -656,9 +673,11 @@
             return false;
         }
 
+        $btn.addClass("submitting");
         let confirmed = await confirmDialog("Delete Designation", "Are you sure you want to delete this Designation?");
 
         if (!confirmed) {
+            $btn.removeClass("submitting");
             return;
         }
 
@@ -674,19 +693,20 @@
 
             if (response.status === 200) {
                 showAlertBox({title: "Success", message: "Deleted Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
-                $('#modal_designation_delete').modal('hide');
+                closeModal('#modal_designation_delete');
                 refreshGrid();
             }
         } catch (err) {
             handleAjaxError(err, "Failed to delete designation");
+            refreshGrid();
         } finally {
-            $btn.prop("disabled", false).removeClass("disabled");
+            $btn.prop("disabled", false).removeClass("disabled submitting");
         }
     }
 
     async function saveDesignationStc() {
         let $btn = $("#btn_confirm_stc");
-        if ($btn.prop("disabled")) return;
+        if ($btn.prop("disabled") || $btn.hasClass("submitting")) return;
 
         let status = form_validation({control: "checker#select#mandatory*remarks#text#nonmandatory", msg_text: "Checker User*Remarks"});
 
@@ -695,9 +715,11 @@
             return false;
         }
 
+        $btn.addClass("submitting");
         let confirmed = await confirmDialog("Sent To Checker", "Are you sure you want to send this Designation to Checker?");
 
         if (!confirmed) {
+            $btn.removeClass("submitting");
             return;
         }
 
@@ -714,19 +736,20 @@
 
             if (response.status === 200) {
                 showAlertBox({title: "Success", message: "Sent To Checker Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
-                $('#modal_designation_stc').modal('hide');
+                closeModal('#modal_designation_stc');
                 refreshGrid();
             }
         } catch (err) {
             handleAjaxError(err, "Failed to send designation to checker");
+            refreshGrid();
         } finally {
-            $btn.prop("disabled", false).removeClass("disabled");
+            $btn.prop("disabled", false).removeClass("disabled submitting");
         }
     }
 
     async function saveDesignationVerify(verifyType) {
         let $btn = verifyType === 0 ? $("#btn_verify_return") : $("#btn_verify_approve");
-        if ($btn.prop("disabled")) return;
+        if ($btn.prop("disabled") || $btn.hasClass("submitting")) return;
 
         if (verifyType === 0) {
             let status = form_validation({control: "return_reason#text#mandatory", msg_text: "Return Reason"});
@@ -736,9 +759,11 @@
                 return false;
             }
 
+            $btn.addClass("submitting");
             let confirmed = await confirmDialog("Return Designation", "Are you sure you want to return this Designation?");
 
             if (!confirmed) {
+                $btn.removeClass("submitting");
                 return;
             }
 
@@ -755,19 +780,22 @@
 
                 if (response.status === 200) {
                     showAlertBox({title: "Success", message: "Returned Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
-                    $('#modal_designation_verify').modal('hide');
+                    closeModal('#modal_designation_verify');
                     refreshGrid();
                 }
             } catch (err) {
                 handleAjaxError(err, "Failed to return designation");
+                refreshGrid();
             } finally {
-                $btn.prop("disabled", false).removeClass("disabled");
+                $btn.prop("disabled", false).removeClass("disabled submitting");
             }
 
         } else {
+            $btn.addClass("submitting");
             let confirmed = await confirmDialog("Verify Designation", "Are you sure you want to approve this Designation?");
 
             if (!confirmed) {
+                $btn.removeClass("submitting");
                 return;
             }
 
@@ -783,20 +811,21 @@
 
                 if (response.status === 200) {
                     showAlertBox({title: "Success", message: "Approved Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
-                    $('#modal_designation_verify').modal('hide');
+                    closeModal('#modal_designation_verify');
                     refreshGrid();
                 }
             } catch (err) {
                 handleAjaxError(err, "Failed to approve designation");
+                refreshGrid();
             } finally {
-                $btn.prop("disabled", false).removeClass("disabled");
+                $btn.prop("disabled", false).removeClass("disabled submitting");
             }
         }
     }
 
     async function saveDesignationActive() {
         let $btn = $("#btn_confirm_active");
-        if ($btn.prop("disabled")) return;
+        if ($btn.prop("disabled") || $btn.hasClass("submitting")) return;
 
         let status = form_validation({control: "active_reason#text#mandatory", msg_text: "Active Reason"});
 
@@ -805,9 +834,11 @@
             return false;
         }
 
+        $btn.addClass("submitting");
         let confirmed = await confirmDialog("Active Designation", "Are you sure you want to activate this Designation?");
 
         if (!confirmed) {
+            $btn.removeClass("submitting");
             return;
         }
 
@@ -823,19 +854,20 @@
 
             if (response.status === 200) {
                 showAlertBox({title: "Success", message: "Activated Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
-                $('#modal_designation_active').modal('hide');
+                closeModal('#modal_designation_active');
                 refreshGrid();
             }
         } catch (err) {
             handleAjaxError(err, "Failed to activate designation");
+            refreshGrid();
         } finally {
-            $btn.prop("disabled", false).removeClass("disabled");
+            $btn.prop("disabled", false).removeClass("disabled submitting");
         }
     }
 
     async function saveDesignationDeactivate() {
         let $btn = $("#btn_confirm_deactive");
-        if ($btn.prop("disabled")) return;
+        if ($btn.prop("disabled") || $btn.hasClass("submitting")) return;
 
         let status = form_validation({control: "deactivate_reason#text#mandatory", msg_text: "Deactivate Reason"});
 
@@ -844,9 +876,11 @@
             return false;
         }
 
+        $btn.addClass("submitting");
         let confirmed = await confirmDialog("Deactivate Designation", "Are you sure you want to deactivate this Designation?");
 
         if (!confirmed) {
+            $btn.removeClass("submitting");
             return;
         }
 
@@ -862,13 +896,14 @@
 
             if (response.status === 200) {
                 showAlertBox({title: "Success", message: "Deactivated Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
-                $('#modal_designation_deactive').modal('hide');
+                closeModal('#modal_designation_deactive');
                 refreshGrid();
             }
         } catch (err) {
             handleAjaxError(err, "Failed to deactivate designation");
+            refreshGrid();
         } finally {
-            $btn.prop("disabled", false).removeClass("disabled");
+            $btn.prop("disabled", false).removeClass("disabled submitting");
         }
     }
 

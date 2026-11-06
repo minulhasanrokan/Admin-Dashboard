@@ -4,6 +4,7 @@ import (
 	"admin-dashboard/cmd/app/requests"
 	"admin-dashboard/cmd/internal/models"
 	"errors"
+	"strconv"
 	"strings"
 	"time"
 
@@ -112,7 +113,14 @@ func (r *Repository) GetDesignationByIdOrUUID(identifier requests.UUIDRequest) (
 		return nil, errors.New("empty identifier")
 	}
 
-	if err := r.Db.GetDb().Where("(uuid = ? OR id = ?) AND delete_status = ?", val, val, 0).First(&d).Error; err != nil {
+	query := r.Db.GetDb().Where("delete_status = ?", 0)
+	if _, err := strconv.ParseUint(val, 10, 64); err == nil {
+		query = query.Where("id = ? OR uuid = ?", val, val)
+	} else {
+		query = query.Where("uuid = ?", val)
+	}
+
+	if err := query.First(&d).Error; err != nil {
 		return nil, err
 	}
 	return &d, nil
