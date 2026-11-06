@@ -103,37 +103,29 @@
         return list;
     }
 
-    function createActionColumnDef(right) {
-
-        let action = right.action;
-        let actionName = right.action_name;
-        let icon = right.icon;
-        //let name = right.name;
-        //let popUpStatus = right.popup_status;
-        let shortName = right.short_name;
-        //let sortOrder = right.sort_order;
-        let title = right.title;
-        let routeUrl = right.url;
-        //let width = right.width;
-
-        let headerIconHtml = `<i class="${icon} fs-15"></i>`;
+    function createActionsColumnDef(rightsList) {
+        let rightsMap = {};
+        if (Array.isArray(rightsList)) {
+            rightsList.forEach(function (r) {
+                if (r && r.action_name) {
+                    rightsMap[r.action_name] = r;
+                }
+            });
+        }
 
         return {
-            headerName: shortName,
-            headerIconHtml: headerIconHtml,
-            headerIconTitle: title,
-            field: 'action_' + actionName,
-            colId: 'action_' + actionName,
-            width: 38,
-            minWidth: 32,
-            maxWidth: 44,
+            headerName: 'Actions',
+            colId: 'actions',
+            field: 'actions',
+            width: 175,
+            minWidth: 155,
             pinned: 'left',
             sortable: false,
             filter: false,
             resizable: false,
             suppressSizeToFit: true,
-            headerClass: 'ag-action-col-header text-center',
-            cellClass: 'ag-action-col-cell d-flex align-items-center justify-content-center',
+            headerClass: 'text-center',
+            cellClass: 'ag-action-cell',
             cellRenderer: function (params) {
                 let full = params.data;
                 if (!full) return '';
@@ -144,54 +136,70 @@
                 let actStatus = Number(full.actual_status);
                 let recStatus = Number(full.status);
 
-                let canRender = false;
+                let buttons = [];
 
-                if (actionName === 'view') {
-                    canRender = true;
-                } else if (actionName === 'edit') {
-                    if ((procStatus === 0 || procStatus === 2 || procStatus === 3) && actStatus !== 4) {
-                        canRender = true;
-                    }
-                } else if (actionName === 'delete') {
-                    if ((procStatus === 0 || procStatus === 2 || procStatus === 3) && actStatus !== 4) {
-                        canRender = true;
-                    }
-                } else if (actionName === 'stc') {
-                    if ((procStatus === 0 || procStatus === 2) && actStatus !== 5 && actStatus !== 6) {
-                        canRender = true;
-                    }
-                } else if (actionName === 'verify') {
-                    let canVerify = (typeof window.duty_carry_out[full.checker] !== 'undefined' || 1 === window.super_admin_status);
-                    if (procStatus === 1 && canVerify) {
-                        canRender = true;
-                    }
-                } else if (actionName === 'active') {
-                    if ((procStatus === 3 || procStatus === 2 || actStatus === 5 || procStatus === 0) && recStatus === 0) {
-                        canRender = true;
-                    }
-                } else if (actionName === 'deactivate') {
-                    if ((procStatus === 3 || procStatus === 2 || actStatus === 6 || procStatus === 0) && recStatus === 1) {
-                        canRender = true;
-                    }
-                } else {
-                    canRender = true;
+                // View
+                if (rightsMap['view']) {
+                    let r = rightsMap['view'];
+                    let icon = r.icon || 'ti ti-eye';
+                    buttons.push(`<a href="#" class="btn-grid-row-action text-info" title="${r.title || 'View Designation'}" data-action="view" data-url="${r.url || ''}" data-title="${r.title || 'View Designation'}" data-id="${targetId}" data-name="${titleValue}"><i class="${icon} fs-16"></i></a>`);
                 }
 
-                if (!canRender) {
-                    return '';
+                // Edit
+                if (rightsMap['edit'] && (procStatus === 0 || procStatus === 2 || procStatus === 3) && actStatus !== 4) {
+                    let r = rightsMap['edit'];
+                    let icon = r.icon || 'ti ti-edit';
+                    buttons.push(`<a href="#" class="btn-grid-row-action text-primary" title="${r.title || 'Edit Designation'}" data-action="edit" data-url="${r.url || ''}" data-title="${r.title || 'Edit Designation'}" data-id="${targetId}" data-name="${titleValue}"><i class="${icon} fs-16"></i></a>`);
                 }
 
-                let iconInner = `<i class="${icon} fs-16"></i>`;
+                // Delete
+                if (rightsMap['delete'] && (procStatus === 0 || procStatus === 2 || procStatus === 3) && actStatus !== 4) {
+                    let r = rightsMap['delete'];
+                    let icon = r.icon || 'ti ti-trash';
+                    buttons.push(`<a href="#" class="btn-grid-row-action text-danger" title="${r.title || 'Delete Designation'}" data-action="delete" data-url="${r.url || ''}" data-title="${r.title || 'Delete Designation'}" data-id="${targetId}" data-name="${titleValue}"><i class="${icon} fs-16"></i></a>`);
+                }
 
-                return `<a href="#" class="btn-grid-row-action" title="${title}" data-action="${actionName}" data-url="${routeUrl}" data-title="${title}" data-id="${targetId}" data-name="${titleValue}">${iconInner}</a>`;
+                // Sent To Checker
+                if (rightsMap['stc'] && (procStatus === 0 || procStatus === 2) && actStatus !== 5 && actStatus !== 6) {
+                    let r = rightsMap['stc'];
+                    let icon = r.icon || 'ti ti-location';
+                    buttons.push(`<a href="#" class="btn-grid-row-action text-warning" title="${r.title || 'Sent To Checker'}" data-action="stc" data-url="${r.url || ''}" data-title="${r.title || 'Sent To Checker'}" data-id="${targetId}" data-name="${titleValue}"><i class="${icon} fs-16"></i></a>`);
+                }
+
+                // Verify
+                let canVerify = (typeof window.duty_carry_out[full.checker] !== 'undefined' || 1 === window.super_admin_status);
+                if (rightsMap['verify'] && procStatus === 1 && canVerify) {
+                    let r = rightsMap['verify'];
+                    let icon = r.icon || 'ti ti-checks';
+                    buttons.push(`<a href="#" class="btn-grid-row-action text-success" title="${r.title || 'Verify Designation'}" data-action="verify" data-url="${r.url || ''}" data-title="${r.title || 'Verify Designation'}" data-id="${targetId}" data-name="${titleValue}"><i class="${icon} fs-16"></i></a>`);
+                }
+
+                // Active
+                if (rightsMap['active'] && (procStatus === 3 || procStatus === 2 || actStatus === 5 || procStatus === 0) && recStatus === 0) {
+                    let r = rightsMap['active'];
+                    let icon = r.icon || 'ti ti-creative-commons-sa';
+                    buttons.push(`<a href="#" class="btn-grid-row-action text-success" title="${r.title || 'Activate Designation'}" data-action="active" data-url="${r.url || ''}" data-title="${r.title || 'Activate Designation'}" data-id="${targetId}" data-name="${titleValue}"><i class="${icon} fs-16"></i></a>`);
+                }
+
+                // Deactivate
+                if (rightsMap['deactivate'] && (procStatus === 3 || procStatus === 2 || actStatus === 6 || procStatus === 0) && recStatus === 1) {
+                    let r = rightsMap['deactivate'];
+                    let icon = r.icon || 'ti ti-assembly-off';
+                    buttons.push(`<a href="#" class="btn-grid-row-action text-dark" title="${r.title || 'Deactivate Designation'}" data-action="deactivate" data-url="${r.url || ''}" data-title="${r.title || 'Deactivate Designation'}" data-id="${targetId}" data-name="${titleValue}"><i class="${icon} fs-16"></i></a>`);
+                }
+
+                if (buttons.length === 0) {
+                    return '<span class="text-muted fs-12">-</span>';
+                }
+
+                return `<div class="d-flex align-items-center gap-2 h-100 ps-1">${buttons.join('')}</div>`;
             }
         };
     }
 
     function initDesignationGrid() {
         let rightsList = getGridRights();
-
-        let actionColumnDefs = rightsList.map(createActionColumnDef);
+        let actionsColumnDef = createActionsColumnDef(rightsList);
 
         let dataColumnDefs = [
             {
@@ -304,18 +312,18 @@
             {
                 headerName: '#',
                 isIndexCol: true,
-                width: 40,
-                minWidth: 34,
-                maxWidth: 48,
+                width: 48,
+                minWidth: 42,
+                maxWidth: 55,
                 pinned: 'left',
                 sortable: false,
                 filter: false,
                 resizable: false,
                 suppressSizeToFit: true,
-                headerClass: 'ag-action-col-header text-center',
-                cellClass: 'ag-action-col-cell d-flex align-items-center justify-content-center text-muted fw-medium'
+                headerClass: 'text-center',
+                cellClass: 'text-center text-muted fw-medium'
             },
-            ...actionColumnDefs,
+            actionsColumnDef,
             ...dataColumnDefs
         ];
 
@@ -341,7 +349,9 @@
     }
 
     function refreshGrid() {
-        if (designationGrid && designationGrid.gridApi) {
+        if (designationGrid && typeof designationGrid.reload === 'function') {
+            designationGrid.reload();
+        } else if (designationGrid && designationGrid.gridApi && typeof designationGrid.gridApi.refreshServerSide === 'function') {
             designationGrid.gridApi.refreshServerSide({ purge: true });
         }
     }

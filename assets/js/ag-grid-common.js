@@ -468,16 +468,17 @@
         let colDefs = (config.columnDefs || []).map(col => {
             if (col.isIndexCol) {
                 return {
+                    ...col,
                     headerName: col.headerName || '#',
                     colId: col.colId || 'row_index',
                     valueGetter: function (params) {
                         return (currentPage - 1) * currentPageSize + params.node.rowIndex + 1;
                     },
                     width: col.width || 70,
-                    minWidth: col.minWidth || 65,
+                    minWidth: col.minWidth || 45,
                     sortable: false,
                     filter: false,
-                    cellClass: 'd-flex align-items-center justify-content-center text-muted fw-medium'
+                    cellClass: col.cellClass || 'd-flex align-items-center justify-content-center text-muted fw-medium'
                 };
             }
             return {

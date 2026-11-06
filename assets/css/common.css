@@ -294,9 +294,35 @@ form .mb-3 {
 }
 
 .custom-ag-grid .ag-cell {
+    color: #334155 !important;
+}
+
+.custom-ag-grid .ag-cell:not(.ag-action-cell) {
     display: flex !important;
     align-items: center !important;
-    color: #334155 !important;
+}
+
+.custom-ag-grid .ag-action-cell {
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 8px !important;
+    overflow: visible !important;
+}
+
+.btn-grid-row-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.btn-grid-row-action:hover {
+    background-color: #f1f5f9;
+    transform: translateY(-1px);
 }
 
 /* Compact Action Columns Styling in AG Grid */
