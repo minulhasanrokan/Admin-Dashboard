@@ -1,14 +1,17 @@
 {{ define "include/grid-menu" }}
     <div class="card-header bg-white d-flex align-items-center flex-wrap gap-2 py-3 border-bottom" id="menu_data">
-        {{range .RightDetails}}
-            <button type="button" class="btn btn-primary d-inline-flex align-items-center me-2 mb-1 shadow-xs btn-grid-menu-action"
-                data-url="{{.RightURL}}"
-                data-title="{{.RightTitle}}"
-                data-popup-status="{{.RightPopupStatus}}"
-                data-popup-width="{{.RightWidth}}"
-                data-action="{{.RightAction}}">
-                <i class="{{.RightIcon}} me-1 fs-15"></i>&nbsp;{{.RightName}}
+        {{ range .RightDetails }}
+            <button type="button"
+                    class="btn btn-primary d-inline-flex align-items-center me-2 mb-1 shadow-xs menu-link h-30"
+                    data-url="{{ .RightURL }}"
+                    data-title="{{ .RightTitle }}"
+                    data-popup-status="{{ .RightPopupStatus }}"
+                    data-popup-width="{{ .RightWidth }}"
+                    data-action="{{ .RightAction }}"
+                    data-content-action="{{ .RightActionName }}"
+                    data-content-div="{{ if or (eq .RightAction "add") (eq .RightActionName "add") (eq .RightPopupStatus 1) }}popup_1{{ else }}content{{ end }}">
+                <i class="{{ .RightIcon }} me-1 fs-15"></i>&nbsp;{{ .RightName }}
             </button>
-        {{end}}
+        {{ end }}
     </div>
 {{ end }}

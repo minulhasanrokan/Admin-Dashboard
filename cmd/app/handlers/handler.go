@@ -10,13 +10,17 @@ import (
 	"admin-dashboard/cmd/internal/config"
 	"admin-dashboard/cmd/internal/constants"
 	"admin-dashboard/cmd/internal/databases"
+	"admin-dashboard/cmd/internal/dtos"
+	"admin-dashboard/cmd/internal/session"
 	"admin-dashboard/cmd/internal/storage"
+	"encoding/json"
 	"errors"
 	"html/template"
 	"io"
 	"net/http"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -229,4 +233,97 @@ func (h Handler) ServerError(c echo.Context) error {
 func (h Handler) CSRFError(c echo.Context) error {
 
 	return webResponse.SendCsrfErrorResponse(c, "csrf error", nil)
+}
+
+func (h Handler) UserGridRight(c echo.Context) (data interface{}, err error) {
+
+	userSess, sess, err := session.GetUserSession(c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var rightDetails []dtos.RightInfo
+
+	if userSess.SuperAdmin == 1 {
+		rightDetails, err = h.Service.GetRightDetailsByCategoryKeyKey(userSess.CategoryRouteAction)
+	} else {
+		rightDetails, err = h.Service.GetRightDetailsByCategoryKeyUserId(userSess.UserId, userSess.CategoryRouteAction)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var gridRight []dtos.GridRightItem
+
+	for _, r := range rightDetails {
+
+		if r.RightActionName == "add" {
+			continue
+		}
+
+		gridRight = append(gridRight, dtos.GridRightItem{
+			Name:        r.RightName,
+			ActionName:  r.RightActionName,
+			Url:         r.RightURL,
+			Title:       r.RightTitle,
+			Action:      r.RightAction,
+			PopupStatus: r.RightPopupStatus,
+			Width:       r.RightWidth,
+			Icon:        r.RightIcon,
+			SortOrder:   r.RightSortOrder,
+			ShortName:   r.RightShortName,
+		})
+	}
+
+	var currentRight dtos.RightInfo
+	found := false
+
+	if userSess.RouteAction != "" {
+		for _, r := range rightDetails {
+			if r.RightAction == userSess.RouteAction {
+				currentRight = r
+				found = true
+				break
+			}
+		}
+	}
+
+	if !found && len(rightDetails) > 0 {
+		for _, r := range rightDetails {
+			if r.RightActionName == "view" {
+				currentRight = r
+				found = true
+				break
+			}
+		}
+		if !found {
+			currentRight = rightDetails[0]
+			found = true
+		}
+	}
+
+	if found {
+		now := time.Now()
+
+		userSess.LastActiveTime = &now
+		userSess.RouteAction = currentRight.RightAction
+		userSess.RouteActionDetails = currentRight
+
+		sess.Values[constants.SessionKeyRouteAction] = currentRight.RightAction
+		sess.Values[constants.SessionKeyRouteActionDetails] = currentRight
+		sess.Values[constants.SessionKeyLastActiveTime] = now.Format(time.RFC3339)
+
+		_ = sess.Save(c.Request(), c.Response())
+		c.Set(constants.SessionName, userSess)
+	}
+
+	gridRightJSON, err := json.Marshal(gridRight)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{"GridRightJSON": string(gridRightJSON), "RightDetails": rightDetails}, nil
 }

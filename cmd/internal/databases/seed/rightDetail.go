@@ -69,22 +69,22 @@ func RightDetailSeed(db *gorm.DB) error {
 			return fmt.Errorf("malformed CSV row: expected 11 columns, got %d", len(record))
 		}
 
-		popupStatus, err := strconv.Atoi(record[6])
+		popupStatus, err := strconv.Atoi(record[7])
 		if err != nil {
 			return fmt.Errorf("invalid popup_status: %w", err)
 		}
 
-		width, err := strconv.Atoi(record[7])
+		width, err := strconv.Atoi(record[8])
 		if err != nil {
 			return fmt.Errorf("invalid width: %w", err)
 		}
 
-		shortOrder, err := strconv.Atoi(record[9])
+		sortOrder, err := strconv.Atoi(record[11])
 		if err != nil {
-			return fmt.Errorf("invalid short_order: %w", err)
+			return fmt.Errorf("invalid sort_order: %w", err)
 		}
 
-		status, err := strconv.Atoi(record[10])
+		status, err := strconv.Atoi(record[12])
 		if err != nil {
 			return fmt.Errorf("invalid status: %w", err)
 		}
@@ -92,14 +92,16 @@ func RightDetailSeed(db *gorm.DB) error {
 		details = append(details, models.RightDetail{
 			CategoryKey: record[0],
 			Name:        record[1],
-			Url:         record[2],
-			Title:       record[3],
-			Action:      record[4],
-			Details:     record[5],
+			ActionName:  record[2],
+			Url:         record[3],
+			Title:       record[4],
+			Action:      record[5],
+			Details:     record[6],
 			PopupStatus: popupStatus,
 			Width:       width,
-			Icon:        record[8],
-			ShortOrder:  shortOrder,
+			Icon:        record[9],
+			ShortName:   record[10],
+			SortOrder:  sortOrder,
 			Status:      status,
 		})
 	}

@@ -121,6 +121,6 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 		c.Response().Header().Set("X-CSRF-Token", csrfToken)
 		viewData["_csrf"] = csrfToken
 	}
-	
+
 	return t.templates.ExecuteTemplate(w, filepath.ToSlash(name), viewData)
 }

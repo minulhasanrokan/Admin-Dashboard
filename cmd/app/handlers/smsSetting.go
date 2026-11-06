@@ -87,11 +87,11 @@ func (h Handler) SendTestSms(c echo.Context) error {
 	resp, err := h.Service.SendTestSms(payload)
 
 	if err != nil {
-		_ = h.Service.CreateUserActivity(c, constants.ActivitySendSms, "sms_settings", 0, "Failed to send test SMS to "+payload.Mobile)
+		_ = h.Service.CreateUserActivity(c, constants.ActivitySendSMS, "sms_settings", 0, "Failed to send test SMS to "+payload.Mobile)
 		return webResponse.SendBadRequestResponse(c, err.Error(), nil)
 	}
 
-	_ = h.Service.CreateUserActivity(c, constants.ActivitySendSms, "sms_settings", 0, "Send test SMS to "+payload.Mobile)
+	_ = h.Service.CreateUserActivity(c, constants.ActivitySendSMS, "sms_settings", 0, "Send test SMS to "+payload.Mobile)
 
 	return webResponse.SendSuccessResponse(c, "Test SMS sent successfully!", resp)
 }

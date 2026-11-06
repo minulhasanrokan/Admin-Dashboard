@@ -3,33 +3,49 @@
 (function ($) {
     let designationGrid = null;
     let selectedDesignation = null;
+    let currentDesignationUuid = null;
 
     window.actual_status = {
         1: "New Add",
         2: "Add-Edit",
         3: "Edit",
         4: "Delete",
-        5: "Deactive",
+        5: "Deactivate",
         6: "Active"
     };
+
     window.process_status = {
         0: "",
         1: "(Sent to Checker)",
         2: "(Returned)",
         3: "(Approved)"
     };
+
     window.data_status = {
-        0: "Deactive",
+        0: "Deactivate",
         1: "Active"
     };
+
     window.duty_carry_out = window.duty_carry_out || {};
+
     if (typeof window.super_admin_status === 'undefined') {
         window.super_admin_status = 1;
+    }
+
+    // Configure CSRF for jQuery AJAX
+    let csrfToken = $('meta[name="_csrf"]').attr('content') || $('meta[name="csrf-token"]').attr('content') || '';
+    if (csrfToken) {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-Token': csrfToken
+            }
+        });
     }
 
     $(document).ready(function () {
         initDesignationGrid();
         bindFormSubmissions();
+        bindGlobalEvents();
     });
 
     function showNotify(type, message) {
@@ -47,7 +63,238 @@
         }
     }
 
+    function getGridRights() {
+
+        let raw = $('#grid_rights_json').val() || '';
+
+        let list = [];
+
+        if (raw) {
+
+            try {
+                list = JSON.parse(raw);
+            } 
+            catch (e) {
+                console.warn('Failed to parse grid rights JSON', e);
+            }
+        }
+
+        return list;
+    }
+
+    function createActionColumnDef(right) {
+
+        let action = right.action;
+        let actionName = right.action_name;
+        let icon = right.icon;
+        //let name = right.name;
+        //let popUpStatus = right.popup_status;
+        let shortName = right.short_name;
+        //let sortOrder = right.sort_order;
+        let title = right.title;
+        let routeUrl = right.url;
+        //let width = right.width;
+
+        let headerIconHtml = `<i class="${icon} fs-15"></i>`;
+
+        return {
+            headerName: shortName,
+            headerIconHtml: headerIconHtml,
+            headerIconTitle: title,
+            field: 'action_' + actionName,
+            colId: 'action_' + actionName,
+            width: 38,
+            minWidth: 32,
+            maxWidth: 44,
+            pinned: 'left',
+            sortable: false,
+            filter: false,
+            resizable: false,
+            suppressSizeToFit: true,
+            headerClass: 'ag-action-col-header text-center',
+            cellClass: 'ag-action-col-cell d-flex align-items-center justify-content-center',
+            cellRenderer: function (params) {
+                let full = params.data;
+                if (!full) return '';
+                let targetId = full.uuid || full.id;
+                let titleValue = encodeURIComponent(full.name);
+
+                let canRender = false;
+
+                if (actionName === 'view') {
+                    canRender = true;
+                } else if (actionName === 'edit') {
+                    if ((full.process_status === 2 || full.process_status === 3 || full.process_status === '0' || full.process_status === '')) {
+                        if (full.process_status === 3 || full.process_status === 2 || full.actual_status !== 4) {
+                            canRender = true;
+                        }
+                    }
+                } else if (actionName === 'delete') {
+                    if ((full.process_status === 2 || full.process_status === 3 || full.process_status === '0' || full.process_status === '')) {
+                        if (full.process_status === 3 || full.process_status === 2 || full.actual_status !== 3) {
+                            canRender = true;
+                        }
+                    }
+                } else if (actionName === 'stc') {
+                    if (full.process_status !== 3 && full.process_status !== 1 && full.actual_status !== 5 && full.actual_status !== 6) {
+                        canRender = true;
+                    }
+                } else if (actionName === 'verify') {
+                    let canVerify = (typeof window.duty_carry_out[full.checker] !== 'undefined' || 1 === window.super_admin_status);
+                    if (full.process_status === 1 && canVerify) {
+                        canRender = true;
+                    }
+                } else if (actionName === 'active') {
+                    if ((full.process_status === 3 || full.process_status === 2 || full.actual_status === 5) && full.status == 0) {
+                        canRender = true;
+                    }
+                } else if (actionName === 'deactivate') {
+                    if ((full.process_status === 3 || full.process_status === 2 || full.actual_status === 6) && full.status === 1) {
+                        canRender = true;
+                    }
+                } else {
+                    canRender = true;
+                }
+
+                if (!canRender) {
+                    return '';
+                }
+
+                let iconInner = `<i class="${icon} fs-16"></i>`;
+
+                return `<a href="#" class="btn-grid-row-action" title="${title}" data-action="${actionName}" data-url="${routeUrl}" data-title="${title}" data-id="${targetId}" data-name="${titleValue}">${iconInner}</a>`;
+            }
+        };
+    }
+
     function initDesignationGrid() {
+        let rightsList = getGridRights();
+
+        let actionColumnDefs = rightsList.map(createActionColumnDef);
+
+        let dataColumnDefs = [
+            {
+                field: 'name',
+                colId: 'name',
+                headerName: 'Designation Name',
+                width: 250,
+                minWidth: 200,
+                sortable: true,
+                filter: true,
+                cellRenderer: function (params) {
+                    return `<span class="fw-semibold text-dark"><i class="ti ti-briefcase me-1 text-primary"></i>${params.data && params.data.name}</span>`;
+                }
+            },
+            {
+                field: 'code',
+                colId: 'code',
+                headerName: 'Code',
+                width: 100,
+                minWidth: 80,
+                sortable: true,
+                filter: true,
+                cellRenderer: function (params) {
+                    let val = params.value || (params.data && params.data.designation_code);
+                    return val ? `<span class="badge bg-light text-dark border">${val}</span>` : '<span class="text-muted">-</span>';
+                }
+            },
+            {
+                field: 'title',
+                colId: 'title',
+                headerName: 'Title',
+                width: 200,
+                minWidth: 160,
+                sortable: true,
+                filter: true
+            },
+            {
+                field: 'actual_status',
+                colId: 'actual_status',
+                headerName: 'OP-Status',
+                width: 180,
+                minWidth: 150,
+                sortable: true,
+                filter: true,
+                cellRenderer: function (params) {
+                    let full = params.data || {};
+                    let statusText = '';
+                    if (typeof window.process_status[full.process_status] !== 'undefined') {
+                        statusText = ' ' + window.process_status[full.process_status];
+                    }
+                    let actLabel = window.actual_status[params.value] || 'New Add';
+                    let badgeClass = 'bg-primary-transparent text-primary';
+                    if (params.value === 4) badgeClass = 'bg-danger-transparent text-danger';
+                    else if (params.value === 5) badgeClass = 'bg-dark-transparent text-dark';
+                    else if (params.value === 6) badgeClass = 'bg-success-transparent text-success';
+                    else if (params.value === 2) badgeClass = 'bg-warning-transparent text-warning';
+                    return `<span class="badge ${badgeClass} fw-semibold">${actLabel}${statusText}</span>`;
+                }
+            },
+            {
+                field: 'status',
+                colId: 'status',
+                headerName: 'Status',
+                width: 120,
+                minWidth: 100,
+                sortable: true,
+                filter: true,
+                cellRenderer: function (params) {
+                    let st = params.value;
+                    let badgeClass = st === 1 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger';
+                    return `<span class="badge ${badgeClass} fw-semibold">${window.data_status[st] || (st === 1 ? 'Active' : 'Deactivate')}</span>`;
+                }
+            },
+            {
+                field: 'message',
+                colId: 'message',
+                headerName: 'Message',
+                width: 220,
+                minWidth: 180,
+                sortable: true,
+                filter: true,
+                cellRenderer: function (params) {
+                    let full = params.data || {};
+                    let msg = params.value;
+                    if (!msg) return '<span class="text-muted">-</span>';
+                    let safeName = encodeURIComponent(full.name || full.name || '');
+                    let safeId = full.uuid || full.id;
+                    return `<span class="text-primary cursor-pointer text-truncate d-inline-block mw-100 btn-message-history" data-name="${safeName}" data-id="${safeId}" data-table="designations" title="${msg}">${msg}</span>`;
+                }
+            },
+            {
+                field: 'created_at',
+                colId: 'created_at',
+                headerName: 'Created At',
+                width: 180,
+                minWidth: 160,
+                sortable: true,
+                filter: true,
+                filterType: 'date',
+                cellRenderer: function (params) {
+                    return `<span class="text-muted fs-12"><i class="ti ti-clock me-1"></i>${params.value || '-'}</span>`;
+                }
+            }
+        ];
+
+        let allColumnDefs = [
+            {
+                headerName: '#',
+                isIndexCol: true,
+                width: 40,
+                minWidth: 34,
+                maxWidth: 48,
+                pinned: 'left',
+                sortable: false,
+                filter: false,
+                resizable: false,
+                suppressSizeToFit: true,
+                headerClass: 'ag-action-col-header text-center',
+                cellClass: 'ag-action-col-cell d-flex align-items-center justify-content-center text-muted fw-medium'
+            },
+            ...actionColumnDefs,
+            ...dataColumnDefs
+        ];
+
         designationGrid = initAgDataGrid({
             gridContainer: '#designation_ag_grid',
             url: '/reference/designation/view',
@@ -60,174 +307,12 @@
                 if (params && params.api) {
                     let selectedRows = params.api.getSelectedRows();
                     selectedDesignation = selectedRows && selectedRows.length > 0 ? selectedRows[0] : null;
+                    if (selectedDesignation) {
+                        currentDesignationUuid = selectedDesignation.uuid || selectedDesignation.id;
+                    }
                 }
             },
-            columnDefs: [
-                {
-                    headerName: '#',
-                    isIndexCol: true,
-                    width: 70,
-                    minWidth: 65
-                },
-                {
-                    headerName: 'Actions',
-                    field: 'actions',
-                    pinned: 'left',
-                    width: 175,
-                    minWidth: 165,
-                    sortable: false,
-                    filter: false,
-                    cellRenderer: function (params) {
-                        let full = params.data;
-                        if (!full) return '';
-                        let titleValue = encodeURIComponent(full.designation_name || full.name || '');
-                        let targetId = full.uuid || full.id;
-                        let out = '<div class="d-flex align-items-center">';
-
-                        // View
-                        out += '<a href="#" class="text-info me-2 btn-grid-row-action" title="View" data-url="/reference/designation/view" data-title="View Designation" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-eye fs-16"></i></a>';
-
-                        // Edit
-                        if ((full.process_status == 2 || full.process_status == 3 || full.process_status == '0' || full.process_status == '')) {
-                            if (full.process_status == 3 || full.process_status == 2 || full.actual_status != 4) {
-                                out += '<a href="#" class="text-primary me-2 btn-grid-row-action" title="Edit" data-url="/reference/designation/edit" data-title="Edit Designation" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-edit fs-16"></i></a>';
-                            }
-                        }
-
-                        // Delete
-                        if ((full.process_status == 2 || full.process_status == 3 || full.process_status == '0' || full.process_status == '')) {
-                            if (full.process_status == 3 || full.process_status == 2 || full.actual_status != 3) {
-                                out += '<a href="#" class="text-danger me-2 btn-grid-row-action" title="Delete" data-url="/reference/designation/delete" data-title="Delete Designation" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-trash fs-16"></i></a>';
-                            }
-                        }
-
-                        // Sent To Checker
-                        if (full.process_status != 3 && full.process_status != 1 && full.actual_status != 5 && full.actual_status != 6) {
-                            out += '<a href="#" class="text-primary me-2 btn-grid-row-action" title="Sent To Checker" data-url="/reference/designation/stc" data-title="Sent To Checker" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-arrow-forward-up fs-16"></i></a>';
-                        }
-
-                        // Verify
-                        let canVerify = (typeof window.duty_carry_out[full.checker] !== 'undefined' || 1 == window.super_admin_status);
-                        if (full.process_status == 1 && canVerify) {
-                            out += '<a href="#" class="text-success me-2 btn-grid-row-action" title="Verify" data-url="/reference/designation/verify" data-title="Verify Designation" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-check fs-16"></i></a>';
-                        }
-
-                        // Active
-                        if ((full.process_status == 3 || full.process_status == 2 || full.actual_status == 5) && full.status == 0) {
-                            out += '<a href="#" class="text-success me-2 btn-grid-row-action" title="Activate" data-url="/reference/designation/active" data-title="Active Designation" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-lock-open fs-16"></i></a>';
-                        }
-
-                        // Deactive
-                        if ((full.process_status == 3 || full.process_status == 2 || full.actual_status == 6) && full.status == 1) {
-                            out += '<a href="#" class="text-warning me-2 btn-grid-row-action" title="Deactivate" data-url="/reference/designation/deactivate" data-title="Deactivate Designation" data-id="' + targetId + '" data-name="' + titleValue + '"><i class="ti ti-lock fs-16"></i></a>';
-                        }
-
-                        out += '</div>';
-                        return out;
-                    }
-                },
-                {
-                    field: 'name',
-                    colId: 'name',
-                    headerName: 'Designation Name',
-                    width: 250,
-                    minWidth: 200,
-                    sortable: true,
-                    filter: true,
-                    cellRenderer: function (params) {
-                        return `<span class="fw-semibold text-dark"><i class="ti ti-briefcase me-1 text-primary"></i>${params.value || (params.data && params.data.designation_name) || '-'}</span>`;
-                    }
-                },
-                {
-                    field: 'code',
-                    colId: 'code',
-                    headerName: 'Code',
-                    width: 120,
-                    minWidth: 100,
-                    sortable: true,
-                    filter: true,
-                    cellRenderer: function (params) {
-                        let val = params.value || (params.data && params.data.designation_code);
-                        return val ? `<span class="badge bg-light text-dark border">${val}</span>` : '<span class="text-muted">-</span>';
-                    }
-                },
-                {
-                    field: 'title',
-                    colId: 'title',
-                    headerName: 'Title',
-                    width: 200,
-                    minWidth: 160,
-                    sortable: true,
-                    filter: true
-                },
-                {
-                    field: 'actual_status',
-                    colId: 'actual_status',
-                    headerName: 'OP-Status',
-                    width: 180,
-                    minWidth: 150,
-                    sortable: true,
-                    filter: true,
-                    cellRenderer: function (params) {
-                        let full = params.data || {};
-                        let statusText = '';
-                        if (typeof window.process_status[full.process_status] !== 'undefined') {
-                            statusText = ' ' + window.process_status[full.process_status];
-                        }
-                        let actLabel = window.actual_status[params.value] || 'New Add';
-                        let badgeClass = 'bg-primary-transparent text-primary';
-                        if (params.value === 4) badgeClass = 'bg-danger-transparent text-danger';
-                        else if (params.value === 5) badgeClass = 'bg-dark-transparent text-dark';
-                        else if (params.value === 6) badgeClass = 'bg-success-transparent text-success';
-                        else if (params.value === 2) badgeClass = 'bg-warning-transparent text-warning';
-                        return `<span class="badge ${badgeClass} fw-semibold">${actLabel}${statusText}</span>`;
-                    }
-                },
-                {
-                    field: 'status',
-                    colId: 'status',
-                    headerName: 'Status',
-                    width: 120,
-                    minWidth: 100,
-                    sortable: true,
-                    filter: true,
-                    cellRenderer: function (params) {
-                        let st = params.value;
-                        let badgeClass = st === 1 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger';
-                        return `<span class="badge ${badgeClass} fw-semibold">${window.data_status[st] || (st === 1 ? 'Active' : 'Deactive')}</span>`;
-                    }
-                },
-                {
-                    field: 'message',
-                    colId: 'message',
-                    headerName: 'Message',
-                    width: 220,
-                    minWidth: 180,
-                    sortable: true,
-                    filter: true,
-                    cellRenderer: function (params) {
-                        let full = params.data || {};
-                        let msg = params.value;
-                        if (!msg) return '<span class="text-muted">-</span>';
-                        let safeName = encodeURIComponent(full.designation_name || full.name || '');
-                        let safeId = full.uuid || full.id;
-                        return `<span class="text-primary cursor-pointer text-truncate d-inline-block mw-100 btn-message-history" data-name="${safeName}" data-id="${safeId}" data-table="designations" title="${msg}">${msg}</span>`;
-                    }
-                },
-                {
-                    field: 'created_at',
-                    colId: 'created_at',
-                    headerName: 'Created At',
-                    width: 180,
-                    minWidth: 160,
-                    sortable: true,
-                    filter: true,
-                    filterType: 'date',
-                    cellRenderer: function (params) {
-                        return `<span class="text-muted fs-12"><i class="ti ti-clock me-1"></i>${params.value || '-'}</span>`;
-                    }
-                }
-            ]
+            columnDefs: allColumnDefs
         });
     }
 
@@ -237,307 +322,149 @@
         }
     }
 
-    // Global get_new_page dispatcher
-    window.get_new_page = function (url, title, id, name, popupStatus, width) {
-        id = id ? String(id).trim() : '';
-        name = name ? decodeURIComponent(name) : '';
-
-        if (!id) {
-            // Triggered from top action buttons
-            if (url.indexOf('/add') !== -1) {
-                openAddModal();
-                return;
-            }
-            if (!selectedDesignation) {
-                showNotify('warning', 'Please select a row from the grid first');
-                return;
-            }
-            id = selectedDesignation.uuid || selectedDesignation.id;
-            name = selectedDesignation.designation_name || selectedDesignation.name;
-        }
-
-        if (url.indexOf('/view') !== -1) {
-            openViewModal(id);
-        } else if (url.indexOf('/edit') !== -1) {
-            openEditModal(id);
-        } else if (url.indexOf('/delete') !== -1) {
-            openDeleteModal(id, name);
-        } else if (url.indexOf('/stc') !== -1) {
-            openStcModal(id, name);
-        } else if (url.indexOf('/verify') !== -1) {
-            openVerifyModal(id, name);
-        } else if (url.indexOf('/active') !== -1) {
-            openStatusModal('active', id, name);
-        } else if (url.indexOf('/deactivate') !== -1 || url.indexOf('/deactive') !== -1) {
-            openStatusModal('deactivate', id, name);
-        }
-    };
 
     window.return_message_history = function (name, id, table) {
         name = name ? decodeURIComponent(name) : 'Designation';
         openHistoryModal(id, name);
     };
 
+
+
     function openAddModal() {
-        $('#form_designation')[0].reset();
-        $('#designation_uuid').val('');
-        $('#designation_id').val('');
-        $('#modal_designation_title').text('Add Designation');
-        $('#btn_save_designation').text('Save Designation');
-        $('#modal_designation_form').modal('show');
+        openMenu('/reference/designation/add', 'Add Designation', '', 'add', 1, 800, 'popup_1');
     }
 
     function openEditModal(targetId) {
-        $.get(`/reference/designation/edit/${targetId}`)
-            .done(function (res) {
-                let data = (res && res.data) || {};
-                $('#form_designation')[0].reset();
-                $('#designation_uuid').val(data.uuid || targetId);
-                $('#designation_id').val(data.id || '');
-                $('#designation_name').val(data.name || data.designation_name || '');
-                $('#designation_code').val(data.code || data.designation_code || '');
-                $('#designation_title').val(data.title || data.designation_title || '');
-                $('#designation_details').val(data.details || data.designation_details || '');
-                $('#modal_designation_title').text('Edit Designation');
-                $('#btn_save_designation').text('Update Designation');
-                $('#modal_designation_form').modal('show');
-            })
-            .fail(function (xhr) {
-                let msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Failed to fetch designation data';
-                showNotify('danger', msg);
-            });
+        currentDesignationUuid = targetId;
+        openMenu('/reference/designation/edit', 'Edit Designation', targetId, 'edit', 1, 800, 'popup_1');
     }
 
     function openViewModal(targetId) {
-        $.get(`/reference/designation/view/${targetId}`)
-            .done(function (res) {
-                let d = (res && res.data) || {};
-                $('#view_name').text(d.name || d.designation_name || '-');
-                $('#view_code').text(d.code || d.designation_code || '-');
-                $('#view_title').text(d.title || d.designation_title || '-');
-                $('#view_details').text(d.details || d.designation_details || '-');
-
-                let opText = window.actual_status[d.actual_status] || 'New Add';
-                $('#view_op_status').text(opText);
-                $('#view_status').text(d.status === 1 ? 'Active' : 'Deactive');
-
-                let procText = 'Draft';
-                if (d.process_status === 1) procText = 'Sent to Checker';
-                else if (d.process_status === 2) procText = 'Returned';
-                else if (d.process_status === 3) procText = 'Approved';
-                $('#view_process_status').text(procText);
-
-                $('#view_checker').text(d.checker > 0 ? `User ID ${d.checker}` : 'None');
-                $('#view_message').text(d.message || '-');
-                $('#view_remarks').text(d.remarks || '-');
-                $('#view_created_at').text(d.created_at || '-');
-
-                $('#btn_open_history_from_view').data('uuid', d.uuid || targetId);
-                $('#modal_designation_view').modal('show');
-            })
-            .fail(function (xhr) {
-                let msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Failed to fetch details';
-                showNotify('danger', msg);
-            });
+        currentDesignationUuid = targetId;
+        openMenu('/reference/designation/view', 'Designation Details', targetId, 'view', 1, 800, 'popup_1');
     }
 
     function openDeleteModal(targetId, name) {
-        $('#form_designation_delete')[0].reset();
-        $('#delete_target_id').val(targetId);
-        $('#delete_designation_name').text(name || 'Selected Item');
-        $('#modal_designation_delete').modal('show');
+        currentDesignationUuid = targetId;
+        openMenu('/reference/designation/delete', 'Delete Designation', targetId, 'delete', 1, 600, 'popup_1');
     }
 
     function openStcModal(targetId, name) {
-        $('#form_designation_stc')[0].reset();
-        $('#stc_target_id').val(targetId);
-        $('#stc_designation_name').text(name || 'Selected Item');
-        $('#modal_designation_stc').modal('show');
+        currentDesignationUuid = targetId;
+        openMenu('/reference/designation/stc', 'Sent To Checker', targetId, 'stc', 1, 800, 'popup_1');
     }
 
     function openVerifyModal(targetId, name) {
-        $('#form_designation_verify')[0].reset();
-        $('#verify_target_id').val(targetId);
-        $('#verify_designation_name').text(name || 'Selected Item');
-        $('#verify_type_approve').prop('checked', true);
-        $('#group_return_reason').addClass('d-none');
-        $('#modal_designation_verify').modal('show');
+        currentDesignationUuid = targetId;
+        openMenu('/reference/designation/verify', 'Verify Designation', targetId, 'verify', 1, 800, 'popup_1');
     }
 
     function openStatusModal(actionType, targetId, name) {
-        $('#form_designation_status')[0].reset();
-        $('#status_target_id').val(targetId);
-        $('#status_action_type').val(actionType);
-        $('#status_designation_name').text(name || 'Selected Item');
-
-        let isActivate = actionType === 'active';
-        $('#modal_status_title').text(isActivate ? 'Activate Designation' : 'Deactivate Designation');
-        $('#status_prompt_text').text(isActivate ? 'Reason for activating this designation:' : 'Reason for deactivating this designation:');
-        $('#btn_confirm_status').text(isActivate ? 'Activate' : 'Deactivate');
-        $('#modal_designation_status').modal('show');
+        currentDesignationUuid = targetId;
+        if (actionType === 'active') {
+            openMenu('/reference/designation/active', 'Active Designation', targetId, 'active', 1, 600, 'popup_1');
+        } else {
+            openMenu('/reference/designation/deactivate', 'Deactivate Designation', targetId, 'deactivate', 1, 600, 'popup_1');
+        }
     }
 
     function openHistoryModal(targetId, name) {
-        $.get(`/reference/designation/history/${targetId}`)
-            .done(function (res) {
-                let list = (res && res.data) || [];
-                let html = '';
-                if (!list || list.length === 0) {
-                    html = '<tr><td colspan="9" class="text-center py-3 text-muted">No audit history recorded yet</td></tr>';
-                } else {
-                    list.forEach(function (h, idx) {
-                        let op = window.actual_status[h.actual_status] || 'New Add';
-                        let ps = h.process_status === 3 ? 'Approved' : (h.process_status === 1 ? 'Sent to Checker' : (h.process_status === 2 ? 'Returned' : 'Draft'));
-                        let st = h.status === 1 ? 'Active' : 'Deactive';
-
-                        html += `
-                            <tr>
-                                <td>${idx + 1}</td>
-                                <td>${h.name || h.designation_name || '-'}</td>
-                                <td>${h.code || h.designation_code || '-'}</td>
-                                <td>${h.title || h.designation_title || '-'}</td>
-                                <td><span class="badge bg-light text-dark border">${op}</span></td>
-                                <td><span class="badge bg-primary-transparent text-primary">${ps}</span></td>
-                                <td><span class="badge ${h.status === 1 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger'}">${st}</span></td>
-                                <td>${h.message || '-'}</td>
-                                <td>${h.created_at || '-'}</td>
-                            </tr>
-                        `;
-                    });
-                }
-                $('#history_table_body').html(html);
-                $('#modal_designation_history').modal('show');
-            })
-            .fail(function (xhr) {
-                let msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Failed to load history';
-                showNotify('danger', msg);
-            });
+        targetId = targetId || currentDesignationUuid;
+        if (!targetId) {
+            showNotify('warning', 'Please select a designation first');
+            return;
+        }
+        currentDesignationUuid = targetId;
+        openMenu('/reference/designation/history', 'Designation Audit History', targetId, 'history', 1, 1140, 'popup_1');
     }
 
-    function bindFormSubmissions() {
-        // Verify reason display toggle
-        $('input[name="verify_type"]').on('change', function () {
-            if ($(this).val() === '0') {
-                $('#group_return_reason').removeClass('d-none');
-                $('#verify_return_reason').prop('required', true);
-            } else {
-                $('#group_return_reason').addClass('d-none');
-                $('#verify_return_reason').prop('required', false);
+    function openActivityModal(targetId) {
+        targetId = targetId || currentDesignationUuid;
+        if (!targetId) {
+            showNotify('warning', 'Please select a designation first');
+            return;
+        }
+        currentDesignationUuid = targetId;
+        openMenu('/reference/designation/activity', 'Designation Activity Logs', targetId, 'activity', 1, 1140, 'popup_1');
+    }
+
+    function bindGlobalEvents() {
+        // Delegated click handler for AG Grid row actions
+        $(document).off('click.designationRow', '.btn-grid-row-action').on('click.designationRow', '.btn-grid-row-action', function (e) {
+            e.preventDefault();
+            let action = $(this).data('action');
+            let id = $(this).data('id');
+            let name = $(this).data('name');
+            let url = $(this).data('url') || '';
+
+            currentDesignationUuid = id;
+
+            if (!action && url) {
+                if (url.indexOf('/view') !== -1) action = 'view';
+                else if (url.indexOf('/edit') !== -1) action = 'edit';
+                else if (url.indexOf('/delete') !== -1) action = 'delete';
+                else if (url.indexOf('/stc') !== -1) action = 'stc';
+                else if (url.indexOf('/verify') !== -1) action = 'verify';
+                else if (url.indexOf('/active') !== -1) action = 'active';
+                else if (url.indexOf('/deactivate') !== -1) action = 'deactivate';
+            }
+
+            switch (action) {
+                case 'view':
+                    openViewModal(id);
+                    break;
+                case 'edit':
+                    openEditModal(id);
+                    break;
+                case 'delete':
+                    openDeleteModal(id, name);
+                    break;
+                case 'stc':
+                    openStcModal(id, name);
+                    break;
+                case 'verify':
+                    openVerifyModal(id, name);
+                    break;
+                case 'active':
+                    openStatusModal('active', id, name);
+                    break;
+                case 'deactivate':
+                    openStatusModal('deactivate', id, name);
+                    break;
+                default:
+                    console.warn('Unhandled action:', action, url);
+                    break;
             }
         });
 
-        $('#btn_open_history_from_view').on('click', function () {
-            let uuid = $(this).data('uuid');
-            $('#modal_designation_view').modal('hide');
-            openHistoryModal(uuid, 'Designation');
+        // Open history from single view modal
+        $(document).off('click.designationViewHistory', '#btn_open_history_from_view').on('click.designationViewHistory', '#btn_open_history_from_view', function (e) {
+            e.preventDefault();
+            let uuid = $(this).data('uuid') || currentDesignationUuid;
+            $('#modal_designation_single_view, #modal_designation_view').modal('hide');
+            openHistoryModal(uuid, 'Designation History');
         });
 
-        // Add / Edit form submit
-        $('#form_designation').on('submit', function (e) {
+        // Activity & History buttons on top right of all sub-modals
+        $(document).off('click.designationActivity', '.btn-open-activity').on('click.designationActivity', '.btn-open-activity', function (e) {
             e.preventDefault();
-            let uuid = $('#designation_uuid').val();
-            let url = uuid ? `/reference/designation/edit/${uuid}` : '/reference/designation/add';
-            let formData = $(this).serialize();
-
-            $.post(url, formData)
-                .done(function (res) {
-                    $('#modal_designation_form').modal('hide');
-                    showNotify('success', res.message || 'Saved successfully');
-                    refreshGrid();
-                })
-                .fail(function (xhr) {
-                    let msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Operation failed';
-                    showNotify('warning', msg);
-                });
+            let $actModal = $('#modal_designation_activity');
+            if ($actModal.length && $actModal.find('tbody tr').length > 0) {
+                $('.modal.show').modal('hide');
+                $actModal.modal('show');
+            } else {
+                openActivityModal(currentDesignationUuid);
+            }
         });
 
-        // Delete form submit
-        $('#form_designation_delete').on('submit', function (e) {
+        $(document).off('click.designationHistory', '.btn-open-history').on('click.designationHistory', '.btn-open-history', function (e) {
             e.preventDefault();
-            let uuid = $('#delete_target_id').val();
-            let formData = $(this).serialize();
-
-            $.post(`/reference/designation/delete/${uuid}`, formData)
-                .done(function (res) {
-                    $('#modal_designation_delete').modal('hide');
-                    showNotify('success', res.message || 'Deleted successfully');
-                    refreshGrid();
-                })
-                .fail(function (xhr) {
-                    let msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Delete failed';
-                    showNotify('danger', msg);
-                });
-        });
-
-        // Sent to checker submit
-        $('#form_designation_stc').on('submit', function (e) {
-            e.preventDefault();
-            let uuid = $('#stc_target_id').val();
-            let formData = $(this).serialize();
-
-            $.post(`/reference/designation/stc/${uuid}`, formData)
-                .done(function (res) {
-                    $('#modal_designation_stc').modal('hide');
-                    showNotify('success', res.message || 'Sent To Checker successfully');
-                    refreshGrid();
-                })
-                .fail(function (xhr) {
-                    let msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Action failed';
-                    showNotify('danger', msg);
-                });
-        });
-
-        // Verify submit
-        $('#form_designation_verify').on('submit', function (e) {
-            e.preventDefault();
-            let uuid = $('#verify_target_id').val();
-            let formData = $(this).serialize();
-
-            $.post(`/reference/designation/verify/${uuid}`, formData)
-                .done(function (res) {
-                    $('#modal_designation_verify').modal('hide');
-                    showNotify('success', res.message || 'Verified successfully');
-                    refreshGrid();
-                })
-                .fail(function (xhr) {
-                    let msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Verification failed';
-                    showNotify('danger', msg);
-                });
-        });
-
-        // Active / Deactivate form submit
-        $('#form_designation_status').on('submit', function (e) {
-            e.preventDefault();
-            let uuid = $('#status_target_id').val();
-            let actionType = $('#status_action_type').val();
-            let formData = $(this).serialize();
-
-            let url = actionType === 'active'
-                ? `/reference/designation/active/${uuid}`
-                : `/reference/designation/deactivate/${uuid}`;
-
-            $.post(url, formData)
-                .done(function (res) {
-                    $('#modal_designation_status').modal('hide');
-                    showNotify('success', res.message || 'Status updated successfully');
-                    refreshGrid();
-                })
-                .fail(function (xhr) {
-                    let msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Status update failed';
-                    showNotify('danger', msg);
-                });
-        });
-
-        // Delegated click handler for row action buttons
-        $(document).off('click.designationRow', '.btn-grid-row-action').on('click.designationRow', '.btn-grid-row-action', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            let url = $(this).data('url');
-            let title = $(this).data('title');
-            let id = $(this).data('id');
-            let name = $(this).data('name');
-            if (typeof window.get_new_page === 'function') {
-                window.get_new_page(url, title, id, name, 1, 1000);
+            let $histModal = $('#modal_designation_history');
+            if ($histModal.length && $histModal.find('tbody tr').length > 0) {
+                $('.modal.show').modal('hide');
+                $histModal.modal('show');
+            } else {
+                openHistoryModal(currentDesignationUuid, 'Designation History');
             }
         });
 
@@ -551,17 +478,406 @@
                 window.return_message_history(name, id, table);
             }
         });
+    }
 
-        // Delegated click handler for top grid menu action buttons
-        $(document).off('click.designationMenu', '.btn-grid-menu-action').on('click.designationMenu', '.btn-grid-menu-action', function (e) {
-            e.preventDefault();
-            let url = $(this).data('url');
-            let title = $(this).data('title');
-            let popupStatus = $(this).data('popup-status');
-            let width = $(this).data('popup-width');
-            if (typeof window.get_new_page === 'function') {
-                window.get_new_page(url, title, '', '', popupStatus, width);
+    function validateField(id) {
+
+        switch (id) {
+            case "name":
+                form_validation({control: "name#text#mandatory", msg_text: "Name"});
+                break;
+            case "code":
+                form_validation({control: "code#text#mandatory", msg_text: "Code"});
+                break;
+            case "title":
+                form_validation({control: "title#text#mandatory", msg_text: "Title"});
+                break;
+            case "details":
+                form_validation({control: "details#text#nonmandatory", msg_text: "Details"});
+                break;
+            case "delete_reason":
+                form_validation({control: "delete_reason#text#mandatory", msg_text: "Delete Reason"});
+                break;
+            case "checker":
+                form_validation({control: "checker#select#mandatory", msg_text: "Checker User"});
+                break;
+            case "remarks":
+                form_validation({control: "remarks#text#nonmandatory", msg_text: "Remarks"});
+                break;
+            case "return_reason":
+                form_validation({control: "return_reason#text#mandatory", msg_text: "Return Reason"});
+                break;
+            case "active_reason":
+                form_validation({control: "active_reason#text#mandatory", msg_text: "Active Reason"});
+                break;
+            case "deactivate_reason":
+                form_validation({control: "deactivate_reason#text#mandatory", msg_text: "Deactivate Reason"});
+                break;
+        }
+    }
+
+    async function saveDesignationAdd() {
+
+        let status = form_validation({control: "name#text#mandatory*code#text#mandatory*title#text#mandatory*details#text#nonmandatory", msg_text: "Name*Code*Title*Details"});
+
+        if (status === false) {
+
+            showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
+            return false;
+        }
+
+        let confirmed = await confirmDialog("Designation", "Are you sure you want to save the Designation?");
+
+        if (!confirmed) {
+            return;
+        }
+
+        let formData = new FormData();
+
+        formData.append("name", $("#name").val());
+        formData.append("code", $("#code").val());
+        formData.append("title", $("#title").val());
+        formData.append("details", $("#details").val());
+
+        try {
+            let response = await web.post('/reference/designation/add', formData);
+
+            if (response.status === 200) {
+
+                showAlertBox({title: "Success", message: "Saved Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
+                $('#modal_designation_add').modal('hide');
+                refreshGrid();
             }
+        } catch (err) {
+        }
+    }
+
+    async function saveDesignationEdit() {
+
+        let status = form_validation({control: "name#text#mandatory*code#text#mandatory*title#text#mandatory*details#text#nonmandatory", msg_text: "Name*Code*Title*Details"});
+
+        if (status === false) {
+
+            showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
+            return false;
+        }
+
+        let confirmed = await confirmDialog("Designation", "Are you sure you want to update the Designation?");
+
+        if (!confirmed) {
+            return;
+        }
+
+        let uuid = $('#edit_designation_uuid').val() || currentDesignationUuid;
+
+        let formData = new FormData();
+
+        formData.append("name", $("#name").val());
+        formData.append("code", $("#code").val());
+        formData.append("title", $("#title").val());
+        formData.append("details", $("#details").val());
+
+        try {
+            let response = await web.post(`/reference/designation/edit/${uuid}`, formData);
+
+            if (response.status === 200) {
+
+                showAlertBox({title: "Success", message: "Updated Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
+                $('#modal_designation_edit').modal('hide');
+                refreshGrid();
+            }
+        } catch (err) {
+        }
+    }
+
+    async function saveDesignationDelete() {
+
+        let status = form_validation({control: "delete_reason#text#mandatory", msg_text: "Delete Reason"});
+
+        if (status === false) {
+
+            showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
+            return false;
+        }
+
+        let confirmed = await confirmDialog("Delete Designation", "Are you sure you want to delete this Designation?");
+
+        if (!confirmed) {
+            return;
+        }
+
+        let uuid = $('#delete_target_id').val() || currentDesignationUuid;
+
+        let formData = new FormData();
+
+        formData.append("delete_reason", $("#delete_reason").val());
+
+        try {
+            let response = await web.post(`/reference/designation/delete/${uuid}`, formData);
+
+            if (response.status === 200) {
+
+                showAlertBox({title: "Success", message: "Deleted Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
+                $('#modal_designation_delete').modal('hide');
+                refreshGrid();
+            }
+        } catch (err) {
+        }
+    }
+
+    async function saveDesignationStc() {
+
+        let status = form_validation({control: "checker#select#mandatory*remarks#text#nonmandatory", msg_text: "Checker User*Remarks"});
+
+        if (status === false) {
+
+            showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
+            return false;
+        }
+
+        let confirmed = await confirmDialog("Sent To Checker", "Are you sure you want to send this Designation to Checker?");
+
+        if (!confirmed) {
+            return;
+        }
+
+        let uuid = $('#stc_target_id').val() || currentDesignationUuid;
+
+        let formData = new FormData();
+
+        formData.append("checker", $("#checker").val());
+        formData.append("remarks", $("#remarks").val());
+
+        try {
+            let response = await web.post(`/reference/designation/stc/${uuid}`, formData);
+
+            if (response.status === 200) {
+
+                showAlertBox({title: "Success", message: "Sent To Checker Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
+                $('#modal_designation_stc').modal('hide');
+                refreshGrid();
+            }
+        } catch (err) {
+        }
+    }
+
+    async function saveDesignationVerify(verifyType) {
+
+        if (verifyType === 0) {
+
+            let status = form_validation({control: "return_reason#text#mandatory", msg_text: "Return Reason"});
+
+            if (status === false) {
+
+                showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
+                return false;
+            }
+
+            let confirmed = await confirmDialog("Return Designation", "Are you sure you want to return this Designation?");
+
+            if (!confirmed) {
+                return;
+            }
+
+            let uuid = $('#verify_target_id').val() || currentDesignationUuid;
+
+            let formData = new FormData();
+
+            formData.append("verify_type", "0");
+            formData.append("return_reason", $("#return_reason").val());
+
+            try {
+                let response = await web.post(`/reference/designation/verify/${uuid}`, formData);
+
+                if (response.status === 200) {
+
+                    showAlertBox({title: "Success", message: "Returned Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
+                    $('#modal_designation_verify').modal('hide');
+                    refreshGrid();
+                }
+            } catch (err) {
+            }
+
+        } else {
+
+            let confirmed = await confirmDialog("Verify Designation", "Are you sure you want to approve this Designation?");
+
+            if (!confirmed) {
+                return;
+            }
+
+            let uuid = $('#verify_target_id').val() || currentDesignationUuid;
+
+            let formData = new FormData();
+
+            formData.append("verify_type", "1");
+
+            try {
+                let response = await web.post(`/reference/designation/verify/${uuid}`, formData);
+
+                if (response.status === 200) {
+
+                    showAlertBox({title: "Success", message: "Approved Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
+                    $('#modal_designation_verify').modal('hide');
+                    refreshGrid();
+                }
+            } catch (err) {
+            }
+        }
+    }
+
+    async function saveDesignationActive() {
+
+        let status = form_validation({control: "active_reason#text#mandatory", msg_text: "Active Reason"});
+
+        if (status === false) {
+
+            showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
+            return false;
+        }
+
+        let confirmed = await confirmDialog("Active Designation", "Are you sure you want to activate this Designation?");
+
+        if (!confirmed) {
+            return;
+        }
+
+        let uuid = $('#active_target_id').val() || currentDesignationUuid;
+
+        let formData = new FormData();
+
+        formData.append("active_reason", $("#active_reason").val());
+
+        try {
+            let response = await web.post(`/reference/designation/active/${uuid}`, formData);
+
+            if (response.status === 200) {
+
+                showAlertBox({title: "Success", message: "Activated Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
+                $('#modal_designation_active').modal('hide');
+                refreshGrid();
+            }
+        } catch (err) {
+        }
+    }
+
+    async function saveDesignationDeactivate() {
+
+        let status = form_validation({control: "deactivate_reason#text#mandatory", msg_text: "Deactivate Reason"});
+
+        if (status === false) {
+
+            showAlertBox({title: "Error", message: "Validation failed", type: "danger", sound: "/assets/sounds/error.mp3"});
+            return false;
+        }
+
+        let confirmed = await confirmDialog("Deactivate Designation", "Are you sure you want to deactivate this Designation?");
+
+        if (!confirmed) {
+            return;
+        }
+
+        let uuid = $('#deactive_target_id').val() || currentDesignationUuid;
+
+        let formData = new FormData();
+
+        formData.append("deactivate_reason", $("#deactivate_reason").val());
+
+        try {
+            let response = await web.post(`/reference/designation/deactivate/${uuid}`, formData);
+
+            if (response.status === 200) {
+
+                showAlertBox({title: "Success", message: "Deactivated Successfully", type: "info", sound: "/assets/sounds/success.mp3"});
+                $('#modal_designation_deactive').modal('hide');
+                refreshGrid();
+            }
+        } catch (err) {
+        }
+    }
+
+    function bindFormSubmissions() {
+
+        $(document).off(".designationForm");
+
+        $(document).on("focusout.designationForm", "input, textarea, select", function () {
+            validateField(this.id);
+        });
+
+        $(document).on("select2:close.designationForm", "select", function () {
+            validateField(this.id);
+        });
+
+        $(document).on("click.designationForm", "#btn_save_designation_add", async function () {
+            await saveDesignationAdd();
+        });
+
+        $(document).on("click.designationForm", "#btn_update_designation", async function () {
+            await saveDesignationEdit();
+        });
+
+        $(document).on("click.designationForm", "#btn_confirm_delete", async function () {
+            await saveDesignationDelete();
+        });
+
+        $(document).on("click.designationForm", "#btn_confirm_stc", async function () {
+            await saveDesignationStc();
+        });
+
+        $(document).on("click.designationForm", "#btn_verify_approve", async function () {
+            await saveDesignationVerify(1);
+        });
+
+        $(document).on("click.designationForm", "#btn_verify_return", async function () {
+            await saveDesignationVerify(0);
+        });
+
+        $(document).on("click.designationForm", "#btn_confirm_active", async function () {
+            await saveDesignationActive();
+        });
+
+        $(document).on("click.designationForm", "#btn_confirm_deactive", async function () {
+            await saveDesignationDeactivate();
+        });
+
+        $(document).on("submit.designationForm", "#form_designation_add", async function (e) {
+            e.preventDefault();
+            await saveDesignationAdd();
+        });
+
+        $(document).on("submit.designationForm", "#form_designation_edit", async function (e) {
+            e.preventDefault();
+            await saveDesignationEdit();
+        });
+
+        $(document).on("submit.designationForm", "#form_designation_delete", async function (e) {
+            e.preventDefault();
+            await saveDesignationDelete();
+        });
+
+        $(document).on("submit.designationForm", "#form_designation_stc", async function (e) {
+            e.preventDefault();
+            await saveDesignationStc();
+        });
+
+        $(document).on("submit.designationForm", "#form_designation_active", async function (e) {
+            e.preventDefault();
+            await saveDesignationActive();
+        });
+
+        $(document).on("submit.designationForm", "#form_designation_deactive", async function (e) {
+            e.preventDefault();
+            await saveDesignationDeactivate();
         });
     }
+
+    window.destroyPage = function () {
+
+        $(document).off(".designationForm");
+        $(document).off(".designationRow");
+        $(document).off(".designationViewHistory");
+        $(document).off(".designationActivity");
+        $(document).off(".designationHistory");
+        $(document).off(".designationMsg");
+    };
 })(jQuery);

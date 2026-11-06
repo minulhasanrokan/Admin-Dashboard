@@ -1,0 +1,94 @@
+<!-- Sent To Checker Modal -->
+<div class="modal fade" id="modal_designation_stc" tabindex="-1" aria-labelledby="modal_stc_title" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-3 border-0 shadow-lg overflow-hidden">
+            <div class="modal-header bg-white border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar avatar-sm bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center w-36 h-36 flex-shrink-0">
+                        <i class="ti ti-arrow-forward-up fs-16"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark fs-15 mb-0" id="modal_stc_title">Sent To Checker</h5>
+                        <span class="text-muted fs-11">Forward modified designation for checker verification and approval</span>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-light border rounded-circle w-30 h-30 p-0 d-inline-flex align-items-center justify-content-center btn-open-activity" title="Activity Logs">
+                        <i class="ti ti-activity fs-14 text-muted"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-light border rounded-circle w-30 h-30 p-0 d-inline-flex align-items-center justify-content-center btn-open-history" title="Audit History">
+                        <i class="ti ti-history fs-14 text-muted"></i>
+                    </button>
+                    <button type="button" class="btn-close custom-btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"><i class="ti ti-x"></i></button>
+                </div>
+            </div>
+            <form id="form_designation_stc">
+                <input type="hidden" id="stc_target_id" name="target_id" value="{{if .SingleData}}{{.SingleData.UUID}}{{else if .uuid}}{{.uuid}}{{end}}">
+                <input type="hidden" name="_csrf" value="{{._csrf}}">
+                <div class="modal-body p-4">
+                    <div class="table-responsive mb-3 border rounded-2">
+                        <table class="table table-bordered mb-0 align-middle fs-12">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3 w-25">Field</th>
+                                    <th class="ps-3 w-35 text-secondary">Original Data (Approved)</th>
+                                    <th class="ps-3 w-40 text-primary">Changed Data (Pending)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="bg-light-subtle ps-3 fw-semibold text-muted">Name</td>
+                                    <td class="ps-3 text-secondary" id="stc_orig_name">{{if .HistoryData}}{{if .HistoryData.Name}}{{.HistoryData.Name}}{{end}}{{else if .history_data}}{{if .history_data.Name}}{{.history_data.Name}}{{end}}{{else}}-{{end}}</td>
+                                    <td class="ps-3 fw-bold text-dark" id="stc_change_name">{{if .SingleData}}{{if .SingleData.Name}}{{.SingleData.Name}}{{end}}{{else if .name}}{{.name}}{{else}}-{{end}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light-subtle ps-3 fw-semibold text-muted">Code</td>
+                                    <td class="ps-3 font-monospace text-secondary" id="stc_orig_code">{{if .HistoryData}}{{if .HistoryData.Code}}{{.HistoryData.Code}}{{end}}{{else if .history_data}}{{if .history_data.Code}}{{.history_data.Code}}{{end}}{{else}}-{{end}}</td>
+                                    <td class="ps-3 font-monospace fw-bold text-dark" id="stc_change_code">{{if .SingleData}}{{if .SingleData.Code}}{{.SingleData.Code}}{{end}}{{else if .code}}{{.code}}{{else}}-{{end}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light-subtle ps-3 fw-semibold text-muted">Title</td>
+                                    <td class="ps-3 text-secondary" id="stc_orig_title">{{if .HistoryData}}{{if .HistoryData.Title}}{{.HistoryData.Title}}{{end}}{{else if .history_data}}{{if .history_data.Title}}{{.history_data.Title}}{{end}}{{else}}-{{end}}</td>
+                                    <td class="ps-3 text-dark" id="stc_change_title">{{if .SingleData}}{{if .SingleData.Title}}{{.SingleData.Title}}{{end}}{{else if .title}}{{.title}}{{else}}-{{end}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light-subtle ps-3 fw-semibold text-muted">Status</td>
+                                    <td class="ps-3" id="stc_orig_status">{{if .HistoryData}}{{if eq .HistoryData.Status 1}}Active{{else}}Deactivate{{end}}{{else if .history_data}}{{if eq .history_data.Status 1}}Active{{else}}Deactivate{{end}}{{else}}-{{end}}</td>
+                                    <td class="ps-3" id="stc_change_status">{{if .SingleData}}{{if eq .SingleData.Status 1}}Active{{else}}Deactivate{{end}}{{else if .status}}{{if eq .status 1}}Active{{else}}Deactivate{{end}}{{else}}-{{end}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light-subtle ps-3 fw-semibold text-muted">Details</td>
+                                    <td class="ps-3 text-muted" id="stc_orig_details">{{if .HistoryData}}{{if .HistoryData.Details}}{{.HistoryData.Details}}{{end}}{{else if .history_data}}{{if .history_data.Details}}{{.history_data.Details}}{{end}}{{else}}-{{end}}</td>
+                                    <td class="ps-3 text-dark" id="stc_change_details">{{if .SingleData}}{{if .SingleData.Details}}{{.SingleData.Details}}{{end}}{{else if .details}}{{.details}}{{else}}-{{end}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="checker" class="form-label fs-12 fw-semibold text-dark mb-1">Checker User <span class="text-danger">*</span></label>
+                            <select class="form-select fs-13 h-30" id="checker" name="checker">
+                                <option value="">-- Select Checker --</option>
+                                {{range .CheckerUsers}}
+                                    <option value="{{.id}}">{{.name}}</option>
+                                {{end}}
+                            </select>
+                            <div class="invalid-feedback" id="error_msg_checker"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="remarks" class="form-label fs-12 fw-semibold text-dark mb-1">Remarks</label>
+                            <input type="text" class="form-control fs-13 h-30" id="remarks" name="remarks" maxlength="250" placeholder="Optional remarks for checker...">
+                            <div class="invalid-feedback" id="error_msg_remarks"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top py-2 px-4 d-flex align-items-center justify-content-end">
+                    <button type="button" class="btn btn-sm btn-primary rounded-2 px-3 shadow-xs d-inline-flex align-items-center h-30" id="btn_confirm_stc">
+                        <i class="ti ti-send me-1 fs-14"></i>Send To Checker
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

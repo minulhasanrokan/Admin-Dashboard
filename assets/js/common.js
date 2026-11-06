@@ -16,29 +16,102 @@ function showAlertBox(options = {}) {
     return $.notify(html, {type: type, allow_dismiss: true, delay: delay, timer: timer, showProgressbar: true, style: style, placement: {from: positionY, align: positionX}, z_index: 999999, animate: {enter: "animated " + animation, exit: "animated fadeOut"}});
 }
 
+function openPopupContainer(cleanedHtml, title, popupWidth, contentDiv, targetModalSelector) {
+    contentDiv = contentDiv || 'popup_1';
+    let $container = $('#' + contentDiv);
+    if ($container.length === 0) {
+        $('body').append(`<div id="${contentDiv}"></div>`);
+        $container = $('#' + contentDiv);
+    }
+
+    let temp = document.createElement('div');
+    temp.innerHTML = cleanedHtml;
+    let modalEl = temp.querySelector('.modal');
+
+    if (modalEl) {
+        let currentOpen = document.querySelector('#' + contentDiv + ' .modal.show');
+        if (currentOpen) {
+            let existingBs = bootstrap.Modal.getInstance(currentOpen);
+            if (existingBs) existingBs.hide();
+        }
+
+        $container.html(cleanedHtml);
+
+        let targetSelector = targetModalSelector;
+        if (!targetSelector && title && title.toLowerCase().includes('activity')) {
+            targetSelector = '#modal_designation_activity, .modal[id*="activity"]';
+        }
+        let liveModal = targetSelector ? document.querySelector('#' + contentDiv + ' ' + targetSelector) : null;
+        if (!liveModal) {
+            liveModal = document.querySelector('#' + contentDiv + ' .modal');
+        }
+        if (liveModal) {
+            let bsModal = bootstrap.Modal.getOrCreateInstance(liveModal);
+            bsModal.show();
+        }
+    } else {
+        let modalId = contentDiv + '_modal';
+        let $existingModal = $('#' + modalId);
+        let sizeClass = popupWidth >= 1140 ? 'modal-xl' : (popupWidth >= 768 ? 'modal-lg' : '');
+
+        if ($existingModal.length === 0) {
+            let modalHtml = `
+                <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+                    <div class="modal-dialog modal-dialog-centered ${sizeClass}">
+                        <div class="modal-content rounded-3 border-0 shadow-lg overflow-hidden">
+                            <div class="modal-header bg-white border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
+                                <h5 class="modal-title fw-bold text-dark fs-15 mb-0" id="${modalId}_title">${title || ''}</h5>
+                                <button type="button" class="btn-close custom-btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"><i class="ti ti-x"></i></button>
+                            </div>
+                            <div class="modal-body p-4 popup-content-body">
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            $container.html(modalHtml);
+            $existingModal = $('#' + modalId);
+        } else {
+            $('#' + modalId + '_title').text(title || '');
+        }
+
+        $existingModal.find('.popup-content-body').html(cleanedHtml);
+        let bsModal = bootstrap.Modal.getOrCreateInstance($existingModal[0]);
+        bsModal.show();
+    }
+}
+
 $(document).on("click", ".menu-link", function (e) {
     e.preventDefault();
     let $this = $(this);
-    openMenu($this.data("url"), $this.data("title"), $this.data("data") || "", $this.data("name"), Number($this.data("popup-status")), Number($this.data("popup-width")), $this.data("content-div")).then();
-});
-
-$(document).on("click", ".btn-grid-menu-action", function (e) {
-    e.preventDefault();
-    let $this = $(this);
+    if ($this.data("loading")) return;
+    $this.data("loading", true);
     let url = $this.data("url");
     let title = $this.data("title");
+    let data = $this.data("data") || "";
+    let name = $this.data("name") || $this.data("content-action") || $this.data("action") || "";
     let popupStatus = Number($this.data("popup-status"));
-    let width = Number($this.data("popup-width"));
-    if (typeof window.get_new_page === "function") {
-        window.get_new_page(url, title, "", "", popupStatus, width);
-    }
+    let popupWidth = Number($this.data("popup-width"));
+    let contentDiv = $this.data("content-div");
+
+    openMenu(url, title, data, name, popupStatus, popupWidth, contentDiv).finally(function () {
+        $this.removeData("loading");
+    });
 });
+
 
 async function openMenu(url, title, data, name, popupStatus, popupWidth, contentDiv) {
 
     let systemName = document.querySelector('meta[name="system_name"]')?.getAttribute('content');
 
-    document.title = title + ' | ' + systemName;
+    if (title && systemName) {
+        document.title = title + ' | ' + systemName;
+    }
+
+    if (popupStatus === 1) {
+        if (!contentDiv || contentDiv === 'content') {
+            contentDiv = 'popup_1';
+        }
+    }
 
     let response = await web.get(data ? `${url}/${data}` : url);
 
@@ -49,6 +122,7 @@ async function openMenu(url, title, data, name, popupStatus, popupWidth, content
     unloadContainerAssets(contentDiv);
 
     if (popupStatus === 1) {
+        openPopupContainer(cleanedHtml, title, popupWidth, contentDiv);
     }
     else {
 

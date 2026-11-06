@@ -1,12 +1,12 @@
-CategoryKey,Name,Url,Title,Action,Details,PopupStatus,Width,Icon,ShortOrder,Status
-settings.system,Basic Settings,/settings/business-settings,Basic Settings,settings.system.basic.settings,Basic Settings,0,1000,ti ti-eye,1,1
-settings.system,System Settings,/settings/email-settings,System Settings,settings.system.system.settings,System Settings,0,1000,ti ti-eye,2,1
-settings.system,Other Settings,/settings/clear-cache,Other Settings,settings.system.other.settings,Other Settings,0,1000,ti ti-eye,3,1
-reference.designation,Add,/reference/designation/add,Add Designation,reference.designation.add,Add Designation,1,1000,ti ti-plus,1,1
-reference.designation,View,/reference/designation/view,View Designation,reference.designation.view,View Designation,1,1000,ti ti-eye,2,1
-reference.designation,Delete,/reference/designation/delete,Delete Designation,reference.designation.delete,Delete Designation,1,1000,ti ti-delete,3,1
-reference.designation,Edit,/reference/designation/edit,Edit Designation,reference.designation.edit,Edit Designation,1,1000,ti ti-edit,4,1
-reference.designation,Active,/reference/designation/active,Active Designation,reference.designation.active,Active Designation,1,1000,ti ti-creative-commons-sa,5,1
-reference.designation,Deactivate,/reference/designation/deactivate,Deactivate Designation,reference.designation.deactivate,Deactivate Designation,1,1000,ti ti-assembly-off,6,1
-reference.designation,Sent To Checker,/reference/designation/stc,Sent To Checker Designation,reference.designation.stc,Sent To Checker Designation,1,1000,ti ti-location,7,1
-reference.designation,Verify,/reference/designation/verify,Verify Designation,reference.designation.verify,Verify Designation,1,1000,ti ti-checks,8,1
+CategoryKey,Name,ActionName,Url,Title,Action,Details,PopupStatus,Width,Icon,ShortName,SortOrder,Status
+settings.system,Basic Settings,view,/settings/business-settings,Basic Settings,settings.system.basic.settings,Basic Settings,0,1000,ti ti-eye,BS,1,1
+settings.system,System Settings,view,/settings/email-settings,Application Settings,settings.system.system.settings,System Settings,0,1000,ti ti-eye,ES,2,1
+settings.system,Other Settings,view,/settings/clear-cache,Other Settings,settings.system.other.settings,Other Settings,0,1000,ti ti-eye,CC,3,1
+reference.designation,Add,add,/reference/designation/add,Add Designation,reference.designation.add,Add Designation,1,1000,ti ti-plus,AD,1,1
+reference.designation,View,view,/reference/designation/view,View Designation,reference.designation.view,View Designation,0,1000,ti ti-eye,VI,2,1
+reference.designation,Delete,delete,/reference/designation/delete,Delete Designation,reference.designation.delete,Delete Designation,0,1000,ti ti-trash,DE,3,1
+reference.designation,Edit,edit,/reference/designation/edit,Edit Designation,reference.designation.edit,Edit Designation,0,1000,ti ti-edit,ED,4,1
+reference.designation,Active,active,/reference/designation/active,Active Designation,reference.designation.active,Active Designation,0,1000,ti ti-creative-commons-sa,AC,5,1
+reference.designation,Deactivate,deactivate,/reference/designation/deactivate,Deactivate Designation,reference.designation.deactivate,Deactivate Designation,0,1000,ti ti-assembly-off,DA,6,1
+reference.designation,Sent To Checker,stc,/reference/designation/stc,Sent To Checker Designation,reference.designation.stc,Sent To Checker Designation,0,1000,ti ti-location,SC,7,1
+reference.designation,Verify,verify,/reference/designation/verify,Verify Designation,reference.designation.verify,Verify Designation,0,1000,ti ti-checks,VE,8,1

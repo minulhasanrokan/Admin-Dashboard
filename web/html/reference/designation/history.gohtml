@@ -1,0 +1,124 @@
+<!-- Designation Audit History Modal -->
+<div class="modal fade" id="modal_designation_history" tabindex="-1" aria-labelledby="modal_history_title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content rounded-3 border-0 shadow-lg overflow-hidden">
+            <div class="modal-header bg-white border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar avatar-sm bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center w-36 h-36 flex-shrink-0">
+                        <i class="ti ti-history fs-16"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark fs-15 mb-0" id="modal_history_title">Designation Audit History</h5>
+                        <span class="text-muted fs-11">Chronological record of approved revisions and state modifications</span>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-light border rounded-circle w-32 h-32 p-0 d-inline-flex align-items-center justify-content-center btn-open-activity" title="Activity Logs">
+                        <i class="ti ti-activity fs-14 text-muted"></i>
+                    </button>
+                    <button type="button" class="btn-close custom-btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"><i class="ti ti-x"></i></button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-bordered mb-0 align-middle fs-12">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3 w-40">Attribute / Lifecycle</th>
+                                <th class="ps-3 w-60">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history_table_body">
+                            {{if .Histories}}
+                                {{range .Histories}}
+                                    <tr class="table-success border-top border-success border-2">
+                                        <td class="ps-3 fw-bold text-success"><i class="ti ti-calendar-check me-1 fs-14"></i>Approve Date</td>
+                                        <td class="ps-3 fw-bold text-success">{{if .UpdatedAt}}{{.UpdatedAt.Format "02 Jan, 2006 15:04:05"}}{{else if .CreatedAt}}{{.CreatedAt.Format "02 Jan, 2006 15:04:05"}}{{else}}-{{end}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="bg-light fw-semibold text-secondary ps-3">Name</td>
+                                        <td class="ps-3 fw-bold text-dark">{{if .Name}}{{.Name}}{{else}}-{{end}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="bg-light fw-semibold text-secondary ps-3">Code</td>
+                                        <td class="ps-3 font-monospace text-dark">{{if .Code}}{{.Code}}{{else}}-{{end}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="bg-light fw-semibold text-secondary ps-3">Title</td>
+                                        <td class="ps-3 text-dark">{{if .Title}}{{.Title}}{{else}}-{{end}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="bg-light fw-semibold text-secondary ps-3">Status</td>
+                                        <td class="ps-3">{{if eq .Status 1}}<span class="badge bg-success-transparent text-success rounded-pill px-2 py-1 fs-11">Active</span>{{else}}<span class="badge bg-danger-transparent text-danger rounded-pill px-2 py-1 fs-11">Deactivate</span>{{end}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="bg-light fw-semibold text-secondary ps-3">Details</td>
+                                        <td class="ps-3 text-muted">{{if .Details}}{{.Details}}{{else}}-{{end}}</td>
+                                    </tr>
+                                {{end}}
+                            {{else}}
+                                <tr><td colspan="2" class="text-center py-4 text-muted">No history found</td></tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top py-2 px-4 d-flex align-items-center justify-content-end">
+                <button type="button" class="btn btn-sm btn-secondary rounded-2 px-3" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Designation User Activity Modal -->
+<div class="modal fade" id="modal_designation_activity" tabindex="-1" aria-labelledby="modal_activity_title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content rounded-3 border-0 shadow-lg overflow-hidden">
+            <div class="modal-header bg-white border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar avatar-sm bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center w-36 h-36 flex-shrink-0">
+                        <i class="ti ti-activity fs-16"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark fs-15 mb-0" id="modal_activity_title">Designation Activity Logs</h5>
+                        <span class="text-muted fs-11">Audit trail of user sessions, IP, and actions on this record</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close custom-btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"><i class="ti ti-x"></i></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-bordered mb-0 align-middle fs-12">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3" style="width: 50px;">#</th>
+                                <th class="ps-3" style="width: 180px;">Timestamp</th>
+                                <th class="ps-3" style="width: 130px;">Action</th>
+                                <th class="ps-3">Activity Description</th>
+                                <th class="ps-3" style="width: 180px;">Client IP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activity_table_body">
+                            {{if .Activities}}
+                                {{range $idx, $act := .Activities}}
+                                    <tr>
+                                        <td>{{$idx}}</td>
+                                        <td>{{if $act.CreatedAt}}{{$act.CreatedAt.Format "02 Jan, 2006 15:04:05"}}{{else}}-{{end}}</td>
+                                        <td><span class="badge bg-primary-transparent text-primary">{{if $act.ActivityStatus}}{{$act.ActivityStatus}}{{else}}Activity{{end}}</span></td>
+                                        <td>{{if $act.Activity}}{{$act.Activity}}{{else}}-{{end}}</td>
+                                        <td>{{if $act.IPAddress}}{{$act.IPAddress}}{{else}}-{{end}}{{if $act.Device}} ({{$act.Device}}){{end}}</td>
+                                    </tr>
+                                {{end}}
+                            {{else}}
+                                <tr><td colspan="5" class="text-center py-4 text-muted">No activity recorded yet</td></tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top py-2 px-4 d-flex align-items-center justify-content-end">
+                <button type="button" class="btn btn-sm btn-secondary rounded-2 px-3" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

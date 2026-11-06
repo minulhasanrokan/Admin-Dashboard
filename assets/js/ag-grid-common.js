@@ -117,20 +117,47 @@
             init(params) {
                 this.params = params;
                 this.eGui = document.createElement('div');
-                this.eGui.className = 'ag-custom-header-wrapper d-flex align-items-center justify-content-between w-100';
 
                 headerInstances.push(this);
 
+                let colDef = params.column.getColDef();
                 let title = params.displayName;
-                let isFilterable = params.column.getColDef().filter !== false;
-                let isSortable = params.column.getColDef().sortable !== false;
+                let isFilterable = colDef.filter !== false;
+                let isSortable = colDef.sortable !== false;
                 let colId = params.column.getColId();
                 let hasFilter = !!columnFilterStates[colId];
 
+                let titleContent = escapeHtml(title);
+                let titleAttr = escapeHtml(title);
+
+                if (colDef.headerIconHtml) {
+                    titleContent = colDef.headerIconHtml;
+                    if (colDef.headerIconTitle) {
+                        titleAttr = escapeHtml(colDef.headerIconTitle);
+                    }
+                } else if (colDef.headerIcon) {
+                    let iconStr = colDef.headerIcon;
+                    if (iconStr.indexOf('/') !== -1 || iconStr.indexOf('.') !== -1) {
+                        let src = iconStr.startsWith('http') || iconStr.startsWith('/') ? iconStr : `/assets/images/${iconStr}`;
+                        titleContent = `<img src="${src}" alt="${titleAttr}" style="width:16px;height:16px;">`;
+                    } else {
+                        titleContent = `<i class="${iconStr} fs-15"></i>`;
+                    }
+                    if (colDef.headerIconTitle) {
+                        titleAttr = escapeHtml(colDef.headerIconTitle);
+                    }
+                }
+
+                let isCentered = (colDef.headerClass && String(colDef.headerClass).indexOf('text-center') !== -1) ||
+                                 (colDef.cellClass && String(colDef.cellClass).indexOf('justify-content-center') !== -1);
+                let justifyClass = isCentered ? 'justify-content-center' : 'justify-content-between';
+
+                this.eGui.className = `ag-custom-header-wrapper d-flex align-items-center ${justifyClass} w-100`;
+
                 let headerHtml = `
-                    <div class="ag-header-cell-label d-flex align-items-center gap-1 overflow-hidden" role="presentation">
-                        <span class="ag-header-cell-text text-truncate">${escapeHtml(title)}</span>
-                        <span class="ag-header-icon ag-sort-indicator ms-1 ag-sort-indicator-w"></span>
+                    <div class="ag-header-cell-label d-flex align-items-center gap-1 overflow-hidden" role="presentation" title="${titleAttr}">
+                        <span class="ag-header-cell-text text-truncate">${titleContent}</span>
+                        ${isSortable ? '<span class="ag-header-icon ag-sort-indicator ms-1 ag-sort-indicator-w"></span>' : ''}
                     </div>
                 `;
 

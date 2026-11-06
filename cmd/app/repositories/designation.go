@@ -443,3 +443,31 @@ func (r *Repository) GetCheckerUserList() ([]models.User, error) {
 		Find(&users).Error
 	return users, err
 }
+
+func (r *Repository) GetLastApprovedDesignationHistory(mainId uint64) (*models.DesignationHistory, error) {
+	if r.Db == nil || r.Db.GetDb() == nil {
+		return nil, nil
+	}
+	var hist models.DesignationHistory
+	err := r.Db.GetDb().
+		Where("main_id = ? AND delete_status = 0 AND process_status = 3 AND actual_status IN (1,2,3)", mainId).
+		Order("id DESC").
+		First(&hist).Error
+	if err != nil {
+		return nil, err
+	}
+	return &hist, nil
+}
+
+func (r *Repository) GetDesignationActivities(designationId uint64) ([]models.UserActivity, error) {
+	var list []models.UserActivity
+	if r.Db == nil || r.Db.GetDb() == nil {
+		return list, nil
+	}
+	err := r.Db.GetDb().
+		Where("table_name = ? AND table_id = ?", "designations", designationId).
+		Order("id DESC").
+		Limit(50).
+		Find(&list).Error
+	return list, err
+}

@@ -1,14 +1,29 @@
 {{ define "include/breadcrumb" }}
     <div class="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
         <div class="my-auto mb-2">
-            <h2 class="mb-1">{{.RouteActionDetails.GroupName}}</h2>
+            <h2 class="mb-1">{{if .RouteActionDetails.CategoryTitle}}{{.RouteActionDetails.CategoryTitle}}{{else if .RouteActionDetails.CategoryName}}{{.RouteActionDetails.CategoryName}}{{else if .RouteActionDetails.GroupTitle}}{{.RouteActionDetails.GroupTitle}}{{else}}{{.RouteActionDetails.GroupName}}{{end}}</h2>
             <nav>
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item">
-                        <a href="{{.ConfigData.AppBaseUrl}}"><i class="ti ti-smart-home"></i></a>
+                        <a href="{{.ConfigData.AppBaseUrl}}/dashboard"><i class="ti ti-smart-home"></i></a>
                     </li>
-                    <li class="breadcrumb-item">{{.RouteActionDetails.CategoryName}}</li>
-                    <li class="breadcrumb-item active" aria-current="page">{{.RouteActionDetails.RightName}}</li>
+                    {{if .RouteActionDetails.GroupTitle}}
+                        <li class="breadcrumb-item">{{.RouteActionDetails.GroupTitle}}</li>
+                    {{else if .RouteActionDetails.GroupName}}
+                        <li class="breadcrumb-item">{{.RouteActionDetails.GroupName}}</li>
+                    {{end}}
+                    {{if and .RouteActionDetails.RightName (ne .RouteActionDetails.RightName .RouteActionDetails.CategoryTitle)}}
+                        <li class="breadcrumb-item">
+                            {{if .RouteActionDetails.CategoryTitle}}{{.RouteActionDetails.CategoryTitle}}{{else}}{{.RouteActionDetails.CategoryName}}{{end}}
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            {{.RouteActionDetails.RightName}}
+                        </li>
+                    {{else}}
+                        <li class="breadcrumb-item active" aria-current="page">
+                            {{if .RouteActionDetails.CategoryTitle}}{{.RouteActionDetails.CategoryTitle}}{{else if .RouteActionDetails.CategoryName}}{{.RouteActionDetails.CategoryName}}{{else}}{{.RouteActionDetails.GroupName}}{{end}}
+                        </li>
+                    {{end}}
                 </ol>
             </nav>
         </div>

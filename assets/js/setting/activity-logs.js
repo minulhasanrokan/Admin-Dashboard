@@ -43,7 +43,7 @@
                     sortable: true,
                     filter: true,
                     cellRenderer: function (params) {
-                        let status = (params.value || '').toLowerCase();
+                        let status = params.value != null ? String(params.value).toLowerCase(): '';
                         let badgeClass = 'bg-secondary-transparent text-secondary';
                         if (status.includes('create') || status.includes('add')) {
                             badgeClass = 'bg-success-transparent text-success';

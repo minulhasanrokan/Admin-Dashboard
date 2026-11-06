@@ -13,7 +13,7 @@ func (r *Repository) GetActiveRightGroups() ([]models.RightGroup, error) {
 		return groups, nil
 	}
 
-	if err := r.Db.GetDb().Where("status = ?", 1).Order("short_order ASC").Find(&groups).Error; err != nil {
+	if err := r.Db.GetDb().Where("status = ?", 1).Order("sort_order ASC").Find(&groups).Error; err != nil {
 
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func (r *Repository) GetActiveRightCategories() ([]models.RightCategory, error) 
 		return categories, nil
 	}
 
-	if err := r.Db.GetDb().Where("status = ?", 1).Order("short_order ASC").Find(&categories).Error; err != nil {
+	if err := r.Db.GetDb().Where("status = ?", 1).Order("sort_order ASC").Find(&categories).Error; err != nil {
 		return nil, err
 	}
 
@@ -46,7 +46,7 @@ func (r *Repository) GetActiveRightDetails() ([]models.RightDetail, error) {
 		return details, nil
 	}
 
-	if err := r.Db.GetDb().Where("status = ?", 1).Order("short_order ASC").Find(&details).Error; err != nil {
+	if err := r.Db.GetDb().Where("status = ?", 1).Order("sort_order ASC").Find(&details).Error; err != nil {
 		return nil, err
 	}
 
@@ -94,7 +94,6 @@ func (r *Repository) CheckRightDetailAction(requiredAction string) (int64, error
 
 func (r *Repository) CheckCategoryRightDetailAction(categoryAction string) (int64, error) {
 	var count int64
-
 
 	cacheKey := fmt.Sprintf("RightCategoryDetailAction%s", categoryAction)
 
@@ -174,7 +173,7 @@ func (r *Repository) GetRightDetailsByKey(action string) (dtos.RightInfo, error)
 			rg.title        AS group_title,
 			rg.details      AS group_details,
 			rg.icon         AS group_icon,
-			rg.short_order  AS group_sort_order,
+			rg.sort_order  AS group_sort_order,
 			rc.name         AS category_name,
 			rc.key          AS category_key,
 			rc.url          AS category_url,
@@ -182,8 +181,9 @@ func (r *Repository) GetRightDetailsByKey(action string) (dtos.RightInfo, error)
 			rc.action       AS category_action,
 			rc.details      AS category_details,
 			rc.icon         AS category_icon,
-			rc.short_order  AS category_sort_order,
+			rc.sort_order  AS category_sort_order,
 			rd.name         AS right_name,
+			rd.action_name  AS right_action_name,
 			rd.url          AS right_url,
 			rd.title        AS right_title,
 			rd.action       AS right_action,
@@ -191,8 +191,8 @@ func (r *Repository) GetRightDetailsByKey(action string) (dtos.RightInfo, error)
 			rd.popup_status AS right_popup_status,
 			rd.width        AS right_width,
 			rd.icon         AS right_icon,
-			rd.short_order  AS right_sort_order
-		`).
+			rd.sort_order  AS right_sort_order ,
+			rd.short_name  	AS right_short_name`).
 		Joins("INNER JOIN right_categories rc ON rc.key = rd.category_key").
 		Joins("INNER JOIN right_groups rg ON rg.key = rc.group_key").
 		Where("rd.action = ?", action).
@@ -209,7 +209,6 @@ func (r *Repository) GetRightDetailsByKey(action string) (dtos.RightInfo, error)
 func (r *Repository) GetRightAllDetailsByKey(categoryKey string) ([]dtos.RightInfo, error) {
 	var info []dtos.RightInfo
 
-
 	cacheKey := fmt.Sprintf("RightAllInfo%s", categoryKey)
 
 	if err := r.CacheSystem.Get(cacheKey, &info); err == nil {
@@ -224,7 +223,7 @@ func (r *Repository) GetRightAllDetailsByKey(categoryKey string) ([]dtos.RightIn
 			rg.title        AS group_title,
 			rg.details      AS group_details,
 			rg.icon         AS group_icon,
-			rg.short_order  AS group_sort_order,
+			rg.sort_order  AS group_sort_order,
 			rc.name         AS category_name,
 			rc.key          AS category_key,
 			rc.url          AS category_url,
@@ -232,8 +231,9 @@ func (r *Repository) GetRightAllDetailsByKey(categoryKey string) ([]dtos.RightIn
 			rc.action       AS category_action,
 			rc.details      AS category_details,
 			rc.icon         AS category_icon,
-			rc.short_order  AS category_sort_order,
+			rc.sort_order  AS category_sort_order,
 			rd.name         AS right_name,
+			rd.action_name  AS right_action_name,
 			rd.url          AS right_url,
 			rd.title        AS right_title,
 			rd.action       AS right_action,
@@ -241,15 +241,15 @@ func (r *Repository) GetRightAllDetailsByKey(categoryKey string) ([]dtos.RightIn
 			rd.popup_status AS right_popup_status,
 			rd.width        AS right_width,
 			rd.icon         AS right_icon,
-			rd.short_order  AS right_sort_order
-		`).
+			rd.sort_order  AS right_sort_order ,
+			rd.short_name  	AS right_short_name`).
 		Joins("INNER JOIN right_categories rc ON rc.key = rd.category_key").
 		Joins("INNER JOIN right_groups rg ON rg.key = rc.group_key").
 		Where("rd.category_key = ?", categoryKey).
 		Where("rd.status = ?", 1).
 		Where("rc.status = ?", 1).
 		Where("rg.status = ?", 1).
-		Order("rg.short_order ASC, rc.short_order ASC, rd.short_order ASC").
+		Order("rg.sort_order ASC, rc.sort_order ASC, rd.sort_order ASC").
 		Find(&info).Error; err != nil {
 		return nil, err
 	}
@@ -276,7 +276,7 @@ func (r *Repository) GetRightDetailsByCategoryKey(categoryKey string) ([]dtos.Ri
 			rg.title        AS group_title,
 			rg.details      AS group_details,
 			rg.icon         AS group_icon,
-			rg.short_order  AS group_sort_order,
+			rg.sort_order  AS group_sort_order,
 			rc.name         AS category_name,
 			rc.key          AS category_key,
 			rc.url          AS category_url,
@@ -284,8 +284,9 @@ func (r *Repository) GetRightDetailsByCategoryKey(categoryKey string) ([]dtos.Ri
 			rc.action       AS category_action,
 			rc.details      AS category_details,
 			rc.icon         AS category_icon,
-			rc.short_order  AS category_sort_order,
+			rc.sort_order  AS category_sort_order,
 			rd.name         AS right_name,
+			rd.action_name  AS right_action_name,
 			rd.url          AS right_url,
 			rd.title        AS right_title,
 			rd.action       AS right_action,
@@ -293,15 +294,15 @@ func (r *Repository) GetRightDetailsByCategoryKey(categoryKey string) ([]dtos.Ri
 			rd.popup_status AS right_popup_status,
 			rd.width        AS right_width,
 			rd.icon         AS right_icon,
-			rd.short_order  AS right_sort_order
-		`).
+			rd.sort_order  AS right_sort_order ,
+			rd.short_name  	AS right_short_name`).
 		Joins("INNER JOIN right_categories rc ON rc.key = rd.category_key").
 		Joins("INNER JOIN right_groups rg ON rg.key = rc.group_key").
 		Where("rd.category_key = ?", categoryKey).
 		Where("rd.status = ?", 1).
 		Where("rc.status = ?", 1).
 		Where("rg.status = ?", 1).
-		Order("rg.short_order ASC, rc.short_order ASC, rd.short_order ASC").
+		Order("rg.sort_order ASC, rc.sort_order ASC, rd.sort_order ASC").
 		Find(&info).Error; err != nil {
 		return nil, err
 	}
@@ -328,7 +329,7 @@ func (r *Repository) GetRightDetailsByCategoryKeyUserId(userId uint64, categoryK
 			rg.title        AS group_title,
 			rg.details      AS group_details,
 			rg.icon         AS group_icon,
-			rg.short_order  AS group_sort_order,
+			rg.sort_order  AS group_sort_order,
 			rc.name         AS category_name,
 			rc.key          AS category_key,
 			rc.url          AS category_url,
@@ -336,8 +337,9 @@ func (r *Repository) GetRightDetailsByCategoryKeyUserId(userId uint64, categoryK
 			rc.action       AS category_action,
 			rc.details      AS category_details,
 			rc.icon         AS category_icon,
-			rc.short_order  AS category_sort_order,
+			rc.sort_order  AS category_sort_order,
 			rd.name         AS right_name,
+			rd.action_name  AS right_action_name,
 			rd.url          AS right_url,
 			rd.title        AS right_title,
 			rd.action       AS right_action,
@@ -345,8 +347,8 @@ func (r *Repository) GetRightDetailsByCategoryKeyUserId(userId uint64, categoryK
 			rd.popup_status AS right_popup_status,
 			rd.width        AS right_width,
 			rd.icon         AS right_icon,
-			rd.short_order  AS right_sort_order
-		`).
+			rd.sort_order  AS right_sort_order ,
+			rd.short_name  	AS right_short_name`).
 		Joins("INNER JOIN right_details rd ON rd.action = ur.right_key").
 		Joins("INNER JOIN right_categories rc ON rc.key = rd.category_key").
 		Joins("INNER JOIN right_groups rg ON rg.key = rc.group_key").
@@ -357,7 +359,7 @@ func (r *Repository) GetRightDetailsByCategoryKeyUserId(userId uint64, categoryK
 		Where("rd.status = ?", 1).
 		Where("rc.status = ?", 1).
 		Where("rg.status = ?", 1).
-		Order("rg.short_order ASC, rc.short_order ASC, rd.short_order ASC").
+		Order("rg.sort_order ASC, rc.sort_order ASC, rd.sort_order ASC").
 		Find(&info).Error; err != nil {
 		return nil, err
 	}

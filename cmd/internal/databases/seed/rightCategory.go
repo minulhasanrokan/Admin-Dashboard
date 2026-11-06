@@ -69,9 +69,9 @@ func RightCategorySeed(db *gorm.DB) error {
 			return fmt.Errorf("malformed CSV row: expected 10 columns, got %d", len(record))
 		}
 
-		shortOrder, err := strconv.Atoi(record[8])
+		sortOrder, err := strconv.Atoi(record[8])
 		if err != nil {
-			return fmt.Errorf("invalid short_order: %w", err)
+			return fmt.Errorf("invalid sort_order: %w", err)
 		}
 
 		status, err := strconv.Atoi(record[9])
@@ -88,7 +88,7 @@ func RightCategorySeed(db *gorm.DB) error {
 			Action:     record[5],
 			Details:    record[6],
 			Icon:       record[7],
-			ShortOrder: shortOrder,
+			SortOrder: sortOrder,
 			Status:     status,
 		})
 	}

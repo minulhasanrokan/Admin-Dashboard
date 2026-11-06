@@ -1,0 +1,48 @@
+<!-- Active Designation Modal -->
+<div class="modal fade" id="modal_designation_active" tabindex="-1" aria-labelledby="modal_active_title" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 border-0 shadow-lg overflow-hidden">
+            <div class="modal-header bg-success-subtle border-bottom border-success-subtle py-3 px-4 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar avatar-sm bg-success text-white rounded-circle d-flex align-items-center justify-content-center w-36 h-36 flex-shrink-0">
+                        <i class="ti ti-check-circle fs-16"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-success fs-15 mb-0" id="modal_active_title">Active Designation</h5>
+                        <span class="text-success-emphasis fs-11">Reactivate designation for operational assignment</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close custom-btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"><i class="ti ti-x"></i></button>
+            </div>
+            <form id="form_designation_active">
+                <input type="hidden" id="active_target_id" name="target_id" value="{{if .SingleData}}{{.SingleData.UUID}}{{else if .uuid}}{{.uuid}}{{end}}">
+                <input type="hidden" name="action_type" value="active">
+                <input type="hidden" name="_csrf" value="{{._csrf}}">
+                <div class="modal-body p-4">
+                    <div class="bg-light rounded-2 p-3 border mb-3">
+                        <div class="row g-2 fs-12">
+                            <div class="col-4 text-muted fw-semibold">Name:</div>
+                            <div class="col-8 fw-bold text-dark" id="active_view_name">{{if .SingleData}}{{if .SingleData.Name}}{{.SingleData.Name}}{{end}}{{else if .name}}{{.name}}{{else}}-{{end}}</div>
+                            <div class="col-4 text-muted fw-semibold">Code:</div>
+                            <div class="col-8 font-monospace text-dark" id="active_view_code">{{if .SingleData}}{{if .SingleData.Code}}{{.SingleData.Code}}{{end}}{{else if .code}}{{.code}}{{else}}-{{end}}</div>
+                            <div class="col-4 text-muted fw-semibold">Title:</div>
+                            <div class="col-8 text-dark" id="active_view_title">{{if .SingleData}}{{if .SingleData.Title}}{{.SingleData.Title}}{{end}}{{else if .title}}{{.title}}{{else}}-{{end}}</div>
+                            <div class="col-4 text-muted fw-semibold">Current:</div>
+                            <div class="col-8"><span class="badge bg-danger-transparent text-danger fw-semibold" id="active_view_status">{{if .SingleData}}{{if eq .SingleData.Status 1}}Active{{else}}Deactivate{{end}}{{else if .status}}{{if eq .status 1}}Active{{else}}Deactivate{{end}}{{else}}Deactivate{{end}}</span></div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="active_reason" class="form-label fs-12 fw-semibold text-dark mb-1">Active Reason <span class="text-danger">*</span></label>
+                        <textarea class="form-control fs-13" id="active_reason" name="active_reason" rows="3" maxlength="250" placeholder="Please Input Active Reason"></textarea>
+                        <div class="invalid-feedback" id="error_msg_active_reason"></div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top py-2 px-4 d-flex align-items-center justify-content-end">
+                    <button type="button" class="btn btn-sm btn-success rounded-2 px-3 shadow-xs d-inline-flex align-items-center h-30" id="btn_confirm_active">
+                        <i class="ti ti-check me-1 fs-14"></i>Active
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

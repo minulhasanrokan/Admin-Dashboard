@@ -1,0 +1,61 @@
+<!-- Edit Designation Modal -->
+<div class="modal fade" id="modal_designation_edit" tabindex="-1" aria-labelledby="modal_edit_title" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-3 border-0 shadow-lg overflow-hidden">
+            <div class="modal-header bg-white border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar avatar-sm bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center w-36 h-36 flex-shrink-0">
+                        <i class="ti ti-edit fs-16"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark fs-15 mb-0" id="modal_edit_title">Edit Designation</h5>
+                        <span class="text-muted fs-11">Modify designation attributes, operational code, and description</span>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-light border rounded-circle w-30 h-30 p-0 d-inline-flex align-items-center justify-content-center btn-open-activity" title="Activity Logs">
+                        <i class="ti ti-activity fs-14 text-muted"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-light border rounded-circle w-30 h-30 p-0 d-inline-flex align-items-center justify-content-center btn-open-history" title="Audit History">
+                        <i class="ti ti-history fs-14 text-muted"></i>
+                    </button>
+                    <button type="button" class="btn-close custom-btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"><i class="ti ti-x"></i></button>
+                </div>
+            </div>
+            <form id="form_designation_edit">
+                <input type="hidden" id="edit_designation_uuid" name="uuid" value="{{if .SingleData}}{{.SingleData.UUID}}{{else if .Designation}}{{.Designation.UUID}}{{end}}">
+                <input type="hidden" id="edit_designation_id" name="id" value="{{if .SingleData}}{{.SingleData.Id}}{{else if .Designation}}{{.Designation.Id}}{{end}}">
+                <input type="hidden" name="_csrf" value="{{._csrf}}">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label fs-12 fw-semibold text-dark mb-1">Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control fs-13 h-30" id="name" name="name" minlength="2" maxlength="150" placeholder="e.g. Senior Software Engineer" value="{{if .SingleData}}{{if .SingleData.Name}}{{.SingleData.Name}}{{end}}{{else if .Designation}}{{if .Designation.Name}}{{.Designation.Name}}{{end}}{{end}}" autofocus tabindex="1">
+                            <div class="invalid-feedback" id="error_msg_name"></div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="code" class="form-label fs-12 fw-semibold text-dark mb-1">Code <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control fs-13 font-monospace h-30" id="code" name="code" minlength="2" maxlength="50" placeholder="e.g. SSE" value="{{if .SingleData}}{{if .SingleData.Code}}{{.SingleData.Code}}{{end}}{{else if .Designation}}{{if .Designation.Code}}{{.Designation.Code}}{{end}}{{end}}" tabindex="2">
+                            <div class="invalid-feedback" id="error_msg_code"></div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="title" class="form-label fs-12 fw-semibold text-dark mb-1">Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control fs-13 h-30" id="title" name="title" minlength="2" maxlength="150" placeholder="Official Title" value="{{if .SingleData}}{{if .SingleData.Title}}{{.SingleData.Title}}{{end}}{{else if .Designation}}{{if .Designation.Title}}{{.Designation.Title}}{{end}}{{end}}" tabindex="3">
+                            <div class="invalid-feedback" id="error_msg_title"></div>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="details" class="form-label fs-12 fw-semibold text-dark mb-1">Details</label>
+                            <textarea class="form-control fs-13" id="details" name="details" rows="4" maxlength="250" placeholder="Enter role responsibilities and details..." tabindex="4">{{if .SingleData}}{{if .SingleData.Details}}{{.SingleData.Details}}{{end}}{{else if .Designation}}{{if .Designation.Details}}{{.Designation.Details}}{{end}}{{end}}</textarea>
+                            <div class="invalid-feedback" id="error_msg_details"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top py-2 px-4 d-flex align-items-center justify-content-end">
+                    <button type="button" class="btn btn-sm btn-primary rounded-2 px-3 shadow-xs d-inline-flex align-items-center h-30" id="btn_update_designation" tabindex="5">
+                        <i class="ti ti-device-floppy me-1 fs-14"></i>Update
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="_csrf" content="{{ ._csrf }}">
     <meta name="system_name" content="{{.SystemSetting.Name}}">
+    <meta name="activity_list" content="{{.ActivityList}}">
+    <meta name="process_status_list" content="{{.ProcessStatusList}}">
+    <meta name="data_active_status_list" content="{{.DataActiveStatusList}}">
+    <meta name="super_admin_status" content="{{.SessionData.SuperAdmin}}">
     <title>Dashboard | {{.SystemSetting.Name}} - {{.SystemSetting.Title}}</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.Icon}}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{.ConfigData.AppBaseUrl}}/file/system/{{.SystemSetting.AppleIcon}}">

@@ -125,7 +125,7 @@ func (s *Service) GetUserDashboardRights(userId uint64, isSuperAdmin bool) ([]dt
 			Title:      c.Title,
 			Action:     c.Action,
 			Icon:       c.Icon,
-			ShortOrder: c.ShortOrder,
+			SortOrder: c.SortOrder,
 		})
 	}
 
@@ -141,7 +141,7 @@ func (s *Service) GetUserDashboardRights(userId uint64, isSuperAdmin bool) ([]dt
 			Key:        g.Key,
 			Title:      g.Title,
 			Icon:       g.Icon,
-			ShortOrder: g.ShortOrder,
+			SortOrder: g.SortOrder,
 			Categories: categories,
 		})
 	}

@@ -24,4 +24,6 @@ type RightInfo struct {
 	RightWidth        int    `json:"right_width"`
 	RightIcon         string `json:"right_icon"`
 	RightSortOrder    int    `json:"right_sort_order"`
+	RightShortName    string `json:"right_short_name"`
+	RightActionName   string `json:"right_action_name"`
 }

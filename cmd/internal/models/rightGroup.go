@@ -13,7 +13,7 @@ type RightGroup struct {
 	Title      string    `gorm:"column:title;type:varchar(255)" json:"title"`
 	Details    string    `gorm:"column:details;type:text" json:"details"`
 	Icon       string    `gorm:"column:icon;type:varchar(255)" json:"icon"`
-	ShortOrder int       `gorm:"column:short_order;type:int" json:"short_order"`
+	SortOrder int       `gorm:"column:sort_order;type:int" json:"sort_order"`
 	Status     int       `gorm:"column:status;type:int;default:1" json:"status"`
 }
 

@@ -258,3 +258,17 @@ func (s *Service) GetCheckerUserList() ([]map[string]interface{}, error) {
 	}
 	return result, nil
 }
+
+func (s *Service) GetLastApprovedDesignationHistory(mainId uint64) (*models.DesignationHistory, error) {
+	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
+	return repository.GetLastApprovedDesignationHistory(mainId)
+}
+
+func (s *Service) GetDesignationActivities(identifier requests.UUIDRequest) ([]models.UserActivity, error) {
+	repository := repositories.NewRepository(&s.Db, s.CacheSystem)
+	d, err := repository.GetDesignationByIdOrUUID(identifier)
+	if err != nil || d == nil {
+		return []models.UserActivity{}, nil
+	}
+	return repository.GetDesignationActivities(d.Id)
+}

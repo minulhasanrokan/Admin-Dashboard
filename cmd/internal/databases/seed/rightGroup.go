@@ -39,7 +39,7 @@ func RightGroupSeed(db *gorm.DB) error {
 	file, err := os.Open(csvPath)
 
 	if err != nil {
-		
+
 		return fmt.Errorf("failed to open right_groups CSV: %w", err)
 	}
 
@@ -74,9 +74,9 @@ func RightGroupSeed(db *gorm.DB) error {
 			return fmt.Errorf("invalid CSV row, expected 7 columns")
 		}
 
-		shortOrder, err := strconv.Atoi(record[5])
+		sortOrder, err := strconv.Atoi(record[5])
 		if err != nil {
-			return fmt.Errorf("invalid short_order: %w", err)
+			return fmt.Errorf("invalid sort_order: %w", err)
 		}
 
 		status, err := strconv.Atoi(record[6])
@@ -85,13 +85,13 @@ func RightGroupSeed(db *gorm.DB) error {
 		}
 
 		groups = append(groups, models.RightGroup{
-			Name:       record[0],
-			Key:        record[1],
-			Title:      record[2],
-			Details:    record[3],
-			Icon:       record[4],
-			ShortOrder: shortOrder,
-			Status:     status,
+			Name:      record[0],
+			Key:       record[1],
+			Title:     record[2],
+			Details:   record[3],
+			Icon:      record[4],
+			SortOrder: sortOrder,
+			Status:    status,
 		})
 	}
 

@@ -1,0 +1,111 @@
+<!-- Verify Designation Modal -->
+<div class="modal fade" id="modal_designation_verify" tabindex="-1" aria-labelledby="modal_verify_title" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-3 border-0 shadow-lg overflow-hidden">
+            <div class="modal-header bg-white border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar avatar-sm bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center w-36 h-36 flex-shrink-0">
+                        <i class="ti ti-checks fs-16"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark fs-15 mb-0" id="modal_verify_title">Verify Designation</h5>
+                        <span class="text-muted fs-11">Review changes, audit remarks, and provide checker authorization</span>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-light border rounded-circle w-30 h-30 p-0 d-inline-flex align-items-center justify-content-center btn-open-activity" title="Activity Logs">
+                        <i class="ti ti-activity fs-14 text-muted"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-light border rounded-circle w-30 h-30 p-0 d-inline-flex align-items-center justify-content-center btn-open-history" title="Audit History">
+                        <i class="ti ti-history fs-14 text-muted"></i>
+                    </button>
+                    <button type="button" class="btn-close custom-btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"><i class="ti ti-x"></i></button>
+                </div>
+            </div>
+            <form id="form_designation_verify">
+                <input type="hidden" id="verify_target_id" name="target_id" value="{{if .SingleData}}{{.SingleData.UUID}}{{else if .uuid}}{{.uuid}}{{end}}">
+                <input type="hidden" id="verify_type" name="verify_type" value="1">
+                <input type="hidden" name="_csrf" value="{{._csrf}}">
+                <div class="modal-body p-4">
+                    <div class="table-responsive mb-3 border rounded-2">
+                        <table class="table table-bordered mb-0 align-middle fs-12">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3 w-25">Field</th>
+                                    <th class="ps-3 w-35 text-secondary">Original Data (Approved)</th>
+                                    <th class="ps-3 w-40 text-primary">Changed Data (Pending)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="bg-light-subtle ps-3 fw-semibold text-muted">Name</td>
+                                    <td class="ps-3 text-secondary" id="verify_orig_name">{{if .HistoryData}}{{if .HistoryData.Name}}{{.HistoryData.Name}}{{end}}{{else if .history_data}}{{if .history_data.Name}}{{.history_data.Name}}{{end}}{{else}}-{{end}}</td>
+                                    <td class="ps-3 fw-bold text-dark" id="verify_change_name">{{if .SingleData}}{{if .SingleData.Name}}{{.SingleData.Name}}{{end}}{{else if .name}}{{.name}}{{else}}-{{end}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light-subtle ps-3 fw-semibold text-muted">Code</td>
+                                    <td class="ps-3 font-monospace text-secondary" id="verify_orig_code">{{if .HistoryData}}{{if .HistoryData.Code}}{{.HistoryData.Code}}{{end}}{{else if .history_data}}{{if .history_data.Code}}{{.history_data.Code}}{{end}}{{else}}-{{end}}</td>
+                                    <td class="ps-3 font-monospace fw-bold text-dark" id="verify_change_code">{{if .SingleData}}{{if .SingleData.Code}}{{.SingleData.Code}}{{end}}{{else if .code}}{{.code}}{{else}}-{{end}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light-subtle ps-3 fw-semibold text-muted">Title</td>
+                                    <td class="ps-3 text-secondary" id="verify_orig_title">{{if .HistoryData}}{{if .HistoryData.Title}}{{.HistoryData.Title}}{{end}}{{else if .history_data}}{{if .history_data.Title}}{{.history_data.Title}}{{end}}{{else}}-{{end}}</td>
+                                    <td class="ps-3 text-dark" id="verify_change_title">{{if .SingleData}}{{if .SingleData.Title}}{{.SingleData.Title}}{{end}}{{else if .title}}{{.title}}{{else}}-{{end}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light-subtle ps-3 fw-semibold text-muted">Status</td>
+                                    <td class="ps-3" id="verify_orig_status">{{if .HistoryData}}{{if eq .HistoryData.Status 1}}Active{{else}}Deactivate{{end}}{{else if .history_data}}{{if eq .history_data.Status 1}}Active{{else}}Deactivate{{end}}{{else}}-{{end}}</td>
+                                    <td class="ps-3" id="verify_change_status">{{if .SingleData}}{{if eq .SingleData.Status 1}}Active{{else}}Deactivate{{end}}{{else if .status}}{{if eq .status 1}}Active{{else}}Deactivate{{end}}{{else}}-{{end}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light-subtle ps-3 fw-semibold text-muted">Details</td>
+                                    <td class="ps-3 text-muted" id="verify_orig_details">{{if .HistoryData}}{{if .HistoryData.Details}}{{.HistoryData.Details}}{{end}}{{else if .history_data}}{{if .history_data.Details}}{{.history_data.Details}}{{end}}{{else}}-{{end}}</td>
+                                    <td class="ps-3 text-dark" id="verify_change_details">{{if .SingleData}}{{if .SingleData.Details}}{{.SingleData.Details}}{{end}}{{else if .details}}{{.details}}{{else}}-{{end}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bg-light rounded-2 p-3 border mb-3">
+                        <div class="row g-2 fs-12">
+                            <div class="col-md-6 d-flex align-items-center">
+                                <span class="text-muted fw-semibold me-2">Operation:</span>
+                                <span class="badge bg-primary-transparent text-primary fw-semibold" id="verify_op_status">{{if .SingleData}}{{.SingleData.ActualStatus}}{{else if .actual_status}}{{.actual_status}}{{else}}-{{end}}</span>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center">
+                                <span class="text-muted fw-semibold me-2">Maker User:</span>
+                                <span class="text-dark fw-medium" id="verify_maker_by">{{if .SingleData}}{{if .SingleData.Checker}}User ID {{.SingleData.Checker}}{{else}}-{{end}}{{else if .checker}}User ID {{.checker}}{{else}}-{{end}}</span>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center">
+                                <span class="text-muted fw-semibold me-2">Submission Time:</span>
+                                <span class="text-dark" id="verify_maker_datetime">{{if .SingleData}}{{.SingleData.UpdatedAt.Format "02 Jan, 2006 15:04:05"}}{{else if .updated_at}}{{.updated_at}}{{else}}-{{end}}</span>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center">
+                                <span class="text-muted fw-semibold me-2">Maker Remarks:</span>
+                                <span class="text-dark" id="verify_maker_remarks">{{if .SingleData}}{{if .SingleData.Remarks}}{{.SingleData.Remarks}}{{end}}{{else if .remarks}}{{.remarks}}{{else}}-{{end}}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="return_reason" class="form-label fs-12 fw-semibold text-dark mb-1">
+                            Return Reason <span class="text-muted fw-normal fs-11">(Required only when returning / rejecting)</span>
+                        </label>
+                        <textarea class="form-control fs-13" id="return_reason" name="return_reason" rows="2" maxlength="250" placeholder="State reason if returning to maker..."></textarea>
+                        <div class="invalid-feedback" id="error_msg_return_reason"></div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top py-2 px-4 d-flex align-items-center justify-content-end">
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-warning rounded-2 px-3 d-inline-flex align-items-center h-30" id="btn_verify_return">
+                            <i class="ti ti-arrow-back-up me-1 fs-14"></i>Return
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success rounded-2 px-3 shadow-xs d-inline-flex align-items-center h-30" id="btn_verify_approve">
+                            <i class="ti ti-check me-1 fs-14"></i>Approve
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

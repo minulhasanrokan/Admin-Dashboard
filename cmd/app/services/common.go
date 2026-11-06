@@ -15,7 +15,7 @@ func (s *Service) GetDynamicDropdown(req requests.GetDropdownRequest) ([]map[str
 	return repository.GetDynamicDropdown(req)
 }
 
-func (s *Service) CreateUserActivity(c echo.Context, processStatus string, tableName string, tableId uint64, activityText string) error {
+func (s *Service) CreateUserActivity(c echo.Context, processStatus uint64, tableName string, tableId uint64, activityText string) error {
 
 	userSess, _, err := session.GetUserSession(c)
 
@@ -41,7 +41,7 @@ func (s *Service) CreateUserActivity(c echo.Context, processStatus string, table
 		GroupKey:       &rightData.GroupKey,
 		CategoryKey:    &rightData.CategoryKey,
 		RightKey:       &rightData.RightAction,
-		ActivityStatus: helpers.Str(processStatus),
+		ActivityStatus: &processStatus,
 		TableName:      helpers.Str(tableName),
 		TableId:        helpers.UInt(tableId),
 		Activity:       helpers.Str(activityText),

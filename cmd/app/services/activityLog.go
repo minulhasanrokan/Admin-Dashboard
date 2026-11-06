@@ -7,7 +7,7 @@ import (
 type FormattedActivityItem struct {
 	Id             uint64 `json:"id"`
 	Activity       string `json:"activity"`
-	ActivityStatus string `json:"activity_status"`
+	ActivityStatus uint64 `json:"activity_status"`
 	TableName      string `json:"table_name"`
 	TableId        uint64 `json:"table_id"`
 	IPAddress      string `json:"ip_address"`
@@ -40,7 +40,7 @@ func (s *Service) GetActivityLogList(params repositories.BackupFilterParams) (ma
 		if l.Activity != nil {
 			act = *l.Activity
 		}
-		actStat := ""
+		var actStat uint64
 		if l.ActivityStatus != nil {
 			actStat = *l.ActivityStatus
 		}
