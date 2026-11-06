@@ -106,12 +106,21 @@
 
 /* Zero-Shift Validation System: Error messages float cleanly below inputs without pushing layout */
 .card-body .row > [class*="col-"],
+.mb-2,
 .mb-3,
 .form-group,
-.col-md-10,
-.col-md-9,
-.col-md-8,
+[class*="col-"],
+.col-md-1,
+.col-md-2,
+.col-md-3,
+.col-md-4,
+.col-md-5,
 .col-md-6,
+.col-md-7,
+.col-md-8,
+.col-md-9,
+.col-md-10,
+.col-md-11,
 .col-md-12 {
     position: relative;
 }
@@ -155,6 +164,33 @@ select ~ .invalid-feedback,
 .select2-container ~ .invalid-feedback,
 [id$="_container"] ~ .invalid-feedback {
     margin-left: 0 !important;
+}
+
+/* Modal Form Validation: Ensure error messages always appear directly below their input field */
+.modal .invalid-feedback,
+.modal .form-control ~ .invalid-feedback,
+.modal .form-select ~ .invalid-feedback,
+.modal input ~ .invalid-feedback,
+.modal textarea ~ .invalid-feedback,
+.modal select ~ .invalid-feedback {
+    display: none;
+    position: static !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+    margin-left: 0 !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    line-height: 1.25 !important;
+    color: #dc3545 !important;
+    white-space: normal !important;
+    pointer-events: auto !important;
+}
+
+.modal .invalid-feedback:not(:empty),
+.modal .form-control.is-invalid ~ .invalid-feedback,
+.modal .form-select.is-invalid ~ .invalid-feedback,
+.modal .is-invalid ~ .invalid-feedback {
+    display: block !important;
 }
 
 /* Ensure comfortable margin between rows so floating error messages never overlap adjacent inputs */
