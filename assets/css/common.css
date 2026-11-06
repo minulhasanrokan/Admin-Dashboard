@@ -909,4 +909,31 @@ form .mb-3 {
 
 .page-wrapper {
     padding-bottom: 58px !important;
-}
+}
+
+/* ==========================================================================
+   Multi-Modal Infinite Stacking System
+   ========================================================================== */
+.modal-backdrop.show {
+    opacity: 0.5;
+}
+
+body.modal-open {
+    overflow: hidden !important;
+}
+
+/* Transparent wrapper for dynamic stacked popup containers */
+.popup-stack-container {
+    display: contents;
+}
+
+/* Ensure Select2 dropdown and SweetAlert always stay above stacked modals */
+.select2-container--open,
+.select2-dropdown {
+    z-index: 99999 !important;
+}
+
+.swal2-container {
+    z-index: 999999 !important;
+}
+

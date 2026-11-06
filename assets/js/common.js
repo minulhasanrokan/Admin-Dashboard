@@ -3,6 +3,93 @@ if (typeof bootstrap !== 'undefined' && bootstrap.Modal && bootstrap.Modal.Defau
     bootstrap.Modal.Default.keyboard = false;
 }
 
+const MODAL_BASE_ZINDEX = 1050;
+const MODAL_STEP_ZINDEX = 20;
+
+function reorderModalStack() {
+    let $openModals = $('.modal.show');
+    if ($openModals.length === 0) return;
+
+    $('body').addClass('modal-open');
+    document.body.style.overflow = 'hidden';
+
+    let $backdrops = $('.modal-backdrop');
+    $openModals.each(function (index) {
+        let baseZ = MODAL_BASE_ZINDEX + (index * MODAL_STEP_ZINDEX);
+        $(this).css('z-index', baseZ + 5);
+        if ($backdrops.eq(index).length) {
+            $backdrops.eq(index).css('z-index', baseZ);
+        }
+    });
+}
+
+function getAvailablePopupContainer(preferredDiv) {
+    let activeContainers = new Set();
+    document.querySelectorAll('.modal.show').forEach(function (m) {
+        let parent = m.closest('[id^="popup_"]');
+        if (parent && parent.id) {
+            activeContainers.add(parent.id);
+        }
+    });
+
+    if (preferredDiv && preferredDiv !== 'content') {
+        if (!activeContainers.has(preferredDiv)) {
+            let el = document.getElementById(preferredDiv);
+            if (!el || !el.querySelector('.modal.show')) {
+                return preferredDiv;
+            }
+        }
+    }
+
+    let i = 1;
+    while (activeContainers.has('popup_' + i)) {
+        i++;
+    }
+    return 'popup_' + i;
+}
+
+$(document).on('show.bs.modal', '.modal', function () {
+    $('body').addClass('modal-open');
+    let openCount = $('.modal.show').not(this).length;
+    let baseZ = MODAL_BASE_ZINDEX + (openCount * MODAL_STEP_ZINDEX);
+    $(this).css('z-index', baseZ + 5);
+
+    setTimeout(function () {
+        reorderModalStack();
+    }, 0);
+});
+
+$(document).on('shown.bs.modal', '.modal', function () {
+    reorderModalStack();
+});
+
+$(document).on('hidden.bs.modal', '.modal', function () {
+    let $thisModal = $(this);
+    setTimeout(function () {
+        let $openModals = $('.modal.show');
+        if ($openModals.length > 0) {
+            $('body').addClass('modal-open');
+            document.body.style.overflow = 'hidden';
+            reorderModalStack();
+            $openModals.last().focus();
+        } else {
+            $('body').removeClass('modal-open');
+            document.body.style.overflow = '';
+        }
+
+        let $container = $thisModal.closest('[id^="popup_"]');
+        if ($container.length && $container.attr('id') !== 'popup_1') {
+            if ($container.find('.modal.show').length === 0) {
+                let containerId = $container.attr('id');
+                if (typeof containerAssets !== 'undefined' && containerAssets.has(containerId)) {
+                    containerAssets.delete(containerId);
+                }
+                $container.remove();
+            }
+        }
+    }, 10);
+});
+
 function showAlertBox(options = {}) {
     let {title = "Loading", message = "Please wait...", type = "theme", delay = 2000, timer = 300, positionX = "right", positionY = "top", sound = null, animation = "viho-up", style = "bootstrap",} = options;
 
@@ -17,10 +104,10 @@ function showAlertBox(options = {}) {
 }
 
 function openPopupContainer(cleanedHtml, title, popupWidth, contentDiv, targetModalSelector) {
-    contentDiv = contentDiv || 'popup_1';
+    contentDiv = getAvailablePopupContainer(contentDiv);
     let $container = $('#' + contentDiv);
     if ($container.length === 0) {
-        $('body').append(`<div id="${contentDiv}"></div>`);
+        $('body').append(`<div id="${contentDiv}" class="popup-stack-container"></div>`);
         $container = $('#' + contentDiv);
     }
 
@@ -29,12 +116,6 @@ function openPopupContainer(cleanedHtml, title, popupWidth, contentDiv, targetMo
     let modalEl = temp.querySelector('.modal');
 
     if (modalEl) {
-        let currentOpen = document.querySelector('#' + contentDiv + ' .modal.show');
-        if (currentOpen) {
-            let existingBs = bootstrap.Modal.getInstance(currentOpen);
-            if (existingBs) existingBs.hide();
-        }
-
         $container.html(cleanedHtml);
 
         let targetSelector = targetModalSelector;
@@ -108,9 +189,7 @@ async function openMenu(url, title, data, name, popupStatus, popupWidth, content
     }
 
     if (popupStatus === 1) {
-        if (!contentDiv || contentDiv === 'content') {
-            contentDiv = 'popup_1';
-        }
+        contentDiv = getAvailablePopupContainer(contentDiv);
     }
 
     let response = await web.get(data ? `${url}/${data}` : url);
@@ -119,13 +198,11 @@ async function openMenu(url, title, data, name, popupStatus, popupWidth, content
 
     let {cleanedHtml, cssUrls, jsUrls} = extractAndLoadAssets(result.data);
 
-    unloadContainerAssets(contentDiv);
-
     if (popupStatus === 1) {
         openPopupContainer(cleanedHtml, title, popupWidth, contentDiv);
     }
     else {
-
+        unloadContainerAssets(contentDiv);
         $('#' + contentDiv).html(cleanedHtml);
     }
 

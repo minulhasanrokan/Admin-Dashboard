@@ -375,7 +375,7 @@
             return;
         }
         currentDesignationUuid = targetId;
-        openMenu('/reference/designation/history', 'Designation Audit History', targetId, 'history', 1, 1140, 'popup_1');
+        openMenu('/reference/designation/history', 'Designation Audit History', targetId, 'history', 1, 1140);
     }
 
     function openActivityModal(targetId) {
@@ -385,7 +385,7 @@
             return;
         }
         currentDesignationUuid = targetId;
-        openMenu('/reference/designation/activity', 'Designation Activity Logs', targetId, 'activity', 1, 1140, 'popup_1');
+        openMenu('/reference/designation/activity', 'Designation Activity Logs', targetId, 'activity', 1, 1140);
     }
 
     function bindGlobalEvents() {
@@ -441,7 +441,6 @@
         $(document).off('click.designationViewHistory', '#btn_open_history_from_view').on('click.designationViewHistory', '#btn_open_history_from_view', function (e) {
             e.preventDefault();
             let uuid = $(this).data('uuid') || currentDesignationUuid;
-            $('#modal_designation_single_view, #modal_designation_view').modal('hide');
             openHistoryModal(uuid, 'Designation History');
         });
 
@@ -450,8 +449,14 @@
             e.preventDefault();
             let $actModal = $('#modal_designation_activity');
             if ($actModal.length && $actModal.find('tbody tr').length > 0) {
-                $('.modal.show').modal('hide');
-                $actModal.modal('show');
+                if ($actModal.hasClass('show')) {
+                    let $currentTop = $('.modal.show').last();
+                    if ($currentTop[0] !== $actModal[0]) {
+                        $currentTop.modal('hide');
+                    }
+                } else {
+                    $actModal.modal('show');
+                }
             } else {
                 openActivityModal(currentDesignationUuid);
             }
@@ -461,8 +466,14 @@
             e.preventDefault();
             let $histModal = $('#modal_designation_history');
             if ($histModal.length && $histModal.find('tbody tr').length > 0) {
-                $('.modal.show').modal('hide');
-                $histModal.modal('show');
+                if ($histModal.hasClass('show')) {
+                    let $currentTop = $('.modal.show').last();
+                    if ($currentTop[0] !== $histModal[0]) {
+                        $currentTop.modal('hide');
+                    }
+                } else {
+                    $histModal.modal('show');
+                }
             } else {
                 openHistoryModal(currentDesignationUuid, 'Designation History');
             }
